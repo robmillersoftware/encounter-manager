@@ -4,13 +4,24 @@ import { IonicApp, IonicErrorHandler, IonicModule } from 'ionic-angular';
 import { SplashScreen } from '@ionic-native/splash-screen';
 import { StatusBar } from '@ionic-native/status-bar';
 
+//Pages
 import { MyApp } from './app.component';
 import { HomePage } from '../pages/home/home';
+import { OptionsPage } from '../pages/options/options';
+import { CampaignPage } from '../pages/campaign/campaign';
+
+//Custom Components
+import { EncNavbar } from '../components/encNav/encNav';
+import { EncTile } from '../components/encTile/encTile';
 
 @NgModule({
   declarations: [
     MyApp,
-    HomePage
+    HomePage,
+    OptionsPage,
+    CampaignPage,
+    EncNavbar,
+    EncTile
   ],
   imports: [
     BrowserModule,
@@ -19,7 +30,11 @@ import { HomePage } from '../pages/home/home';
   bootstrap: [IonicApp],
   entryComponents: [
     MyApp,
-    HomePage
+    HomePage,
+    OptionsPage,
+    CampaignPage,
+    EncNavbar,
+    EncTile
   ],
   providers: [
     StatusBar,

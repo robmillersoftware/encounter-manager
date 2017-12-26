@@ -1,1 +1,22 @@
-<ion-nav [root]="rootPage"></ion-nav>
+<ion-menu [content]="content">
+    <ion-header>
+        <ion-toolbar>
+        <ion-title>Encounter Manager</ion-title>
+        </ion-toolbar>
+    </ion-header>
+    <ion-content>
+        <ion-list>
+        <button ion-item menuClose (click)="openPage(homePage)">
+            Home
+        </button>
+        <button ion-item menuClose (click)="openPage(campaignPage)">
+            Campaign
+        </button>
+        <button ion-item menuClose (click)="openPage(optionsPage)">
+            Options
+        </button>
+        </ion-list>
+    </ion-content>
+</ion-menu>
+      
+<ion-nav #content [root]="rootPage"></ion-nav>

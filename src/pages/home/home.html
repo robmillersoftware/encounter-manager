@@ -1,14 +1,14 @@
 <ion-header>
-  <ion-navbar>
-    <ion-title>
-      Ionic Blank
-    </ion-title>
-  </ion-navbar>
+  <enc-nav [header]="headerData"></enc-nav>
 </ion-header>
 
 <ion-content padding>
-  The world is your oyster.
-  <p>
-    If you get lost, the <a href="http://ionicframework.com/docs/v2">docs</a> will be your guide.
-  </p>
+  <p>Campaigns</p>
+  <ion-grid>
+    <ion-row>
+      <ion-col *ngFor="let tile of tiles">
+        <enc-tile [image]="tile.image" [title]="tile.title"></enc-tile>
+      </ion-col>
+    </ion-row>
+  </ion-grid>
 </ion-content>

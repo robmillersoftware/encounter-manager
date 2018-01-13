@@ -2,12 +2,30 @@
   <enc-nav [header]="headerData"></enc-nav>
 </ion-header>
 
-<ion-content padding>
+<ion-content>
   <p>Campaigns</p>
   <ion-grid>
-    <ion-row>
-      <ion-col *ngFor="let tile of tiles">
-        <enc-tile [image]="tile.image" [title]="tile.title"></enc-tile>
+    <ion-row nowrap>
+      <ion-col *ngFor="let tile of campaignTiles">
+        <enc-tile [image]="tile.image" [title]="tile.title" (click)="navToCampaign(tile.data)"></enc-tile>
+      </ion-col>
+    </ion-row>
+  </ion-grid>
+
+  <p>Characters/NPCs</p>
+  <ion-grid>
+    <ion-row nowrap>
+      <ion-col *ngFor="let tile of characterTiles">
+        <enc-tile [image]="tile.image" [title]="tile.title" (click)="navToCharacters(tile.data)"></enc-tile>
+      </ion-col>
+    </ion-row>
+  </ion-grid>
+
+  <p>Locations</p>
+  <ion-grid>
+    <ion-row nowrap>
+      <ion-col *ngFor="let tile of locationTiles">
+        <enc-tile [image]="tile.image" [title]="tile.title" (click)="navToLocations(tile.data)"></enc-tile>
       </ion-col>
     </ion-row>
   </ion-grid>

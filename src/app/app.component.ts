@@ -3,9 +3,9 @@ import { Platform } from 'ionic-angular';
 import { StatusBar } from '@ionic-native/status-bar';
 import { SplashScreen } from '@ionic-native/splash-screen';
 
-import { HomePage } from '../pages/home/home';
-import { CampaignPage } from '../pages/campaign/campaign';
-import { OptionsPage } from '../pages/options/options';
+import { HomePage } from '../pages/home/home.component';
+import { CampaignPage } from '../pages/campaign/campaign.component';
+import { OptionsPage } from '../pages/options/options.component';
 
 @Component({
   templateUrl: 'app.html'

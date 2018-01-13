@@ -27,4 +27,13 @@ export class EncTile {
     get title() {
         return this.tileData.title;
     }
+
+    @Input()
+    set data(data:object) {
+        this.tileData.data = data;
+    }
+
+    get data() {
+        return this.tileData.data;
+    }
 }

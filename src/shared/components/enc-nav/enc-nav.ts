@@ -3,7 +3,7 @@ import { NavController } from 'ionic-angular';
 
 @Component({
     selector: 'enc-nav',
-    templateUrl: 'encNav.html',
+    templateUrl: 'enc-nav.html',
 })
 export class EncNavbar {
     headerData: any;

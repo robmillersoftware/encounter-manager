@@ -1,0 +1,15 @@
+<p>Create New Location</p>
+<form [formGroup]="location" (ngSubmit)="createLocation()">
+    <ion-item>
+        <ion-label class="form-label" fixed>Name </ion-label>
+        <ion-input class="form-input-text" [class.invalid]="location.get('locName').hasError('has_location') && submitAttempted" type="text" formControlName="locName"></ion-input>
+    </ion-item>
+    <ion-item *ngIf="location.get('locName').hasError('has_location') && submitAttempted">
+        <p color="red">That location already exists</p>
+    </ion-item>
+    <ion-item class="formField">
+        <ion-label class="form-label" fixed>Description </ion-label>
+        <ion-input class="form-input-text" type="text" formControlName="locDesc"></ion-input>
+    </ion-item>
+    <button ion-button type="submit" [disabled]="!location.valid">Create</button>
+</form>

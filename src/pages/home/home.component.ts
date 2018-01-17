@@ -21,10 +21,10 @@ export class HomePage {
   }
 
   navToCharacters(data) {
-    this.navCtrl.push('Characters', data);
+    this.navCtrl.push('CharacterPage', data);
   }
 
   navToLocations(data) {
-    this.navCtrl.push('Locations', data);
+    this.navCtrl.push('LocationPage', data);
   }
 }

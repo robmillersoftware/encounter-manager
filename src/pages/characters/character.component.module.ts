@@ -11,17 +11,20 @@ import { CharacterDirective } from './character.directive';
 import { CharacterService } from './character.service';
 
 import { CharacterList } from './views/character-list/character-list';
+import { CharacterNew } from './views/character-new/character-new';
 
 @NgModule({
     imports: [SharedModule, IonicPageModule.forChild(CharacterPage)],
     declarations: [
         CharacterPage, 
         CharacterList, 
+        CharacterNew,
         CharacterDirective
     ],
     entryComponents: [
         CharacterPage,
-        CharacterList 
+        CharacterList,
+        CharacterNew
     ],
     providers: [CharacterService],
     exports: [

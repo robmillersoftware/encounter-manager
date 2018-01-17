@@ -6,6 +6,8 @@ import { StatusBar } from '@ionic-native/status-bar';
 
 import { CampaignModule } from '../pages/campaign/campaign.component.module';
 import { HomeModule } from '../pages/home/home.component.module';
+import { CharacterModule } from '../pages/characters/character.component.module';
+import { LocationModule } from '../pages/locations/location.component.module';
 import { OptionsModule } from '../pages/options/options.component.module';
 
 //Pages
@@ -20,6 +22,8 @@ import { MyApp } from './app.component';
     IonicModule.forRoot(MyApp),
     CampaignModule,
     HomeModule,
+    CharacterModule,
+    LocationModule,
     OptionsModule
   ],
   bootstrap: [IonicApp],

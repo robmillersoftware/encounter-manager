@@ -3,7 +3,7 @@ import { NavController } from 'ionic-angular';
 
 @Component({
     selector: 'enc-tile',
-    templateUrl: 'encTile.html',
+    templateUrl: 'enc-tile.html',
 })
 export class EncTile {
     tileData: any = {};

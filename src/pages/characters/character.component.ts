@@ -27,7 +27,7 @@ export class CharacterPage {
   }
 
   loadComponent(state: string) {
-    let viewToLoad = this.views.find((v) => v.name === state);
+    let viewToLoad = this.views.find((v) => v.name.toLowerCase() === state.toLowerCase());
 
     if (!viewToLoad) {
       console.error('Unable to find view for character state: ' + state);

@@ -42,5 +42,10 @@ export class CharacterPage {
     let componentRef = viewContainerRef.createComponent(componentFactory);
     (<CharacterViewComponent>componentRef.instance).name = viewToLoad.name;
     (<CharacterViewComponent>componentRef.instance).data = viewToLoad.data;
+    (<CharacterViewComponent>componentRef.instance).callback = this.onNotify.bind(this);
+  }
+
+  onNotify(message: string) {
+    this.loadComponent(message);
   }
 }

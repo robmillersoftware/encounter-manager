@@ -2,6 +2,7 @@ import { Component, Input } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { LocationViewComponent } from '../location-view.component';
 import { StorageService } from '../../../../shared/services/storage.service';
+import { Location } from '../../../../objects/location';
 
 @Component({
   templateUrl: './location-new.html'
@@ -28,7 +29,10 @@ export class LocationNew implements LocationViewComponent {
       obj.submitAttempted = true;
     } else {
       obj.submitAttempted = false;
-      obj.service.addLocation(obj.location.value).then(() => {
+
+      let loc = new Location(obj.location.value.locName, obj.location.value.locDesc);
+
+      obj.service.addLocation(loc).then(() => {
         obj.callback('edit');
       });
     }

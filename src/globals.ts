@@ -16,3 +16,13 @@ export class Globals {
         {title: 'View/Edit', image: '', data: { state: 'Edit' }}
     ];
 }
+
+export function debugMap(map: Map<string, any>) {
+    console.log(JSON.stringify(Array.from(map.entries()).reduce(
+        (json, [key, value]) => {
+            console.log('Adding: ' + key + '->' + value);
+            json[key] = value;
+            return json;
+        }, {})
+    ));
+}

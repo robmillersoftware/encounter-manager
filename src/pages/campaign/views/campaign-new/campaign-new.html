@@ -1,1 +1,31 @@
-<p>{{name}}</p>
+<p>Create New Campaign</p>
+<form [formGroup]="campaign" (ngSubmit)="createCampaign()">
+    <ion-item>
+        <ion-label class="form-label" fixed>Name </ion-label>
+        <ion-input class="form-input-text" [class.invalid]="campaign.get('campaignName').hasError('has_campaign') && submitAttempted" type="text" formControlName="campaignName"></ion-input>
+    </ion-item>
+    <ion-item *ngIf="campaign.get('campaignName').hasError('has_campaign') && submitAttempted">
+        <p color="red">A campaign with that name already exists</p>
+    </ion-item>
+    <ion-item class="formField">
+        <ion-label class="form-label" fixed>Description </ion-label>
+        <ion-input class="form-input-text" type="text" formControlName="campaignDesc"></ion-input>
+    </ion-item>
+    <ion-item class="formSelect">
+        <ion-label class="form-label" fixed>Characters</ion-label>
+        <ion-select multiple="true" formControlName="campaignChars">
+            <ion-option *ngFor="let char of allCharacters">
+                {{char.name}}
+            </ion-option>
+        </ion-select>
+    </ion-item>
+    <ion-item class="formSelect">
+        <ion-label class="form-label" fixed>Locations</ion-label>
+        <ion-select multiple="true" formControlName="campaignLocs">
+            <ion-option *ngFor="let loc of allLocations">
+                {{loc.name}}
+            </ion-option>
+        </ion-select>
+    </ion-item>
+    <button ion-button type="submit" [disabled]="!campaign.valid">Create</button>
+</form>

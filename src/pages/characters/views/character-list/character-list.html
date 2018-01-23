@@ -1,1 +1,22 @@
-<p>{{name}}</p>
+<ion-list>
+        <ion-item *ngFor ="let char of characters;">
+            <ion-card>
+                <ion-card-header>
+                    <ion-grid>
+                        <ion-row>
+                            <ion-col>
+                                <h2>{{char.name}}</h2>
+                            </ion-col>
+                            <ion-col>
+                                <div align="right">
+                                    <button (click)="deleteCharacter(char.name);" style="background-color: Transparent; border: none; outline: none;">
+                                    <img src="assets/imgs/delete.png" style="width:16px;height:16px">
+                                </button></div>
+                            </ion-col>
+                        </ion-row>
+                    </ion-grid>
+                </ion-card-header>
+                <ion-card-content><p>{{char.description}}</p></ion-card-content>
+            </ion-card>
+        </ion-item>
+    </ion-list>

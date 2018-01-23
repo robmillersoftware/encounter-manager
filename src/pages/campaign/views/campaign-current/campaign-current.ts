@@ -7,5 +7,6 @@ import { CampaignViewComponent } from '../campaign-view.component';
 export class CampaignCurrent implements CampaignViewComponent {
   @Input() data: any;
   @Input() name: string;
+  @Input() callback: any;
 }
 

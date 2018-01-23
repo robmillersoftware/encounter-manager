@@ -1,1 +1,15 @@
-<p>{{name}}</p>
+<p>Create New Character</p>
+<form [formGroup]="character" (ngSubmit)="createCharacter()">
+    <ion-item>
+        <ion-label class="form-label" fixed>Name </ion-label>
+        <ion-input class="form-input-text" [class.invalid]="character.get('charName').hasError('has_character') && submitAttempted" type="text" formControlName="charName"></ion-input>
+    </ion-item>
+    <ion-item *ngIf="character.get('charName').hasError('has_character') && submitAttempted">
+        <p color="red">That character already exists</p>
+    </ion-item>
+    <ion-item class="formField">
+        <ion-label class="form-label" fixed>Description </ion-label>
+        <ion-input class="form-input-text" type="text" formControlName="charDesc"></ion-input>
+    </ion-item>
+    <button ion-button type="submit" [disabled]="!character.valid">Create</button>
+</form>

@@ -2,7 +2,6 @@ import { Component, ComponentFactoryResolver, ViewChild } from '@angular/core';
 import { IonicPage, NavController, NavParams } from 'ionic-angular';
 import { CampaignDirective } from './campaign.directive';
 import { CampaignViewComponent } from './views/campaign-view.component';
-import { CampaignView } from './views/campaign-view';
 import { CampaignService } from './campaign.service';
 
 @IonicPage()
@@ -11,7 +10,6 @@ import { CampaignService } from './campaign.service';
   templateUrl: 'campaign.html'
 })
 export class CampaignPage {
-  views: CampaignView[];
   @ViewChild(CampaignDirective) campaignHost: CampaignDirective;
   headerData:any;
   state:string;
@@ -22,12 +20,13 @@ export class CampaignPage {
   }
 
   ionViewDidLoad() {
-    this.views = this.service.getViews();
     this.loadComponent(this.state);
   }
 
   loadComponent(state: string) {
-    let viewToLoad = this.views.find((v) => v.name.toLowerCase() === state.toLowerCase());
+    let views = this.service.getViews();
+
+    let viewToLoad = views.find((v) => v.name.toLowerCase() === state.toLowerCase());
 
     if (!viewToLoad) {
       console.error('Unable to find view for campaign state: ' + state);
@@ -42,5 +41,15 @@ export class CampaignPage {
     let componentRef = viewContainerRef.createComponent(componentFactory);
     (<CampaignViewComponent>componentRef.instance).name = viewToLoad.name;
     (<CampaignViewComponent>componentRef.instance).data = viewToLoad.data;
+    (<CampaignViewComponent>componentRef.instance).callback = this.onNotify.bind(this);
+  }
+
+  onNotify(message: any) {
+    if (typeof message === "string") {
+      this.loadComponent(message);
+    } else if (typeof message === "object") {
+      this.service.currentCampaign = message;
+      this.loadComponent('current');
+    }
   }
 }

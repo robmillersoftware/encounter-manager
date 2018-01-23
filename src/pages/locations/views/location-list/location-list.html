@@ -1,8 +1,22 @@
 <ion-list>
     <ion-item *ngFor ="let loc of locations;">
         <ion-card>
-            <ion-card-header>{{loc.locName}}</ion-card-header>
-            <ion-card-content><p>{{loc.locDesc}}</p></ion-card-content>
+            <ion-card-header>
+                <ion-grid>
+                    <ion-row>
+                        <ion-col>
+                            <h2>{{loc.name}}</h2>
+                        </ion-col>
+                        <ion-col>
+                            <div align="right">
+                                <button (click)="deleteLocation(loc.name);" style="background-color: Transparent; border: none; outline: none;">
+                                <img src="assets/imgs/delete.png" style="width:16px;height:16px">
+                            </button></div>
+                        </ion-col>
+                    </ion-row>
+                </ion-grid>
+            </ion-card-header>
+            <ion-card-content><p>{{loc.description}}</p></ion-card-content>
         </ion-card>
     </ion-item>
 </ion-list>

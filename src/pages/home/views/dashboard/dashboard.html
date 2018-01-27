@@ -1,0 +1,20 @@
+<ion-grid>
+    <ion-row><h3>Campaigns</h3></ion-row>
+    <ion-row nowrap>
+        <ion-col *ngFor="let tile of campaignTiles">
+            <enc-tile [image]="tile.image" [title]="tile.title" (click)=" navTo(tile.data)"></enc-tile>
+        </ion-col>
+    </ion-row>
+    <ion-row><h3>Characters/NPCs</h3></ion-row>
+    <ion-row>
+        <ion-col *ngFor="let tile of characterTiles">
+            <enc-tile [image]="tile.image" [title]="tile.title" (click)="navTo(tile.data)"></enc-tile>
+        </ion-col>
+    </ion-row>
+    <ion-row><h3>Locations</h3></ion-row>
+    <ion-row>
+        <ion-col *ngFor="let tile of locationTiles">
+            <enc-tile [image]="tile.image" [title]="tile.title" (click)="navTo(tile.data)"></enc-tile>
+        </ion-col>
+    </ion-row>
+</ion-grid>      

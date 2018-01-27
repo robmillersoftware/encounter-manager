@@ -1,32 +1,11 @@
-<ion-header>
-  <enc-nav [header]="headerData"></enc-nav>
-</ion-header>
-
-<ion-content>
-  <p>Campaigns</p>
-  <ion-grid>
-    <ion-row nowrap>
-      <ion-col *ngFor="let tile of campaignTiles">
-        <enc-tile [image]="tile.image" [title]="tile.title" (click)="navToCampaign(tile.data)"></enc-tile>
-      </ion-col>
-    </ion-row>
-  </ion-grid>
-
-  <p>Characters/NPCs</p>
-  <ion-grid>
-    <ion-row nowrap>
-      <ion-col *ngFor="let tile of characterTiles">
-        <enc-tile [image]="tile.image" [title]="tile.title" (click)="navToCharacters(tile.data)"></enc-tile>
-      </ion-col>
-    </ion-row>
-  </ion-grid>
-
-  <p>Locations</p>
-  <ion-grid>
-    <ion-row nowrap>
-      <ion-col *ngFor="let tile of locationTiles">
-        <enc-tile [image]="tile.image" [title]="tile.title" (click)="navToLocations(tile.data)"></enc-tile>
-      </ion-col>
-    </ion-row>
-  </ion-grid>
+<ion-content class="has-tabs-bottom">
+    <ion-navbar>
+        <ion-buttons *ngIf="headerData.canGoBack" left>
+            <button ion-button icon-only (click)="navTo('pageChange')">
+                <ion-icon name="arrow-back"></ion-icon>
+            </button>
+        </ion-buttons>
+        <ion-title>{{headerData.title}}</ion-title>
+    </ion-navbar>
+    <ng-template home-host></ng-template>
 </ion-content>

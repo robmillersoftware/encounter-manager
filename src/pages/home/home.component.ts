@@ -1,30 +1,93 @@
-import { Component } from '@angular/core';
-import { NavController } from 'ionic-angular';
-import { Globals } from '../../globals';
+import { Component, ComponentFactoryResolver, ViewChild } from '@angular/core';
+import { IonicPage, NavController } from 'ionic-angular';
+import { StorageService } from '../../shared/services/storage.service';
+import { UserService } from '../../shared/services/user.service';
+import { HomeViewComponent } from './views/home-view.component';
+import { HomeDirective } from './home.directive';
+import { HomeService } from './home.service';
 
+@IonicPage()
 @Component({
   selector: 'page-home',
   templateUrl: 'home.html'
 })
 export class HomePage {
-  headerData: any;
-  campaignTiles: Array<Object> = Globals.campaignTiles;
-  characterTiles: Array<Object> = Globals.characterTiles;
-  locationTiles: Array<Object> = Globals.locationTiles;
+  @ViewChild(HomeDirective) homeHost: HomeDirective;
 
-  constructor(public navCtrl: NavController) {
-    this.headerData = { title: "Encounter Manager" };
+  private headerData: any;
+  private headers: any;
+
+  constructor(public navCtrl: NavController, public storageService: StorageService, public homeService: HomeService,  public userService: UserService, private componentFactoryResolver: ComponentFactoryResolver) {
+    this.headers = { 
+      dashboard: { title: 'Encounter Manager' },
+      campaignjoin: { title: 'Join a Campaign', canGoBack: true },
+      campaignload: { title: 'Load an Existing Campaign', canGoBack: true },
+      campaignnew: { title: 'Create a New Campaign', canGoBack: true },
+      characteredit: { title: 'Edit Existing Characters', canGoBack: true },
+      characternew: { title: 'Create a New Character', canGoBack: true },
+      locationedit: { title: 'Edit Existing Locations', canGoBack: true },
+      locationnew: { title: 'Create a New Location', canGoBack: true }
+    };
+
+    this.headerData = this.headers.dashboard
+
+    this.checkCurrentCampaign();
   }
 
-  navToCampaign(data) {
-    this.navCtrl.push('CampaignPage', data);
+  ionViewDidLoad() {
+    this.loadComponent("dashboard");
   }
 
-  navToCharacters(data) {
-    this.navCtrl.push('CharacterPage', data);
+  loadComponent(name: String) {
+    let views = this.homeService.getViews();
+    let viewToLoad = views.find((v) => v.name.toLowerCase() === name.toString().toLowerCase());
+
+    if (!viewToLoad) {
+      console.error('Unable to find view for state: ' + name.toString());
+      return null;
+    }
+
+    let componentFactory = this.componentFactoryResolver.resolveComponentFactory(viewToLoad.component);
+    
+    let viewContainerRef = this.homeHost.viewContainerRef;
+    viewContainerRef.clear();
+
+    let componentRef = viewContainerRef.createComponent(componentFactory);
+    (<HomeViewComponent>componentRef.instance).name = viewToLoad.name;
+    (<HomeViewComponent>componentRef.instance).data = viewToLoad.data;
+    (<HomeViewComponent>componentRef.instance).callback = this.navTo.bind(this);
+  
+    this.headerData = this.headers[viewToLoad.name.replace('-', '')];
   }
 
-  navToLocations(data) {
-    this.navCtrl.push('LocationPage', data);
+  navTo(operation: String, data: any) {
+    switch(operation) {
+      case 'tabChange': 
+        if (data === 'encounter') {
+          this.checkCurrentCampaign();
+        }
+        break;
+      case 'pageChange':
+        if (!data) {
+          this.loadComponent('dashboard');
+        } else {
+          if (data.campaign) {
+            this.userService.setCurrentCampaign(data.campaign).then(() => {
+              this.loadComponent('dashboard');
+            });
+          } else {
+            this.loadComponent(data);
+          }
+        }
+        break;
+    }
+  }
+
+  private async checkCurrentCampaign() {
+    let current = await this.storageService.getCurrentCampaign();
+
+    if (current) {
+      this.navCtrl.parent.select(1);
+    }
   }
 }

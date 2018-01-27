@@ -5,17 +5,22 @@ import { NgModule } from '@angular/core';
 import { IonicStorageModule } from '@ionic/storage';
 import { IonicApp, IonicModule } from 'ionic-angular';
 
-import { EncNavbar } from './components/enc-nav/enc-nav';
 import { EncTile } from './components/enc-tile/enc-tile';
+import { EncChat } from './components/enc-chat/enc-chat';
+import { EncPlayerCard } from './components/enc-player-card/enc-player-card.component';
+import { EncNpcCard } from './components/enc-npc-card/enc-npc-card.component';
+import { EncCampaignCard } from './components/enc-campaign-card/enc-campaign-card.component';
+import { EncLocCard } from './components/enc-loc-card/enc-loc-card.component';
 
 import { StorageService } from './services/storage.service';
+import { UserService } from './services/user.service';
 
 @NgModule({
     imports: [IonicModule, IonicStorageModule.forRoot()],
     bootstrap: [IonicApp],
-    declarations: [EncNavbar, EncTile],
-    entryComponents: [EncNavbar, EncTile],
-    providers: [StorageService],
-    exports: [EncNavbar, EncTile, IonicModule, IonicStorageModule],
+    declarations: [EncTile, EncChat, EncPlayerCard, EncNpcCard, EncCampaignCard, EncLocCard],
+    entryComponents: [EncTile, EncChat, EncPlayerCard, EncNpcCard, EncCampaignCard, EncLocCard],
+    providers: [StorageService, UserService],
+    exports: [EncTile, EncChat, EncPlayerCard, EncNpcCard, EncCampaignCard, EncLocCard, IonicModule, IonicStorageModule],
 })
 export class SharedModule {}

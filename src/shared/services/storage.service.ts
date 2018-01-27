@@ -1,34 +1,30 @@
 import { Injectable } from '@angular/core';
 import { Storage } from '@ionic/storage';
-import { ValidatorFn } from '@angular/forms/src/directives/validators';
-import { AbstractControl } from '@angular/forms/src/model';
-import { Location } from '../../objects/location';
-import { Character } from '../../objects/character';
-import { Campaign } from '../../objects/campaign';
+import { Location, Character, Campaign } from '../objects';
 
 @Injectable()
 export class StorageService {
-    private locations: Map<string, Location>;
-    private characters: Map<string, Character>;
-    private campaigns: Map<string, Campaign>;
+    constructor(public storage: Storage) {}
 
-    constructor(public storage: Storage) {
-        this.queryLocations();
-        this.queryCharacters();
-        this.queryCampaigns();
+    public setCurrentCampaign(c: Campaign) {
+        this.storage.set('currentCampaign', c);
+    }
+
+    public async getCurrentCampaign() {
+        return this.storage.get('currentCampaign');
     }
 
     private async queryLocations() {
-        let obj = this;
+        let locations: Map<String, Location>;
 
-        return obj.storage.get('locations').then(val => {
+        return this.storage.get('locations').then(val => {
             if (!val) {
-                obj.locations = new Map<string, Location>();
+                locations = new Map<string, Location>();
             } else {
-                obj.locations = val;
+                locations = val;
             }
 
-            return obj.locations;
+            return locations;
         });
     }
 
@@ -37,47 +33,33 @@ export class StorageService {
     }
     
     async addLocation(loc: Location) {
-        await this.queryLocations();
+        let locations = await this.queryLocations();
 
-        if (!this.locations.has(loc.name)) {
-            this.locations.set(loc.name, loc);
+        if (!locations.has(loc.name)) {
+            locations.set(loc.name, loc);
         }
 
-        this.storage.set('locations', this.locations);
+        this.storage.set('locations', locations);
     }
 
-    removeLocation(locName: string) {
-        this.locations.delete(locName);
-        this.storage.set('locations', this.locations);
-    }
+    async removeLocation(locName: string) {
+        let locations = await this.queryLocations();
 
-    hasLocation(): ValidatorFn {        
-        this.queryLocations();
-
-        let obj = this;
-        return (control: AbstractControl): {[key: string]: any} => {
-            let input = control.value;
-            let isValid = !obj.locations.has(input);
-
-            if (!isValid) {
-                return { 'has_location': { isValid }};
-            } else {
-                return null;
-            }
-        }; 
+        locations.delete(locName);
+        this.storage.set('locations', locations);
     }
 
     private async queryCharacters() {
-        let obj = this;
+        let characters: Map<String, Character>;
 
-        return obj.storage.get('characters').then(val => {
+        return this.storage.get('characters').then(val => {
             if (!val) {
-                obj.characters = new Map<string, Character>();
+                characters = new Map<string, Character>();
             } else {
-                obj.characters = val;
+                characters = val;
             }
 
-            return obj.characters;
+            return characters;
         });
     }
 
@@ -86,47 +68,33 @@ export class StorageService {
     }
     
     async addCharacter(loc: Character) {
-        await this.queryCharacters();
+        let characters = await this.queryCharacters();
 
-        if (!this.characters.has(loc.name)) {
-            this.characters.set(loc.name, loc);
+        if (!characters.has(loc.name)) {
+            characters.set(loc.name, loc);
         }
 
-        this.storage.set('characters', this.characters);
+        this.storage.set('characters', characters);
     }
 
-    removeCharacter(locName: string) {
-        this.characters.delete(locName);
-        this.storage.set('characters', this.characters);
-    }
+    async removeCharacter(locName: string) {
+        let characters = await this.queryCharacters();
 
-    hasCharacter(): ValidatorFn {        
-        this.queryCharacters();
-
-        let obj = this;
-        return (control: AbstractControl): {[key: string]: any} => {
-            let input = control.value;
-            let isValid = !obj.characters.has(input);
-
-            if (!isValid) {
-                return { 'has_character': { isValid }};
-            } else {
-                return null;
-            }
-        }; 
+        characters.delete(locName);
+        this.storage.set('characters', characters);
     }
 
     private async queryCampaigns() {
-        let obj = this;
+        let campaigns: Map<String, Campaign>;
 
-        return obj.storage.get('campaigns').then(val => {
+        return this.storage.get('campaigns').then(val => {
             if (!val) {
-                obj.campaigns = new Map<string, Campaign>();
+                campaigns = new Map<string, Campaign>();
             } else {
-                obj.campaigns = val;
+                campaigns = val;
             }
 
-            return obj.campaigns;
+            return campaigns;
         });
     }
 
@@ -135,38 +103,24 @@ export class StorageService {
     }
     
     async addCampaign(loc: Campaign) {
-        await this.queryCampaigns();
+        let campaigns = await this.queryCampaigns();
 
-        if (!this.campaigns.has(loc.name)) {
-            this.campaigns.set(loc.name, loc);
+        if (!campaigns.has(loc.name)) {
+            campaigns.set(loc.name, loc);
         }
 
-        this.storage.set('campaigns', this.campaigns);
+        this.storage.set('campaigns', campaigns);
     }
 
-    removeCampaign(locName: string) {
-        this.campaigns.delete(locName);
-        this.storage.set('campaigns', this.campaigns);
-    }
+    async removeCampaign(locName: string) {
+        let campaigns = await this.queryCampaigns();
 
-    hasCampaign(): ValidatorFn {        
-        this.queryCampaigns();
-
-        let obj = this;
-        return (control: AbstractControl): {[key: string]: any} => {
-            let input = control.value;
-            let isValid = !obj.campaigns.has(input);
-
-            if (!isValid) {
-                return { 'has_campaign': { isValid }};
-            } else {
-                return null;
-            }
-        }; 
+        campaigns.delete(locName);
+        this.storage.set('campaigns', campaigns);
     }
 
     async getCampaign(name: string) {
-        await this.queryCampaigns();
-        return this.campaigns.get(name);
+        let campaigns = await this.queryCampaigns();
+        return campaigns.get(name);
     }
 }

@@ -1,1 +1,10 @@
-
+@font-face {
+    font-family: 'Luxi';
+    src: url('../assets/fonts/luximb.ttf') format('ttf'), url('../assets/fonts/luximb.woff') format('woff');
+    font-weight: bold;
+    font-style: normal;
+  }
+  
+  * {
+    font-family: 'Luxi';
+  }

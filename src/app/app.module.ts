@@ -4,31 +4,33 @@ import { IonicApp, IonicErrorHandler, IonicModule } from 'ionic-angular';
 import { SplashScreen } from '@ionic-native/splash-screen';
 import { StatusBar } from '@ionic-native/status-bar';
 
-import { CampaignModule } from '../pages/campaign/campaign.component.module';
+import { SharedModule } from '../shared/shared.module';
 import { HomeModule } from '../pages/home/home.component.module';
-import { CharacterModule } from '../pages/characters/character.component.module';
-import { LocationModule } from '../pages/locations/location.component.module';
 import { OptionsModule } from '../pages/options/options.component.module';
+
+import { EncounterPage } from '../pages/encounter/encounter.component';
+import { NotesPage } from '../pages/notes/notes.component';
+import { TabsPage } from '../pages/tabs/tabs.component';
+import { CampaignPage } from '../pages/campaign/campaign.component';
+import { ChatPage } from '../pages/chat/chat.component';
 
 //Pages
 import { MyApp } from './app.component';
 
 @NgModule({
   declarations: [
-    MyApp
+    MyApp, EncounterPage, NotesPage, ChatPage, TabsPage, CampaignPage
   ],
   imports: [
+    SharedModule,
     BrowserModule,
     IonicModule.forRoot(MyApp),
-    CampaignModule,
     HomeModule,
-    CharacterModule,
-    LocationModule,
     OptionsModule
   ],
   bootstrap: [IonicApp],
   entryComponents: [
-    MyApp
+    MyApp, EncounterPage, NotesPage, ChatPage, TabsPage, CampaignPage
   ],
   providers: [
     StatusBar,

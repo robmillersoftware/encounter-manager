@@ -1,7 +1,24 @@
-<ion-header>
-    <enc-nav [header]="headerData"></enc-nav>
-</ion-header>
-
-<ion-content>
-    <ng-template campaign-host></ng-template>
+<ion-content class='has-tabs-bottom'>
+    <ion-grid *ngIf="campaign">
+        <ion-row>
+            <ion-col><p>Campaign Name: </p></ion-col>
+            <ion-col><p>{{campaign.name}}</p></ion-col>
+        </ion-row>
+        <ion-row>
+            <ion-col><p>Description: </p></ion-col>
+            <ion-col><p>{{campaign.description}}</p></ion-col>
+        </ion-row>
+        <ion-row><p>Players</p></ion-row>
+        <ion-row *ngFor="let p of campaign.players">
+            <enc-player-card [player]="p"></enc-player-card>
+        </ion-row>
+        <ion-row><p>NPCs</p></ion-row>
+        <ion-row *ngFor="let c of campaign.characters">
+            <enc-npc-card [character]="c"></enc-npc-card>
+        </ion-row>
+        <ion-row><p>Locations</p></ion-row>
+        <ion-row *ngFor="let l of campaign.locations">
+            <enc-loc-card [location]="l"></enc-loc-card>
+        </ion-row>
+    </ion-grid>
 </ion-content>

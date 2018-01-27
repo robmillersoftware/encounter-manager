@@ -1,0 +1,8 @@
+<ion-content class="has-tabs-bottom">
+    <ion-grid *ngIf="currentCampaign">
+        <ion-row *ngFor="let p of currentCampaign.encounter.participants">
+            <!--<enc-init></enc-init>-->
+        </ion-row>
+    </ion-grid>
+    <p *ngIf="currentCampaign">{{currentCampaign.name}}</p>
+</ion-content>

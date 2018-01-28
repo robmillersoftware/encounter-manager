@@ -10,8 +10,8 @@ export class CampaignPage {
     campaign: Campaign;
 
     constructor(private storage: StorageService) {
-        this.storage.getCurrentCampaign().then(campaign => {
-            this.campaign = campaign;
+        this.storage.campaignSubject.subscribe(c => {
+            this.campaign = c;
         });
     }
 }

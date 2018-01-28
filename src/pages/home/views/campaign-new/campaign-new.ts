@@ -56,20 +56,24 @@ export class CampaignNew implements HomeViewComponent {
       let selectedChars = new Array<Character>();
       let selectedLocs = new Array<Location>();
 
-      obj.campaign.value.campaignChars.forEach(char => {
-        selectedChars.push(obj.allCharacters.find(item => {
-          let stripped = char.replace(/\s+$/, "");
-          return item.name.trim() === stripped.trim();
-        }))
-      });
+      if (obj.campaign.value.campaignChars) {
+        obj.campaign.value.campaignChars.forEach(char => {
+          selectedChars.push(obj.allCharacters.find(item => {
+            let stripped = char.replace(/\s+$/, "");
+            return item.name.trim() === stripped.trim();
+          }))
+        });
+      }
 
-      obj.campaign.value.campaignLocs.forEach(loc => {
-        selectedLocs.push(obj.allLocations.find(item => {
-          let stripped = loc.replace(/\s+$/, "");
-          return item.name.trim() === stripped.trim();
-        }))
-      });
-
+      if (obj.campaign.value.campaignLocs) {
+        obj.campaign.value.campaignLocs.forEach(loc => {
+          selectedLocs.push(obj.allLocations.find(item => {
+            let stripped = loc.replace(/\s+$/, "");
+            return item.name.trim() === stripped.trim();
+          }))
+        });
+      }
+      
       let newCamp = new Campaign({ 
         name: obj.campaign.value.campaignName, 
         description: obj.campaign.value.campaignDesc,

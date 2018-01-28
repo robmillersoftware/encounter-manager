@@ -8,12 +8,14 @@ import { StorageService } from '../../shared/services/storage.service';
 export class TabsPage {
     @ViewChild('tabs') tabs: any;
 
-    homePage: any;
-    encounterPage: any;
-    chatPage: any;
-    notesPage: any;
-    campaignPage: any;
-    headerData: any;
+    private homePage: any;
+    private encounterPage: any;
+    private chatPage: any;
+    private notesPage: any;
+    private campaignPage: any;
+    private headerData: any;
+
+    private campaignLoaded: boolean;
 
     constructor(private storage: StorageService) {
         this.homePage = HomePage;
@@ -26,6 +28,10 @@ export class TabsPage {
             if (campaign) {
                 this.tabs.select(1);
             }
+        });
+
+        this.storage.campaignLoaded.subscribe(val => {
+            this.campaignLoaded = val;
         });
     }
 }

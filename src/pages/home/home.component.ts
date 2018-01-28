@@ -63,7 +63,7 @@ export class HomePage {
   navTo(operation: String, data: any) {
     switch(operation) {
       case 'tabChange': 
-        if (data === 'encounter') {
+        if (data === 'campaign') {
           this.checkCurrentCampaign();
         }
         break;

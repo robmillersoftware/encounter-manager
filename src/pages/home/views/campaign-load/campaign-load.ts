@@ -36,7 +36,8 @@ export class CampaignLoad implements HomeViewComponent {
   }
 
   loadCampaign(campaign: Campaign) {
-    this.callback('pageChange', 'dashboard');
+    this.storageService.setCurrentCampaign(campaign);
+    this.callback('tabChange', 'campaign');
   }
 }
 

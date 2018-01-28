@@ -1,17 +1,39 @@
 import { Injectable } from '@angular/core';
 import { Storage } from '@ionic/storage';
+import { BehaviorSubject } from 'rxjs/BehaviorSubject';
 import { Location, Character, Campaign } from '../objects';
 
 @Injectable()
 export class StorageService {
-    constructor(public storage: Storage) {}
+    //Anything that subscribes to this will be notified when the current campaign
+    //changes
+    public campaignSubject: BehaviorSubject<Campaign>;
+
+    //Updates subscribers whenever a campaign is loaded or unloaded
+    public campaignLoaded: BehaviorSubject<boolean>;
+
+    constructor(public storage: Storage) {
+        this.campaignSubject = new BehaviorSubject<Campaign>(null);
+        this.campaignLoaded = new BehaviorSubject<boolean>(null);
+        this.loadCampaign();
+    }
+
+    private async loadCampaign() {
+        let campaign = await this.getCurrentCampaign();
+        let isLoaded:boolean = campaign ? true : false;
+
+        this.campaignSubject.next(campaign);
+        this.campaignLoaded.next(isLoaded);
+    }
 
     public setCurrentCampaign(c: Campaign) {
         this.storage.set('currentCampaign', c);
+        this.campaignSubject.next(c);
+        this.campaignLoaded.next(c ? true : false);
     }
 
     public async getCurrentCampaign() {
-        return this.storage.get('currentCampaign');
+        return this.storage.get('currentCampaign').then(c => c);
     }
 
     private async queryLocations() {
@@ -102,21 +124,26 @@ export class StorageService {
         return await this.queryCampaigns();
     }
     
-    async addCampaign(loc: Campaign) {
+    async addCampaign(c: Campaign) {
         let campaigns = await this.queryCampaigns();
 
-        if (!campaigns.has(loc.name)) {
-            campaigns.set(loc.name, loc);
+        if (!campaigns.has(c.name)) {
+            campaigns.set(c.name, c);
         }
 
         this.storage.set('campaigns', campaigns);
     }
 
-    async removeCampaign(locName: string) {
+    async removeCampaign(cName: string) {
         let campaigns = await this.queryCampaigns();
+        let current = await this.getCurrentCampaign();
 
-        campaigns.delete(locName);
+        campaigns.delete(cName);
         this.storage.set('campaigns', campaigns);
+
+        if (current.name === cName) {
+            this.setCurrentCampaign(null);
+        }
     }
 
     async getCampaign(name: string) {

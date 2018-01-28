@@ -1,6 +1,6 @@
 export class Globals {
     public static campaignTiles: Array<Object> = [
-        {title: 'Resume', image: '', data: {changeTab: true, tabName: 'encounter'}},
+        {title: 'Resume', image: '', data: {changeTab: true, tabName: 'campaign'}},
         {title: 'Join', image: '', data: { state: 'join', page: 'campaign' }},
         {title: 'New', image: '', data: { state: 'new', page: 'campaign' }},
         {title: 'Load', image: '', data: { state: 'load', page: 'campaign' }}

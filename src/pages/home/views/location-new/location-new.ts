@@ -1,8 +1,7 @@
 import { Component, Input } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { HomeViewComponent } from '../home-view.component';
-import { StorageService } from '../../../../shared/services/storage.service';
-import { UserService } from '../../../../shared/services/user.service';
+import { UserService, LocationService } from '../../../../shared/services';
 import { Location } from '../../../../shared/objects/location';
 
 @Component({
@@ -16,9 +15,10 @@ export class LocationNew implements HomeViewComponent {
   public location: FormGroup;
   public submitAttempted: boolean;
 
-  constructor(private storage: StorageService, private user: UserService, private formBuilder: FormBuilder) {
+  constructor(private locationService: LocationService, private userService: UserService, 
+      private formBuilder: FormBuilder) {
     this.location = this.formBuilder.group({
-      locName: ['', Validators.compose[Validators.required, this.user.hasLocation().bind(this.user)]],
+      locName: ['', Validators.compose[Validators.required, this.userService.hasLocation().bind(this.userService)]],
       locDesc: ['']
     });
   }
@@ -37,7 +37,7 @@ export class LocationNew implements HomeViewComponent {
 
       let loc = new Location(obj.location.value.locName, obj.location.value.locDesc);
 
-      obj.storage.addLocation(loc).then(() => {
+      obj.locationService.addLocation(loc).then(() => {
         obj.callback('pageChange', 'location-edit');
       });
     }

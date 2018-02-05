@@ -2,7 +2,7 @@ import { Component, Input } from '@angular/core';
 import { HomeViewComponent } from '../home-view.component';
 import { Globals } from '../../../../globals';
 import { Campaign } from '../../../../shared/objects/index';
-import { StorageService } from '../../../../shared/services/storage.service';
+import { CampaignService } from '../../../../shared/services';
 
 @Component({
   templateUrl: './dashboard.html'
@@ -17,11 +17,18 @@ export class Dashboard implements HomeViewComponent {
   public locationTiles: Array<Object> = Globals.locationTiles;
   
   private currentCampaign: Campaign;
-
-  constructor(private storage: StorageService) {
-    this.storage.campaignSubject.subscribe(c => {
+  private hasCampaigns: boolean;
+  
+  constructor(private campaignService: CampaignService) {
+    this.campaignService.campaignSubject.subscribe(c => {
       this.currentCampaign = c;
     });
+
+    this.campaignService.getCampaigns().then(() => {
+      this.campaignService.hasCampaigns.subscribe(val => {
+          this.hasCampaigns = val;
+      });
+  });
   }
 
   getTitle() {

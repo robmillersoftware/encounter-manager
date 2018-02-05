@@ -2,7 +2,7 @@
     <ion-row><h3>Campaigns</h3></ion-row>
     <ion-row nowrap>
         <ng-template ngFor let-tile [ngForOf]="campaignTiles">
-            <ion-col *ngIf="tile.title !== 'Resume' || currentCampaign">
+            <ion-col *ngIf="(tile.title !== 'Resume' || currentCampaign) && (tile.title !== 'Load' || hasCampaigns)">
                 <enc-tile [image]="tile.image" [title]="tile.title" (click)=" navTo(tile.data)"></enc-tile>
             </ion-col>
         </ng-template>

@@ -1,0 +1,20 @@
+<div class="modal-content">
+    <ion-toolbar>
+        <ion-buttons end>
+            <button ion-button (click)="closeModal(false)">
+                <ion-icon name="close"></ion-icon>
+            </button>
+        </ion-buttons>
+        <ion-title>Add Characters</ion-title>
+    </ion-toolbar>
+    <ion-item *ngFor="let char of availableChars">
+        <ion-label>{{char.character.name}}</ion-label>
+        <ion-checkbox [(ngModel)]="char.state"></ion-checkbox>
+    </ion-item>
+    <div *ngIf="availableChars.length === 0">
+        <h6 padding>Must create additional characters before they can be added.</h6>
+    </div>
+    <div *ngIf="availableChars.length > 0">
+        <button ion-button type="button" (click)="addCharacters()">Save</button>
+    </div>
+</div>

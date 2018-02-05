@@ -1,6 +1,6 @@
 export interface Participant {
-    name: String;
-    role: String;
+    name: string;
+    role: string;
 
     notify(data: any): void;
 }

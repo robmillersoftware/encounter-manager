@@ -1,6 +1,6 @@
 import { Component, Input } from '@angular/core';
 import { HomeViewComponent } from '../home-view.component';
-import { StorageService } from '../../../../shared/services/storage.service';
+import { CampaignService } from '../../../../shared/services';
 import { Campaign } from '../../../../shared/objects/campaign';
 
 @Component({
@@ -11,9 +11,9 @@ export class CampaignLoad implements HomeViewComponent {
   @Input() name: string;
   @Input() callback: any;
 
-  public campaigns: Campaign[];
+  public campaigns: Array<Campaign>;
 
-  constructor(private storageService: StorageService) {
+  constructor(private campaignService: CampaignService) {
     this.getCampaigns();
   }
 
@@ -22,22 +22,28 @@ export class CampaignLoad implements HomeViewComponent {
   }
   
   async getCampaigns() {
-    let map = await this.storageService.getCampaigns();
+    let map: Map<string, Campaign> = await this.campaignService.getCampaigns();
     this.campaigns = Array.from(map.values());
   }
 
   deleteCampaign(name: string) {
-    let idx = this.campaigns.findIndex(item => item.name === name);
+    this.campaigns.forEach((campaign, i) => {
+      if (campaign.name === name) {
+        this.campaigns.splice(i, 1);
+      }
+    });
 
-    if (idx !== -1) {
-      this.campaigns.splice(idx, 1);
-      this.storageService.removeCampaign(name);
+    this.campaignService.removeCampaign(name);
+    
+    if (this.campaigns.length === 0) {
+      this.callback('pageChange', 'dashboard')
     }
   }
 
   loadCampaign(campaign: Campaign) {
-    this.storageService.setCurrentCampaign(campaign);
-    this.callback('tabChange', 'campaign');
+    this.campaignService.setCurrentCampaign(campaign).then(() => {
+      this.callback('tabChange', 'campaign');
+    });
   }
 }
 

@@ -1,7 +1,6 @@
 import { Component, ComponentFactoryResolver, ViewChild } from '@angular/core';
 import { IonicPage, NavController } from 'ionic-angular';
-import { StorageService } from '../../shared/services/storage.service';
-import { UserService } from '../../shared/services/user.service';
+import { UserService, CampaignService } from '../../shared/services';
 import { HomeViewComponent } from './views/home-view.component';
 import { HomeDirective } from './home.directive';
 import { HomeService } from './home.service';
@@ -17,7 +16,9 @@ export class HomePage {
   private headerData: any;
   private headers: any;
 
-  constructor(public navCtrl: NavController, public storageService: StorageService, public homeService: HomeService,  public userService: UserService, private componentFactoryResolver: ComponentFactoryResolver) {
+  constructor(public navCtrl: NavController, public campaignService: CampaignService, 
+      public homeService: HomeService,  public userService: UserService, 
+      private componentFactoryResolver: ComponentFactoryResolver) {
     this.headers = { 
       dashboard: { title: 'Encounter Manager' },
       campaignjoin: { title: 'Join a Campaign', canGoBack: true },
@@ -28,22 +29,20 @@ export class HomePage {
       locationedit: { title: 'Edit Existing Locations', canGoBack: true },
       locationnew: { title: 'Create a New Location', canGoBack: true }
     };
-
+    
     this.headerData = this.headers.dashboard
-
-    this.checkCurrentCampaign();
   }
 
   ionViewDidLoad() {
     this.loadComponent("dashboard");
   }
 
-  loadComponent(name: String) {
+  loadComponent(name: string) {
     let views = this.homeService.getViews();
-    let viewToLoad = views.find((v) => v.name.toLowerCase() === name.toString().toLowerCase());
+    let viewToLoad = views.find((v) => v.name.toLowerCase() === name.toLowerCase());
 
     if (!viewToLoad) {
-      console.error('Unable to find view for state: ' + name.toString());
+      console.error('Unable to find view for state: ' + name);
       return null;
     }
 
@@ -60,12 +59,16 @@ export class HomePage {
     this.headerData = this.headers[viewToLoad.name.replace('-', '')];
   }
 
-  navTo(operation: String, data: any) {
+  navTo(operation: string, data: any) {
     switch(operation) {
       case 'tabChange': 
+        if (this.headerData.campaignload) {
+          this.loadComponent('dashboard');
+        }
         if (data === 'campaign') {
           this.checkCurrentCampaign();
         }
+
         break;
       case 'pageChange':
         if (!data) {
@@ -84,7 +87,7 @@ export class HomePage {
   }
 
   private async checkCurrentCampaign() {
-    let current = await this.storageService.getCurrentCampaign();
+    let current = await this.campaignService.getCurrentCampaign();
 
     if (current) {
       this.navCtrl.parent.select(1);

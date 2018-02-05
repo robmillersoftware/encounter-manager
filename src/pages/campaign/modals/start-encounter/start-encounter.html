@@ -1,0 +1,29 @@
+<div class="modal-content">
+    <ion-toolbar>
+        <ion-buttons end>
+            <button ion-button (click)="closeModal(false)">
+                <ion-icon name="close"></ion-icon>
+            </button>
+        </ion-buttons>
+        <ion-title>Start an Encounter</ion-title>
+    </ion-toolbar>
+    <form *ngIf="campaign" [formGroup]="encounterInfo" (ngSubmit)="startEncounter()">
+        <ion-item class="formSelect">
+            <ion-label class="form-label" fixed>Location</ion-label>
+            <ion-select formControlName="encounterLoc">
+                <ion-option *ngFor="let loc of campaign.locations">
+                    {{loc.name}}
+                </ion-option>
+            </ion-select>
+        </ion-item>
+        <ion-item class="formSelect">
+            <ion-label class="form-label" fixed>Participants</ion-label>
+            <ion-select multiple="true" formControlName="encounterParticipants">
+                <ion-option *ngFor="let char of campaign.characters">
+                    {{char.name}}
+                </ion-option>
+            </ion-select>
+        </ion-item>
+        <button ion-button type="submit" [disabled]="!encounterInfo.valid">Begin</button>
+    </form>
+</div>

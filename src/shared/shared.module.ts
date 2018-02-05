@@ -12,15 +12,15 @@ import { EncNpcCard } from './components/enc-npc-card/enc-npc-card.component';
 import { EncCampaignCard } from './components/enc-campaign-card/enc-campaign-card.component';
 import { EncLocCard } from './components/enc-loc-card/enc-loc-card.component';
 
-import { StorageService } from './services/storage.service';
-import { UserService } from './services/user.service';
+import { StorageService, CampaignService, CharacterService, 
+    LocationService, UserService } from './services';
 
 @NgModule({
     imports: [IonicModule, IonicStorageModule.forRoot()],
     bootstrap: [IonicApp],
     declarations: [EncTile, EncChat, EncPlayerCard, EncNpcCard, EncCampaignCard, EncLocCard],
     entryComponents: [EncTile, EncChat, EncPlayerCard, EncNpcCard, EncCampaignCard, EncLocCard],
-    providers: [StorageService, UserService],
+    providers: [StorageService, CampaignService, LocationService, CharacterService, UserService],
     exports: [EncTile, EncChat, EncPlayerCard, EncNpcCard, EncCampaignCard, EncLocCard, IonicModule, IonicStorageModule],
 })
 export class SharedModule {}

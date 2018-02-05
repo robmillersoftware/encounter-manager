@@ -1,8 +1,8 @@
 import { Component, Input } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { HomeViewComponent } from '../home-view.component';
-import { StorageService } from '../../../../shared/services/storage.service';
-import { UserService } from '../../../../shared/services/user.service';
+import { CampaignService, UserService, CharacterService, LocationService } from 
+  '../../../../shared/services';
 import { Campaign, Location, Character } from '../../../../shared/objects';
 
 @Component({
@@ -16,12 +16,14 @@ export class CampaignNew implements HomeViewComponent {
   public campaign: FormGroup;
   public submitAttempted: boolean;
 
-  private allCharacters: Character[];
-  private allLocations: Location[];
+  private allCharacters: Array<Character>;
+  private allLocations: Array<Location>;
 
-  constructor(private storage: StorageService, private user: UserService, private formBuilder: FormBuilder) {
+  constructor(private campaignService: CampaignService, private userService: UserService, 
+      private characterService: CharacterService, private locationService: LocationService, 
+      private formBuilder: FormBuilder) {
     this.campaign = this.formBuilder.group({
-      campaignName: ['', Validators.compose[Validators.required, this.user.hasCampaign().bind(this.user)]],
+      campaignName: ['', Validators.compose[Validators.required, this.userService.hasCampaign().bind(this.userService)]],
       campaignDesc: [''],
       campaignChars: [''],
       campaignLocs: ['']
@@ -36,12 +38,12 @@ export class CampaignNew implements HomeViewComponent {
   }
   
   async getCharacters() {
-    let map = await this.storage.getCharacters();
+    let map: Map<string, Character> = await this.characterService.getCharacters();
     this.allCharacters = Array.from(map.values());
   }
 
   async getLocations() {
-    let map = await this.storage.getLocations();
+    let map: Map<string, Location> = await this.locationService.getLocations();
     this.allLocations = Array.from(map.values());
   }
 
@@ -58,30 +60,33 @@ export class CampaignNew implements HomeViewComponent {
 
       if (obj.campaign.value.campaignChars) {
         obj.campaign.value.campaignChars.forEach(char => {
-          selectedChars.push(obj.allCharacters.find(item => {
+          obj.allCharacters.forEach(item => {
             let stripped = char.replace(/\s+$/, "");
-            return item.name.trim() === stripped.trim();
-          }))
+            if (item.name.trim() === stripped.trim()) {
+              selectedChars.push(item);
+            }
+          });
         });
       }
 
       if (obj.campaign.value.campaignLocs) {
         obj.campaign.value.campaignLocs.forEach(loc => {
-          selectedLocs.push(obj.allLocations.find(item => {
+          obj.allLocations.forEach(item => {
             let stripped = loc.replace(/\s+$/, "");
-            return item.name.trim() === stripped.trim();
-          }))
+            if (item.name.trim() === stripped.trim()) {
+              selectedLocs.push(item);
+            }
+          });
         });
       }
       
-      let newCamp = new Campaign({ 
-        name: obj.campaign.value.campaignName, 
-        description: obj.campaign.value.campaignDesc,
-        characters: selectedChars,
-        locations: selectedLocs
-      });
+      let newCamp = new Campaign(
+        obj.campaign.value.campaignName, 
+        obj.campaign.value.campaignDesc,
+        selectedChars,
+        selectedLocs);
 
-      obj.storage.addCampaign(newCamp).then(() => {
+      obj.campaignService.addCampaign(newCamp).then(() => {
         obj.callback('pageChange', 'campaign-load');
       });
     }

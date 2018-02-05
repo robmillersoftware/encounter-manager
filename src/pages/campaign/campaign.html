@@ -1,24 +1,49 @@
+<div class="overlay" [hidden]="hideOverlay"></div>
 <ion-content class='has-tabs-bottom'>
+    <ion-toolbar>
+        <ion-title *ngIf="campaign">{{campaign.name}}</ion-title>
+        <ion-buttons right>
+            <button ion-button (click)="startEncounter()" [disabled]="!hideOverlay">
+                <ion-icon name="alert"></ion-icon>
+            </button>
+            <button ion-button (click)="addLocation()" [disabled]="!hideOverlay">
+                <ion-icon name="compass"></ion-icon>
+            </button>
+            <button ion-button (click)="addCharacter()" [disabled]="!hideOverlay">
+                <ion-icon name="person-add"></ion-icon>
+            </button>
+        </ion-buttons>
+    </ion-toolbar>
     <ion-grid *ngIf="campaign">
         <ion-row>
-            <ion-col><p>Campaign Name: </p></ion-col>
-            <ion-col><p>{{campaign.name}}</p></ion-col>
+            <h3>Description: </h3>
         </ion-row>
         <ion-row>
-            <ion-col><p>Description: </p></ion-col>
-            <ion-col><p>{{campaign.description}}</p></ion-col>
+            <p>{{campaign.description}}</p>
         </ion-row>
-        <ion-row><p>Players</p></ion-row>
-        <ion-row *ngFor="let p of campaign.players">
-            <enc-player-card [player]="p"></enc-player-card>
+        <ion-row>
+            <h3>Players</h3>
         </ion-row>
-        <ion-row><p>NPCs</p></ion-row>
-        <ion-row *ngFor="let c of campaign.characters">
-            <enc-npc-card [character]="c"></enc-npc-card>
+        <ion-row>
+            <ion-col *ngFor="let p of campaign.players">
+                <enc-tile [title]="p.name" [image]="" [data]="p"></enc-tile>
+            </ion-col>
         </ion-row>
-        <ion-row><p>Locations</p></ion-row>
-        <ion-row *ngFor="let l of campaign.locations">
-            <enc-loc-card [location]="l"></enc-loc-card>
+        <ion-row>
+            <h3>NPCs</h3>
+        </ion-row>
+        <ion-row>
+            <ion-col *ngFor="let c of campaign.characters">
+                <enc-tile [title]="c.name" [image]="" [data]="c"></enc-tile>
+            </ion-col>
+        </ion-row>
+        <ion-row>
+            <h3>Locations</h3>
+        </ion-row>
+        <ion-row>
+            <ion-col *ngFor="let l of campaign.locations">
+                <enc-tile [title]="l.name" [image]="" [data]="l"></enc-tile>
+            </ion-col>
         </ion-row>
     </ion-grid>
 </ion-content>

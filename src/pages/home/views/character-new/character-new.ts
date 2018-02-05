@@ -1,8 +1,7 @@
 import { Component, Input } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { HomeViewComponent } from '../home-view.component';
-import { StorageService } from '../../../../shared/services/storage.service';
-import { UserService } from '../../../../shared/services/user.service';
+import { CharacterService, UserService } from '../../../../shared/services';
 import { Character } from '../../../../shared/objects/character';
 
 @Component({
@@ -16,9 +15,10 @@ export class CharacterNew implements HomeViewComponent {
   public character: FormGroup;
   public submitAttempted: boolean;
 
-  constructor(private storage: StorageService, private user: UserService, private formBuilder: FormBuilder) {
+  constructor(private characterService: CharacterService, private user: UserService, 
+      private formBuilder: FormBuilder) {
     this.character = this.formBuilder.group({
-      charName: ['', Validators.compose[Validators.required, this.user.hasCharacter().bind(this.storage)]],
+      charName: ['', Validators.compose[Validators.required, this.user.hasCharacter().bind(this.user)]],
       charDesc: ['']
     });
   }
@@ -37,7 +37,7 @@ export class CharacterNew implements HomeViewComponent {
 
       let char = new Character(obj.character.value.charName, obj.character.value.charDesc);
 
-      obj.storage.addCharacter(char).then(() => {
+      obj.characterService.addCharacter(char).then(() => {
         obj.callback('pageChange', 'character-edit');
       });
     }

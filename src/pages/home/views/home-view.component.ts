@@ -3,6 +3,6 @@ export interface HomeViewComponent {
     data: any;
     callback: any;
 
-    getTitle(): String;
+    getTitle(): string;
 }
   

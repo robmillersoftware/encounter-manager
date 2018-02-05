@@ -1,6 +1,6 @@
 import { Component } from '@angular/core';
 import { Campaign } from '../../shared/objects/index';
-import { UserService } from '../../shared/services/user.service';
+import { CampaignService } from '../../shared/services';
 
 @Component({
     templateUrl: 'encounter.html'
@@ -8,8 +8,12 @@ import { UserService } from '../../shared/services/user.service';
 export class EncounterPage {
     public currentCampaign: Campaign;
 
-    constructor(public userService: UserService) {
-        this.userService.getCurrentCampaign().then(campaign => {
+    constructor(public campaignService: CampaignService) {
+        this.getCampaign();
+    }
+
+    private async getCampaign() {
+        this.campaignService.getCurrentCampaign().then(campaign => {
             this.currentCampaign = campaign;
         });
     }

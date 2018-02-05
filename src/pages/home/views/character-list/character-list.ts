@@ -1,6 +1,6 @@
 import { Component, Input } from '@angular/core';
 import { HomeViewComponent } from '../home-view.component';
-import { StorageService } from '../../../../shared/services/storage.service';
+import { CharacterService } from '../../../../shared/services';
 import { Character } from '../../../../shared/objects/character';
 
 @Component({
@@ -13,7 +13,7 @@ export class CharacterList implements HomeViewComponent {
   
   public characters: Character[];
 
-  constructor(private storageService: StorageService) {
+  constructor(private characterService: CharacterService) {
     this.getCharacters();
   }
 
@@ -22,7 +22,7 @@ export class CharacterList implements HomeViewComponent {
   }
   
   async getCharacters() {
-    let map = await this.storageService.getCharacters();
+    let map = await this.characterService.getCharacters();
     this.characters = Array.from(map.values());
   }
 
@@ -31,7 +31,7 @@ export class CharacterList implements HomeViewComponent {
 
     if (idx !== -1) {
       this.characters.splice(idx, 1);
-      this.storageService.removeCharacter(name);
+      this.characterService.removeCharacter(name);
     }
   }
 }

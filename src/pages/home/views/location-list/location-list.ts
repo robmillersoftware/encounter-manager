@@ -1,6 +1,6 @@
 import { Component, Input } from '@angular/core';
 import { HomeViewComponent } from '../home-view.component';
-import { StorageService } from '../../../../shared/services/storage.service';
+import { LocationService } from '../../../../shared/services';
 import { Location } from '../../../../shared/objects/location';
 
 @Component({
@@ -13,7 +13,7 @@ export class LocationList implements HomeViewComponent {
   
   public locations: Location[];
 
-  constructor(private storageService: StorageService) {
+  constructor(private locationService: LocationService) {
     this.getLocations();
   }
 
@@ -22,7 +22,7 @@ export class LocationList implements HomeViewComponent {
   }
 
   async getLocations() {
-    let map = await this.storageService.getLocations();
+    let map = await this.locationService.getLocations();
     this.locations = Array.from(map.values());
   }
 
@@ -31,7 +31,7 @@ export class LocationList implements HomeViewComponent {
 
     if (idx !== -1) {
       this.locations.splice(idx, 1);
-      this.storageService.removeLocation(name);
+      this.locationService.removeLocation(name);
     }
   }
 }

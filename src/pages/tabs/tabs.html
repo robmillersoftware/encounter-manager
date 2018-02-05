@@ -1,7 +1,7 @@
 <ion-tabs #tabs>
     <ion-tab [root]="homePage" tabIcon="homeicon" tabTitle="Home"></ion-tab>
     <ion-tab [root]="campaignPage" [enabled]="campaignLoaded" tabIcon="campaign" tabTitle="Campaign"></ion-tab>
-    <ion-tab [root]="encounterPage" [enabled]="campaignLoaded" tabIcon="encounter" tabTitle="Encounter"></ion-tab>
+    <ion-tab [root]="encounterPage" [enabled]="campaignLoaded && hasEncounter" tabIcon="encounter" tabTitle="Encounter"></ion-tab>
     <ion-tab [root]="chatPage" [enabled]="campaignLoaded" tabIcon="chaticon" tabTitle="Chat"></ion-tab>
     <ion-tab [root]="notesPage" [enabled]="campaignLoaded" tabIcon="noteicon" tabTitle="Notes"></ion-tab>
 </ion-tabs>

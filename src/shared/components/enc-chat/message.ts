@@ -7,10 +7,10 @@ export class Message {
         this.timestamp = new Date();
     }
 
-    public getTimestamp(): String {
+    public getTimestamp(): string {
         let t = this.timestamp;
-        let date = [ String(t.getMonth() + 1), String(t.getDate()), String(t.getFullYear())];
-        let time = [ String(t.getHours()), String(t.getMinutes()), String(t.getSeconds())];
+        let date = [ t.getMonth() + 1, t.getDate(), t.getFullYear()];
+        let time = [ t.getHours() + '', t.getMinutes() + '', t.getSeconds() + ''];
 
         for (let i of time) {
             if ( Number(i) < 10 ) {

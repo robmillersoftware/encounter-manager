@@ -13,14 +13,14 @@ import { EncCampaignCard } from './components/enc-campaign-card/enc-campaign-car
 import { EncLocCard } from './components/enc-loc-card/enc-loc-card.component';
 
 import { StorageService, CampaignService, CharacterService, 
-    LocationService, UserService } from './services';
+    LocationService, UserService, BluetoothService } from './services';
 
 @NgModule({
     imports: [IonicModule, IonicStorageModule.forRoot()],
     bootstrap: [IonicApp],
     declarations: [EncTile, EncChat, EncPlayerCard, EncNpcCard, EncCampaignCard, EncLocCard],
     entryComponents: [EncTile, EncChat, EncPlayerCard, EncNpcCard, EncCampaignCard, EncLocCard],
-    providers: [StorageService, CampaignService, LocationService, CharacterService, UserService],
+    providers: [StorageService, CampaignService, LocationService, CharacterService, UserService, BluetoothService],
     exports: [EncTile, EncChat, EncPlayerCard, EncNpcCard, EncCampaignCard, EncLocCard, IonicModule, IonicStorageModule],
 })
 export class SharedModule {}

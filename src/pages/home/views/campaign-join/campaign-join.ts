@@ -9,6 +9,11 @@ export class CampaignJoin implements HomeViewComponent {
   @Input() name: string;
   @Input() callback: any;
 
+  ionViewDidLoad() {
+    
+    
+  }
+
   getTitle() {
     return "Join a Campaign";
   }

@@ -15,7 +15,9 @@ import { ChatPage } from '../pages/chat/chat.component';
 
 import { StatusBar } from '@ionic-native/status-bar';
 import { SplashScreen } from '@ionic-native/splash-screen';
-import { iBeacon, BLE } from '@ionic-native';
+import { IBeacon } from '@ionic-native/ibeacon';
+import { BLE } from '@ionic-native/ble';
+import { Diagnostic } from '@ionic-native/diagnostic';
 
 @NgModule({
   declarations: [
@@ -45,7 +47,8 @@ import { iBeacon, BLE } from '@ionic-native';
     StatusBar,
     SplashScreen,
     BLE,
-    iBeacon,
+    IBeacon,
+    Diagnostic,
     {provide: ErrorHandler, useClass: IonicErrorHandler}
   ]
 })

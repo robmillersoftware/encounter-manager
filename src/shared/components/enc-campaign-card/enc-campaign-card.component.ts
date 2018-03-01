@@ -1,6 +1,6 @@
 import { Component, Input } from '@angular/core';
 import { NavController } from 'ionic-angular';
-import { Campaign } from '../../objects/campaign';
+import { Campaign } from '@shared/objects';
 
 @Component({
     selector: 'enc-campaign-card',

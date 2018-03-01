@@ -1,6 +1,6 @@
 import { Component } from '@angular/core';
-import { Campaign } from '../../shared/objects/index';
-import { CampaignService } from '../../shared/services';
+import { Campaign } from '@shared/objects';
+import { CampaignService } from '@shared/services';
 
 @Component({
     templateUrl: 'encounter.html'

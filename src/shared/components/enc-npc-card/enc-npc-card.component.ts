@@ -1,6 +1,6 @@
 import { Component, Input } from '@angular/core';
 import { NavController } from 'ionic-angular';
-import { Character } from '../../objects/character';
+import { Character } from '@shared/objects';
 
 @Component({
     selector: 'enc-npc-card',

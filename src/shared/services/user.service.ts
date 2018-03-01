@@ -1,8 +1,8 @@
 import { Injectable } from '@angular/core';
-import { Character, Location, Campaign } from '../objects';
+import { Character, Location, Campaign } from '@shared/objects';
 import { ValidatorFn } from '@angular/forms/src/directives/validators';
 import { AbstractControl } from '@angular/forms/src/model';
-import { CampaignService } from './';
+import { CampaignService } from '@shared/services';
 
 @Injectable()
 export class UserService {
@@ -17,7 +17,7 @@ export class UserService {
 
     constructor(public campaignService: CampaignService) {}
 
-    async getCurrentCampaign() { 
+    async getCurrentCampaign() {
         this.currentCampaign = await this.campaignService.getCurrentCampaign();
         return this.currentCampaign;
     }
@@ -27,7 +27,7 @@ export class UserService {
         await this.campaignService.setCurrentCampaign(c);
     }
 
-    hasCampaign(): ValidatorFn {        
+    hasCampaign(): ValidatorFn {
         let obj = this;
         return (control: AbstractControl): {[key: string]: any} => {
             let input = control.value;
@@ -38,10 +38,10 @@ export class UserService {
             } else {
                 return null;
             }
-        }; 
+        };
     }
 
-    hasLocation(): ValidatorFn {        
+    hasLocation(): ValidatorFn {
         let obj = this;
         return (control: AbstractControl): {[key: string]: any} => {
             let input = control.value;
@@ -52,10 +52,10 @@ export class UserService {
             } else {
                 return null;
             }
-        }; 
+        };
     }
 
-    hasCharacter(): ValidatorFn {        
+    hasCharacter(): ValidatorFn {
         let obj = this;
         return (control: AbstractControl): {[key: string]: any} => {
             let input = control.value;
@@ -66,7 +66,7 @@ export class UserService {
             } else {
                 return null;
             }
-        }; 
+        };
     }
 
 }

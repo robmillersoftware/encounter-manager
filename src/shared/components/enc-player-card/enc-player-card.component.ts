@@ -1,6 +1,6 @@
 import { Component, Input } from '@angular/core';
 import { NavController } from 'ionic-angular';
-import { Player } from '../../objects/player';
+import { Player } from '@shared/objects';
 
 @Component({
     selector: 'enc-player-card',

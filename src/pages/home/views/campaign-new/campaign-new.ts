@@ -1,9 +1,8 @@
 import { Component, Input } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { HomeViewComponent } from '../home-view.component';
-import { CampaignService, UserService, CharacterService, LocationService } from 
-  '../../../../shared/services';
-import { Campaign, Location, Character } from '../../../../shared/objects';
+import { CampaignService, UserService, CharacterService, LocationService } from '@shared/services';
+import { Campaign, Location, Character } from '@shared/objects';
 
 @Component({
   templateUrl: './campaign-new.html'
@@ -19,8 +18,8 @@ export class CampaignNew implements HomeViewComponent {
   private allCharacters: Array<Character>;
   private allLocations: Array<Location>;
 
-  constructor(private campaignService: CampaignService, private userService: UserService, 
-      private characterService: CharacterService, private locationService: LocationService, 
+  constructor(private campaignService: CampaignService, private userService: UserService,
+      private characterService: CharacterService, private locationService: LocationService,
       private formBuilder: FormBuilder) {
     this.campaign = this.formBuilder.group({
       campaignName: ['', Validators.compose[Validators.required, this.userService.hasCampaign().bind(this.userService)]],
@@ -36,7 +35,7 @@ export class CampaignNew implements HomeViewComponent {
   getTitle() {
     return "Create New Campaign";
   }
-  
+
   async getCharacters() {
     let map: Map<string, Character> = await this.characterService.getCharacters();
     this.allCharacters = Array.from(map.values());
@@ -79,9 +78,9 @@ export class CampaignNew implements HomeViewComponent {
           });
         });
       }
-      
+
       let newCamp = new Campaign(
-        obj.campaign.value.campaignName, 
+        obj.campaign.value.campaignName,
         obj.campaign.value.campaignDesc,
         selectedChars,
         selectedLocs);

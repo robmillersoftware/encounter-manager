@@ -1,7 +1,7 @@
 import { Component, ComponentFactoryResolver, ViewChild } from '@angular/core';
 import { IonicPage, NavController } from 'ionic-angular';
-import { UserService, CampaignService } from '../../shared/services';
-import { HomeViewComponent } from './views/home-view.component';
+import { UserService, CampaignService } from '@shared/services';
+import { HomeViewComponent } from './views';
 import { HomeDirective } from './home.directive';
 import { HomeService } from './home.service';
 
@@ -16,10 +16,10 @@ export class HomePage {
   private headerData: any;
   private headers: any;
 
-  constructor(public navCtrl: NavController, public campaignService: CampaignService, 
-      public homeService: HomeService,  public userService: UserService, 
+  constructor(public navCtrl: NavController, public campaignService: CampaignService,
+      public homeService: HomeService,  public userService: UserService,
       private componentFactoryResolver: ComponentFactoryResolver) {
-    this.headers = { 
+    this.headers = {
       dashboard: { title: 'Encounter Manager' },
       campaignjoin: { title: 'Join a Campaign', canGoBack: true },
       campaignload: { title: 'Load an Existing Campaign', canGoBack: true },
@@ -29,7 +29,7 @@ export class HomePage {
       locationedit: { title: 'Edit Existing Locations', canGoBack: true },
       locationnew: { title: 'Create a New Location', canGoBack: true }
     };
-    
+
     this.headerData = this.headers.dashboard
   }
 
@@ -47,7 +47,7 @@ export class HomePage {
     }
 
     let componentFactory = this.componentFactoryResolver.resolveComponentFactory(viewToLoad.component);
-    
+
     let viewContainerRef = this.homeHost.viewContainerRef;
     viewContainerRef.clear();
 
@@ -55,13 +55,13 @@ export class HomePage {
     (<HomeViewComponent>componentRef.instance).name = viewToLoad.name;
     (<HomeViewComponent>componentRef.instance).data = viewToLoad.data;
     (<HomeViewComponent>componentRef.instance).callback = this.navTo.bind(this);
-  
+
     this.headerData = this.headers[viewToLoad.name.replace('-', '')];
   }
 
   navTo(operation: string, data: any) {
     switch(operation) {
-      case 'tabChange': 
+      case 'tabChange':
         if (this.headerData.campaignload) {
           this.loadComponent('dashboard');
         }

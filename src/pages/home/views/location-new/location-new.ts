@@ -1,8 +1,8 @@
 import { Component, Input } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { HomeViewComponent } from '../home-view.component';
-import { UserService, LocationService } from '../../../../shared/services';
-import { Location } from '../../../../shared/objects/location';
+import { UserService, LocationService } from '@shared/services';
+import { Location } from '@shared/objects';
 
 @Component({
   templateUrl: './location-new.html'
@@ -15,7 +15,7 @@ export class LocationNew implements HomeViewComponent {
   public location: FormGroup;
   public submitAttempted: boolean;
 
-  constructor(private locationService: LocationService, private userService: UserService, 
+  constructor(private locationService: LocationService, private userService: UserService,
       private formBuilder: FormBuilder) {
     this.location = this.formBuilder.group({
       locName: ['', Validators.compose[Validators.required, this.userService.hasLocation().bind(this.userService)]],
@@ -26,7 +26,7 @@ export class LocationNew implements HomeViewComponent {
   getTitle() {
     return "Create New Location";
   }
-  
+
   createLocation() {
     let obj = this;
 

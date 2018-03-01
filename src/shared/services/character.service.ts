@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
-import { StorageService } from './storage.service';
-import { Character } from '../objects';
+import { StorageService } from '@shared/services';
+import { Character } from '@shared/objects';
 
 @Injectable()
 export class CharacterService {
@@ -13,7 +13,7 @@ export class CharacterService {
     async getCharacters() {
         return await this.queryCharacters();
     }
-    
+
     async updateCharacter(char: Character) {
         let characters = await this.queryCharacters();
         characters.set(char.name, char);

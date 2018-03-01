@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { BehaviorSubject } from 'rxjs/BehaviorSubject';
-import { Campaign, Encounter } from '../objects';
-import { StorageService } from './storage.service';
+import { Campaign, Encounter } from '@shared/objects';
+import { StorageService } from '@shared/services';
 
 @Injectable()
 export class CampaignService {
@@ -55,7 +55,7 @@ export class CampaignService {
 
     private async loadCampaign() {
         let campaign: Campaign = await this.getCurrentCampaign();
-        
+
         let isLoaded:boolean = campaign ? true : false;
 
         this.campaignSubject.next(campaign);
@@ -98,7 +98,7 @@ export class CampaignService {
         this.hasCampaigns.next(map && map.size > 0 ? true : false);
         return map;
     }
-    
+
     async addCampaign(c: Campaign) {
         let campaigns: Map<string, Campaign> = await this.queryCampaigns();
 
@@ -117,7 +117,7 @@ export class CampaignService {
         if (campaigns.has(cName)) {
             campaigns.delete(cName);
         }
-        
+
         this.hasCampaigns.next(campaigns.size > 0 ? true : false);
         this.storage.set('campaigns', Array.from(campaigns.values()));
 

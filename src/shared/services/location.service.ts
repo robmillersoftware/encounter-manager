@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
-import { StorageService } from './storage.service';
-import { Location } from '../objects';
+import { StorageService } from '@shared/services';
+import { Location } from '@shared/objects';
 
 @Injectable()
 export class LocationService {
@@ -13,7 +13,7 @@ export class LocationService {
     async getLocations() {
         return await this.queryLocations();
     }
-    
+
     async updateLocation(loc: Location) {
         let locations = await this.queryLocations();
         locations.set(loc.name, loc);

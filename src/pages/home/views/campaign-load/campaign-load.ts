@@ -1,7 +1,7 @@
 import { Component, Input } from '@angular/core';
 import { HomeViewComponent } from '../home-view.component';
-import { CampaignService } from '../../../../shared/services';
-import { Campaign } from '../../../../shared/objects/campaign';
+import { CampaignService } from '@shared/services';
+import { Campaign } from '@shared/objects';
 
 @Component({
   templateUrl: './campaign-load.html'
@@ -20,7 +20,7 @@ export class CampaignLoad implements HomeViewComponent {
   getTitle() {
     return "Select a Campaign To Load";
   }
-  
+
   async getCampaigns() {
     let map: Map<string, Campaign> = await this.campaignService.getCampaigns();
     this.campaigns = Array.from(map.values());
@@ -34,7 +34,7 @@ export class CampaignLoad implements HomeViewComponent {
     });
 
     this.campaignService.removeCampaign(name);
-    
+
     if (this.campaigns.length === 0) {
       this.callback('pageChange', 'dashboard')
     }

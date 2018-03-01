@@ -1,5 +1,13 @@
 {
   "compilerOptions": {
+    "baseUrl": "src",
+    "paths": {
+      "@globals": ["globals.ts"],
+      "@shared": ["shared"],
+      "@shared/*": ["shared/*"],
+      "@pages": ["pages"],
+      "@pages/*": ["pages/*"]
+    },
     "allowSyntheticDefaultImports": true,
     "declaration": false,
     "emitDecoratorMetadata": true,

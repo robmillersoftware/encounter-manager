@@ -1,8 +1,8 @@
 import { Component } from '@angular/core';
 import { ViewController } from 'ionic-angular';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
-import { CampaignService } from '../../../../shared/services';
-import { Campaign, Encounter, Location } from '../../../../shared/objects';
+import { CampaignService } from '@shared/services';
+import { Campaign, Encounter, Location } from '@shared/objects';
 
 @Component({
   selector: 'page-start-encounter',
@@ -12,7 +12,7 @@ export class StartEncounterModal {
   public encounterInfo: FormGroup;
   public campaign: Campaign;
 
-  constructor(public viewCtrl: ViewController, public campaignService: CampaignService, 
+  constructor(public viewCtrl: ViewController, public campaignService: CampaignService,
       private formBuilder: FormBuilder) {
     this.encounterInfo = this.formBuilder.group({
       encounterLoc: ['', Validators.required],
@@ -34,7 +34,7 @@ export class StartEncounterModal {
     let encounter = new Encounter();
     let selectedLocation: Location =
         this.campaign.locations.find(loc => this.encounterInfo.value.encounterLoc === loc.name);
-  
+
     encounter.location = selectedLocation;
 
     if (this.encounterInfo.value.encounterParticipants) {

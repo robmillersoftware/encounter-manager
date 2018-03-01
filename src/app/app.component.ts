@@ -2,8 +2,8 @@ import { Component } from '@angular/core';
 import { Platform } from 'ionic-angular';
 import { StatusBar } from '@ionic-native/status-bar';
 import { SplashScreen } from '@ionic-native/splash-screen';
-import { ConnectionService } from '../shared/services';
-import { TabsPage } from '../pages/tabs/tabs.component';
+import { ConnectionService } from '@shared/services';
+import { TabsPage } from '@pages/tabs/tabs.component';
 
 @Component({
   templateUrl: 'app.html'

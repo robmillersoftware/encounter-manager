@@ -1,16 +1,16 @@
 import { NgModule } from '@angular/core';
 import { IonicPageModule, IonicModule } from 'ionic-angular';
-import { SharedModule } from '../../shared/shared.module';
+import { SharedModule } from '@shared/shared.module';
 
-import { CampaignPage } from './campaign.component';
+import { CampaignPage } from '@pages';
 import { StartEncounterModal } from './modals/start-encounter/start-encounter.component';
 import { AddLocationModal } from './modals/add-location/add-location.component';
 import { AddCharacterModal } from './modals/add-character/add-character.component';
 
 @NgModule({
     imports: [
-        SharedModule, 
-        IonicPageModule.forChild(CampaignPage), 
+        SharedModule,
+        IonicPageModule.forChild(CampaignPage),
         IonicModule.forRoot(AddCharacterModal),
         IonicModule.forRoot(AddLocationModal),
         IonicModule.forRoot(StartEncounterModal)

@@ -2,12 +2,12 @@
  * This file is a wrapper around the Ionic Storage service. This class will contain
  * all of the ugly code for converting to and from local storage. This avoids having
  * ugly code throughout the project
- * 
+ *
  * Author: Rob
  */
 import { Injectable } from '@angular/core';
 import { Storage } from '@ionic/storage';
-import { Location, Character, Campaign } from '../objects/index';
+import { Location, Character, Campaign } from '@shared/objects/index';
 
 @Injectable()
 export class StorageService {
@@ -18,7 +18,7 @@ export class StorageService {
             case 'locations':
                 return this.storage.get('locations').then(val => {
                     let map: Map<string, Location> = new Map();
-                    
+
                     if (Array.isArray(val)) {
                         let arr: Array<Location> = val;
                         arr.forEach(loc => {
@@ -31,7 +31,7 @@ export class StorageService {
             case 'characters':
                 return this.storage.get('characters').then(val => {
                     let map: Map<string, Character> = new Map();
-                    
+
                     if (Array.isArray(val)) {
                         let arr: Array<Character> = val;
                         arr.forEach(char => {

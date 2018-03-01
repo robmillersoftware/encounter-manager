@@ -1,7 +1,7 @@
 import { Component } from '@angular/core';
 import { ModalController, NavController } from 'ionic-angular';
-import { CampaignService } from '../../shared/services';
-import { Campaign } from '../../shared/objects/index';
+import { CampaignService } from '@shared/services';
+import { Campaign } from '@shared/objects';
 import { StartEncounterModal, AddCharacterModal, AddLocationModal } from './modals';
 
 @Component({
@@ -21,7 +21,7 @@ export class CampaignPage {
     public startEncounter() {
         let modal = this.modalCtrl.create(StartEncounterModal);
         this.hideOverlay = false;
-        
+
         modal.present();
         modal.onDidDismiss(didSubmit => {
             this.hideOverlay = true;

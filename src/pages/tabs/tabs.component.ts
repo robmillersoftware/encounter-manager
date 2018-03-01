@@ -1,6 +1,6 @@
 import { Component, ViewChild } from '@angular/core';
-import { HomePage, EncounterPage, ChatPage, NotesPage, CampaignPage } from '../';
-import { CampaignService } from '../../shared/services';
+import { HomePage, EncounterPage, ChatPage, NotesPage, CampaignPage } from '@pages';
+import { CampaignService } from '@shared/services';
 
 @Component({
     templateUrl: 'tabs.html'

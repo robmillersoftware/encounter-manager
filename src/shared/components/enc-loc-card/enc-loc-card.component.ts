@@ -1,6 +1,6 @@
 import { Component, Input } from '@angular/core';
 import { NavController } from 'ionic-angular';
-import { Location } from '../../objects/location';
+import { Location } from '@shared/objects';
 
 @Component({
     selector: 'enc-loc-card',

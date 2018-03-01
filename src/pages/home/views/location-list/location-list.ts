@@ -1,7 +1,7 @@
 import { Component, Input } from '@angular/core';
 import { HomeViewComponent } from '../home-view.component';
-import { LocationService } from '../../../../shared/services';
-import { Location } from '../../../../shared/objects/location';
+import { LocationService } from '@shared/services';
+import { Location } from '@shared/objects';
 
 @Component({
   templateUrl: './location-list.html'
@@ -10,7 +10,7 @@ export class LocationList implements HomeViewComponent {
   @Input() data: any;
   @Input() name: string;
   @Input() callback: any;
-  
+
   public locations: Location[];
 
   constructor(private locationService: LocationService) {

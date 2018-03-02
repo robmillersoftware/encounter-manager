@@ -1,12 +1,15 @@
 import { Injectable } from '@angular/core';
-import { IBeacon } from '@ionic-native/ibeacon';
+import { IBeacon, BeaconRegion, IBeaconDelegate } from '@ionic-native/ibeacon';
 import { BLE } from '@ionic-native/ble';
 import { Diagnostic } from '@ionic-native/diagnostic';
 import { Platform } from 'ionic-angular';
+import { Globals, MajorCodes, MinorCodes } from '@globals';
 
 export enum ConnectionState {
-    DISCONNECTED,
-    CONNECTED
+    SEARCHING,
+    BROADCASTING,
+    CONNECTED,
+    OFFLINE
 }
 
 export enum ConnectionType {
@@ -25,57 +28,59 @@ class BTDevice {
 @Injectable()
 export class ConnectionService {
     private devices: Set<BTDevice>;
-    private state: ConnectionState = ConnectionState.DISCONNECTED;
+    private state: ConnectionState = ConnectionState.OFFLINE;
     private type: ConnectionType = ConnectionType.BLUETOOTH;
+    private beaconRegion: BeaconRegion;
+    private beaconDelegate: IBeaconDelegate;
 
     constructor(private platform: Platform, private ble: BLE, private ibeacon: IBeacon, private diag: Diagnostic,) {
         this.devices = new Set();
 
-        if (this.platform.is('cordova')) {
-            this.diag.isBluetoothAvailable().then(
-                () => this.type = ConnectionType.BLUETOOTH,
-                () => this.type = ConnectionType.WIFI)
-            .then(() => {
-                this.startScan();
-            });
-        }
+        let uuid = Globals.beaconRegionId;
+        let identifier = Globals.beaconRegionName;
+
+        this.beaconRegion = this.ibeacon.BeaconRegion(identifier, uuid);
+        this.beaconDelegate = this.ibeacon.Delegate();
     }
 
     async startAdvertising() {
         this.ibeacon.enableBluetooth();
     }
 
-    async startScan() {
-        if (this.type == ConnectionType.BLUETOOTH) {
-            this.btScan();
-        } else if (this.type == ConnectionType.WIFI) {
-            this.wifiScan();
+    async lookForConnections() {
+        if (this.platform.is('cordova')) {
+            this.diag.isBluetoothAvailable().then(
+                () => {
+                    this.type = ConnectionType.BLUETOOTH
+                },
+                () => this.type = ConnectionType.WIFI);
         }
     }
 
     btScan() {
-        this.state = ConnectionState.CONNECTED;
+        this.state = ConnectionState.SEARCHING;
         this.ble.startScan([]).subscribe((success: BTDevice) => {
-            this.devices.add(success);
+
         }, failure => {
             console.log(failure);
         });
+    }
 
-        setTimeout(this.ble.stopScan, 30000,
-            () => console.log("Scan finished"),
-            () => console.log("stopScan failed!"));
+    btStop() {
+        this.ble.stopScan();
     }
 
     wifiScan() {
         this.diag.isWifiAvailable().then(() => {
-            console.log("SCANNING WIFI");
+            //Broadcast UDP looking for campaigns
+            //Listen for TCP
         },
         () => {
             console.log("NO!!!!!");
         });
     }
 
-    /*private stringToBytes(str: string) {
+    private stringToBytes(str: string) {
         let array = new Uint8Array(str.length);
         for (let i = 0; i < str.length; ++i) {
             array[i] = str.charCodeAt(i);
@@ -85,5 +90,5 @@ export class ConnectionService {
 
     private bytesToString(buffer: any) {
         return String.fromCharCode.apply(null, new Uint8Array(buffer));
-    }*/
+    }
 }

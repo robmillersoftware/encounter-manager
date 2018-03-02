@@ -15,6 +15,19 @@ export class Globals {
         {title: 'Create', image: '', data: { state: 'new', page: 'location' }},
         {title: 'View/Edit', image: '', data: { state: 'edit', page: 'location' }}
     ];
+
+    public static beaconRegionId: string = "a13f8f27-1504-423c-bfd7-02203349405c";
+    public static beaconRegionName: string = "ppo";
+}
+
+export enum MajorCodes {
+    CAMPAIGN = 0x0001,
+    DM = 0x0011
+}
+
+export enum MinorCodes {
+    SEARCHING = 0,
+    CONNECTED = 1
 }
 
 export function debugMap(map: Map<string, any>) {

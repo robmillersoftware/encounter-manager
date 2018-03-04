@@ -7,7 +7,7 @@
  */
 import { Injectable } from '@angular/core';
 import { Storage } from '@ionic/storage';
-import { Location, Character, Campaign } from '@shared/objects/index';
+import { Location, Character, Campaign } from '@shared/objects';
 
 @Injectable()
 export class StorageService {

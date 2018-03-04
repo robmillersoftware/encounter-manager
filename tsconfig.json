@@ -6,7 +6,8 @@
       "@shared": ["shared"],
       "@shared/*": ["shared/*"],
       "@pages": ["pages"],
-      "@pages/*": ["pages/*"]
+      "@pages/*": ["pages/*"],
+      "@vendor/*": ["vendor/*"]
     },
     "allowSyntheticDefaultImports": true,
     "declaration": false,

@@ -1,0 +1,12 @@
+{
+  "name": "cordova-plugin-wifidirect",
+  "version": "1.0.0",
+  "cordova": {
+    "id": "cordova-plugin-wifidirect",
+    "platforms": [
+      "android",
+      "ios"
+    ]
+  },
+  "description": "Allows cordova applications to directly connect to local devices"
+}

@@ -12,7 +12,6 @@ import { EncounterPage, NotesPage, TabsPage, ChatPage } from '@pages';
 
 import { StatusBar } from '@ionic-native/status-bar';
 import { SplashScreen } from '@ionic-native/splash-screen';
-import { IBeacon } from '@ionic-native/ibeacon';
 import { BLE } from '@ionic-native/ble';
 import { Diagnostic } from '@ionic-native/diagnostic';
 
@@ -44,7 +43,6 @@ import { Diagnostic } from '@ionic-native/diagnostic';
     StatusBar,
     SplashScreen,
     BLE,
-    IBeacon,
     Diagnostic,
     {provide: ErrorHandler, useClass: IonicErrorHandler}
   ]

@@ -8,5 +8,6 @@
       "ios"
     ]
   },
-  "description": "Allows cordova applications to directly connect to local devices"
+  "description": "Allows cordova applications to directly connect to local devices",
+  "types": "./types/index.d.ts"
 }

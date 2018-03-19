@@ -3,16 +3,17 @@
 <plugin xmlns="http://apache.org/cordova/ns/plugins/1.0"
     id="cordova-plugin-wifidirect"
     version="1.0.0">
-    <name>Wifi Direct</name>
+    <name>WifiDirect</name>
     <description>Allows Cordova applications to create P2P connections over Wifi without a network.</description>
+    <author>Rob Miller</author>
     <license>MIT</license>
-    <keywords></keywords>
+    <keywords>wifi,direct,connect,wireless</keywords>
     <repo></repo>
     <issue></issue>
 
     <!-- android -->
     <platform name="android">
-        <config-file target="AndroidManifest.xml" parent="/*">
+        <config-file target="AndroidManifest.xml" parent="/manifest">
             <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
             <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
             <uses-permission android:name="android.permission.CHANGE_WIFI_STATE" />
@@ -20,21 +21,24 @@
         </config-file>
 
         <js-module src="www/plugin.js" name="plugin">
-            <runs/>
-
-            <!-- This is the window variable name you want, like window.MyCordovaPlugin -->
             <clobbers target="WifiDirect" />
         </js-module>
 
         <config-file target="res/xml/config.xml" parent="/*">
             <feature name="WifiDirect">
-            <param name="android-package" value="com.rmiller.wifidirect" />
+            <param name="android-package" value="com.rmiller.WifiDirect" />
             <param name="onload" value="true" />
             </feature>
         </config-file>
 
-        <source-file src="src/android/com/rmiller/wifidirect/WifiDirect.java"
-            target-dir="src/com/rmiller/wifidirect" />
+        <source-file src="src/android/com/rmiller/WifiDirect.java"
+            target-dir="src/com/rmiller" />
+        <source-file src="src/android/com/rmiller/FileTransferService.java"
+            target-dir="src/com/rmiller" />
+        <source-file src="src/android/com/rmiller/FileServerAsyncTask.java"
+            target-dir="src/com/rmiller" />
+        <source-file src="src/android/com/rmiller/WifiDirectBroadcastReceiver.java"
+            target-dir="src/com/rmiller" />
     </platform>
 
     <!-- ios -->

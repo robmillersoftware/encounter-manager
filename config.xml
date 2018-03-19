@@ -1,8 +1,8 @@
 <?xml version='1.0' encoding='utf-8'?>
 <widget id="com.rmiller" version="0.0.1" xmlns="http://www.w3.org/ns/widgets" xmlns:cdv="http://cordova.apache.org/ns/1.0">
-    <name>temp</name>
-    <description>An awesome Ionic/Cordova app.</description>
-    <author email="hi@ionicframework" href="http://ionicframework.com/">Ionic Framework Team</author>
+    <name>Pen and Paper Plugged In</name>
+    <description>A companion app for roleplaying</description>
+    <author email="robmillersoftware@gmail.com" href="http://github.com/robmillersoftware/encounter-manager.git">Rob Miller</author>
     <content src="index.html" />
     <access origin="*" />
     <allow-intent href="http://*/*" />
@@ -88,7 +88,9 @@
     <plugin name="com.unarin.cordova.beacon" spec="~3.6.0" />
     <plugin name="cordova.plugins.diagnostic" spec="^3.9.2" />
     <allow-navigation href="http://192.168.1.54:8100" />
-    <plugin name="cordova-plugin-wifidirect" spec="../wifi-direct" />
+    <plugin name="cordova-custom-config" spec="^5.0.2" />
+    <plugin name="WifiDirect" spec="./wifi-direct" />
+    <plugin name="cordova-plugin-statusbar" spec="^2.4.1" />
     <engine name="android" spec="7.0.0" />
     <engine name="ios" spec="~4.5.4" />
 </widget>

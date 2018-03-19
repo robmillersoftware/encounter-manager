@@ -1,18 +1,22 @@
 {
-  "name": "temp",
+  "name": "penAndPaperPluggedIn",
   "version": "0.0.1",
-  "author": "Ionic Framework",
+  "author": "Rob Miller",
   "homepage": "http://ionicframework.com/",
   "private": true,
   "config": {
     "ionic_webpack": "./webpack.config.js"
   },
   "scripts": {
-    "clean": "ionic-app-scripts clean",
-    "build": "ionic-app-scripts build",
-    "lint": "ionic-app-scripts lint",
-    "ionic:build": "ionic-app-scripts build",
-    "ionic:serve": "ionic-app-scripts serve"
+    "host": "node ./scripts/npm/host.js",
+    "apk:install": "./scripts/shell/adb+ install -r /home/rmiller/encounter-manager/platforms/android/app/build/outputs/apk/debug/app-debug.apk",
+    "plugin:uninstall": "cordova plugin remove cordova-plugin-wifidirect",
+    "log": "adb logcat | grep -e 'WifiDirect' -e 'SystemWebChromeClient'",
+    "build": "ionic cordova build android && cp ''./platforms/android/app/build/outputs/apk/debug/app-debug.apk ./dist/penandpaper.apk",
+    "rebuild": "npm run plugin:uninstall && npm run build",
+    "test": "npm run apk:install",
+    "serve": "ionic serve -c",
+    "full": "npm run rebuild && npm run test"
   },
   "dependencies": {
     "@angular/common": "5.0.3",
@@ -30,20 +34,23 @@
     "@ionic-native/status-bar": "4.4.0",
     "@ionic/pro": "1.0.16",
     "@ionic/storage": "2.1.3",
+    "@types/uuid": "^3.4.3",
     "@types/web-bluetooth": "0.0.4",
     "angular": "^1.6.9",
+    "com.unarin.cordova.beacon": "^3.6.0",
     "cordova-android": "7.0.0",
+    "cordova-custom-config": "^5.0.2",
     "cordova-ios": "~4.5.4",
     "cordova-plugin-ble-central": "^1.1.4",
+    "cordova-plugin-bluetooth-serial": "^0.4.7",
     "cordova-plugin-compat": "^1.2.0",
-    "cordova-plugin-device": "^1.1.7",
+    "cordova-plugin-device": "^2.0.1",
     "cordova-plugin-ionic-keyboard": "^2.0.5",
     "cordova-plugin-ionic-webview": "^1.1.16",
     "cordova-plugin-splashscreen": "^4.1.0",
+    "cordova-plugin-statusbar": "^2.4.1",
     "cordova-plugin-whitelist": "^1.3.3",
-    "cordova-plugin-wifidirect": "file:../wifi-direct",
     "cordova.plugins.diagnostic": "^3.9.2",
-    "ionic": "^3.19.1",
     "ionic-angular": "3.9.2",
     "ionicons": "3.0.0",
     "rxjs": "5.5.2",
@@ -53,6 +60,7 @@
   },
   "devDependencies": {
     "@ionic/app-scripts": "3.1.8",
+    "ionic": "3.20.0",
     "typescript": "2.4.2",
     "webpack-merge": "^4.1.2"
   },
@@ -68,7 +76,10 @@
         "BLUETOOTH_USAGE_DESCRIPTION": " "
       },
       "cordova.plugins.diagnostic": {},
-      "cordova-plugin-wifidirect": {}
+      "cordova-plugin-bluetooth-serial": {},
+      "com.unarin.cordova.beacon": {},
+      "cordova-custom-config": {},
+      "cordova-plugin-statusbar": {}
     },
     "platforms": [
       "android",

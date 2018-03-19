@@ -2,11 +2,13 @@ import { Injectable } from '@angular/core';
 import { Character, Location, Campaign } from '@shared/objects';
 import { ValidatorFn } from '@angular/forms/src/directives/validators';
 import { AbstractControl } from '@angular/forms/src/model';
-import { CampaignService } from '@shared/services';
+import { CampaignService, StorageService } from '@shared/services';
+import * as uuidv4 from 'uuid/v4';
 
 @Injectable()
 export class UserService {
-    public name: string;
+    public name: string = "Anonymous";
+    public id: string = uuidv4();
     public roles: Map<string, string>;
 
     private locations: Map<string, Location>;
@@ -15,7 +17,28 @@ export class UserService {
 
     private currentCampaign: Campaign;
 
-    constructor(public campaignService: CampaignService) {}
+    constructor(public storageService: StorageService, public campaignService: CampaignService) {
+      this.storageService.get('id').then(id => {
+        if (id) {
+          this.id = id;
+        } else {
+          this.storageService.set('id', this.id);
+        }
+      });
+
+      this.storageService.get('name').then(name => {
+        if (name) {
+          this.name = name;
+        } else {
+          this.storageService.set('name', this.name);
+        }
+      });
+    }
+
+    setName(name: string) {
+      this.name = name;
+      this.storageService.set('name', name);
+    }
 
     async getCurrentCampaign() {
         this.currentCampaign = await this.campaignService.getCurrentCampaign();

@@ -10,10 +10,9 @@ import org.json.JSONObject;
 import org.json.JSONArray;
 import org.json.JSONException;
 import android.app.Activity;
-import android.content.BroadcastReceiver;
 import android.content.Context;
-import android.content.Intent;
 import android.content.IntentFilter;
+import android.net.wifi.WpsInfo;
 import android.net.wifi.p2p.WifiP2pConfig;
 import android.net.wifi.p2p.WifiP2pDevice;
 import android.net.wifi.p2p.WifiP2pManager;
@@ -22,18 +21,13 @@ import android.net.wifi.p2p.WifiP2pManager.DnsSdServiceResponseListener;
 import android.net.wifi.p2p.WifiP2pManager.ActionListener;
 import android.net.wifi.p2p.WifiP2pManager.Channel;
 import android.net.wifi.p2p.WifiP2pManager.ChannelListener;
+import android.net.wifi.p2p.WifiP2pGroup;
 import android.net.wifi.p2p.nsd.WifiP2pDnsSdServiceInfo;
 import android.net.wifi.p2p.nsd.WifiP2pDnsSdServiceRequest;
-import android.os.Bundle;
-import android.provider.Settings;
 import android.util.Log;
-import android.view.Menu;
-import android.view.MenuInflater;
-import android.view.MenuItem;
-import android.view.View;
-import android.widget.Toast;
 import java.util.Map;
 import java.util.HashMap;
+import java.util.ArrayList;
 
 /**
  * A Cordova plugin that wraps the Wifi P2P Android API
@@ -53,6 +47,8 @@ public class WifiDirect extends CordovaPlugin implements ChannelListener {
   private final JSONObject services = new JSONObject();
   private CallbackContext servicesCallback = null;
   private String name;
+  private Map<Integer, ArrayList<WifiP2pDnsSdServiceInfo>> localServices = new HashMap();
+  private WifiP2pGroup group = null;
 
   @Override
   public void initialize(CordovaInterface cordova, CordovaWebView webView) {
@@ -85,18 +81,28 @@ public class WifiDirect extends CordovaPlugin implements ChannelListener {
       });
     } else if(action.equals("subscribeToPeers")) {
       this.receiver.getPeers(callbackContext);
-    } else if (action.equals("broadcastService")) {
+    } else if (action.equals("broadcast")) {
       if (args == null || args.length() == 0) {
         throw new JSONException("No arguments sent to broadcast");
       } else if (args.length() == 1) {
-        this.broadcastService(args.getString(0), null);
+        this.broadcast(args.getString(0), null);
       } else {
-        this.broadcastService(args.getString(0), args.getString(1));
+        this.broadcast(args.getString(0), args.getString(1));
       }
-    } else if (action.equals("subscribeToServices")) {
-      this.subscribeToServices(callbackContext);
-    } else if (action.equals("setDeviceName")) {
-      this.name = args.getString(0);
+    } else if (action.equals("subscribeToBroadcasts")) {
+      this.subscribeToBroadcasts(callbackContext);
+    } else if (action.equals("createGroup")) {
+      this.createGroup(callbackContext);
+    } else if (action.equals("joinGroup")) {
+      Log.d(TAG, "WTF MOTHER FUCK");
+      WifiP2pConfig config = new WifiP2pConfig();
+      WpsInfo wps = new WpsInfo();
+      wps.setup = WpsInfo.PBC;
+
+      config.deviceAddress = args.getString(0);
+      config.wps = wps;
+      Log.d(TAG, "JOINING GROUP: " + args.getString(0));
+      this.joinGroup(config, callbackContext);
     }
     return true;
   }
@@ -107,16 +113,41 @@ public class WifiDirect extends CordovaPlugin implements ChannelListener {
    * @param data This string represents a message to be sent. WifiDirect treats this as a plain String
    *   Any parsing must be done on the client side
    */
-  public void broadcastService(String data, String state) {
-    if (state == null || state == "") {
-      state = "UNKNOWN";
+  public void broadcast(String data, String state) {
+    String actualState = (state == null || state.isEmpty()) ? "UNKNOWN" : state;
+
+    BroadcastRecord record = new BroadcastRecord(actualState, data);
+    WifiP2pDnsSdServiceInfo serviceInfo = WifiP2pDnsSdServiceInfo.newInstance("_test", "_presence._tcp", record.toMap());
+
+    Integer broadcastType = 0;
+    Boolean shouldRemove = false;
+
+    try {
+      JSONObject dataObj = new JSONObject(data);
+      broadcastType = dataObj.getInt("type");
+      shouldRemove = dataObj.getBoolean("shouldRemove");
+    } catch(JSONException ex) {
+      Log.e(TAG, "Error retrieving broadcast property: " + ex.getMessage());
     }
 
-    Log.d(TAG, "Broadcasting message:  " + data + " in state: " + state);
-    BroadcastMessage record = new BroadcastMessage(state, data);
+    if (!this.localServices.containsKey(broadcastType)) {
+      this.localServices.put(broadcastType, new ArrayList<WifiP2pDnsSdServiceInfo>());
+    } else if (shouldRemove && this.localServices.get(broadcastType).size() > 0) {
+      this.manager.removeLocalService(this.channel, this.localServices.get(broadcastType).get(0), new ActionListener() {
+        @Override
+        public void onSuccess() {
+          Log.d(TAG, "Successfully removed local service");
+        }
+        @Override
+        public void onFailure(int code) {
+          Log.d(TAG, "Failed to remove local service. Reason code is " + code);
+        }
+      });
 
-    WifiP2pDnsSdServiceInfo serviceInfo = WifiP2pDnsSdServiceInfo.newInstance("WifiDirect", "_presence._tcp", record.toMap());
+      this.localServices.get(broadcastType).clear();
+    }
 
+    this.localServices.get(broadcastType).add(serviceInfo);
     this.manager.addLocalService(this.channel, serviceInfo, new ActionListener() {
       @Override
       public void onSuccess() {
@@ -130,7 +161,11 @@ public class WifiDirect extends CordovaPlugin implements ChannelListener {
     });
   }
 
-  public void subscribeToServices(CallbackContext callbackContext) {
+  public void setGroup(WifiP2pGroup group) {
+    this.group = group;
+  }
+
+  private void subscribeToBroadcasts(CallbackContext callbackContext) {
     this.servicesCallback = callbackContext;
 
     DnsSdTxtRecordListener txtListener = new DnsSdTxtRecordListener() {
@@ -142,7 +177,6 @@ public class WifiDirect extends CordovaPlugin implements ChannelListener {
           Log.e(TAG, "Error adding service to JSON object: " + e.getMessage());
         }
 
-        Log.d(TAG, "SERVICES OBJECT IS: " + services.toString());
         PluginResult result = new PluginResult(Status.OK, services);
         result.setKeepCallback(true);
         servicesCallback.sendPluginResult(result);
@@ -152,7 +186,7 @@ public class WifiDirect extends CordovaPlugin implements ChannelListener {
     DnsSdServiceResponseListener servListener = new DnsSdServiceResponseListener() {
       @Override
       public void onDnsSdServiceAvailable(String instanceName, String registrationType, WifiP2pDevice resourceType) {
-        Log.d(TAG, "We got service response instance=" + instanceName);
+        Log.d(TAG, "We got a service response instance = " + instanceName);
       }
     };
 
@@ -179,31 +213,12 @@ public class WifiDirect extends CordovaPlugin implements ChannelListener {
 
       @Override
       public void onFailure(int code) {
-        Log.d(TAG, "Failed to start service discovery. Reason code is " + code);
+        Log.d(TAG, "Failed to start seBroadcastMessagervice discovery. Reason code is " + code);
       }
     });
   }
 
-  public Activity getActivity() {
-    return cordova.getActivity();
-  }
-
-  @Override
-  public void onResume(boolean multitasking) {
-    super.onResume(multitasking);
-    Log.d(TAG, "Resuming WifiDirect activity");
-    this.receiver = new WifiDirectBroadcastReceiver(this.manager, this.channel, this);
-    cordova.getActivity().registerReceiver(this.receiver, this.intentFilter);
-  }
-
-  @Override
-  public void onPause(boolean multitasking) {
-    super.onPause(multitasking);
-    Log.d(TAG, "Pausing WifiDirect activity");
-    cordova.getActivity().unregisterReceiver(this.receiver);
-  }
-
-  public void connect(WifiP2pConfig config) {
+  public void joinGroup(WifiP2pConfig config, CallbackContext cb) {
     this.manager.connect(this.channel, config, new ActionListener() {
       @Override
       public void onSuccess() {
@@ -231,6 +246,40 @@ public class WifiDirect extends CordovaPlugin implements ChannelListener {
     });
   }
 
+  private void createGroup(CallbackContext cb) {
+    this.receiver.groupCb = cb;
+    this.manager.createGroup(this.channel, new WifiP2pManager.ActionListener() {
+      @Override
+      public void onSuccess() {
+        Log.d(TAG, "Group created, ready to accept connections");
+      }
+
+      @Override
+      public void onFailure(int reason) {
+        Log.d(TAG, "Group creation failed. Reason code is " + reason);
+      }
+    });
+  }
+
+  public Activity getActivity() {
+    return cordova.getActivity();
+  }
+
+  @Override
+  public void onResume(boolean multitasking) {
+    super.onResume(multitasking);
+    Log.d(TAG, "Resuming WifiDirect activity");
+    this.receiver = new WifiDirectBroadcastReceiver(this.manager, this.channel, this);
+    cordova.getActivity().registerReceiver(this.receiver, this.intentFilter);
+  }
+
+  @Override
+  public void onPause(boolean multitasking) {
+    super.onPause(multitasking);
+    Log.d(TAG, "Pausing WifiDirect activity");
+    cordova.getActivity().unregisterReceiver(this.receiver);
+  }
+
   @Override
   public void onChannelDisconnected() {
       // we will try once more
@@ -243,11 +292,11 @@ public class WifiDirect extends CordovaPlugin implements ChannelListener {
       }
   }
 
-  private class BroadcastMessage {
+  private class BroadcastRecord {
     public String state = "";
     public String data;
 
-    public BroadcastMessage(String state, String data) {
+    public BroadcastRecord(String state, String data) {
       this.state = state;
       this.data = data;
     }

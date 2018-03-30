@@ -32,7 +32,7 @@ export class Dashboard implements HomeViewComponent {
   }
 
   getTitle() {
-    return "Encounter Manager";
+    return "RetConnected";
   }
 
   navTo(data: any) {
@@ -43,4 +43,3 @@ export class Dashboard implements HomeViewComponent {
     }
   }
 }
-

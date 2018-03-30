@@ -1,6 +1,6 @@
 import { Component, ComponentFactoryResolver, ViewChild } from '@angular/core';
 import { IonicPage, NavController } from 'ionic-angular';
-import { UserService, CampaignService } from '@shared/services';
+import { UserService, CampaignService, ConnectionService } from '@shared/services';
 import { HomeViewComponent } from './views';
 import { HomeDirective } from './home.directive';
 import { HomeService } from './home.service';
@@ -18,9 +18,11 @@ export class HomePage {
 
   constructor(public navCtrl: NavController, public campaignService: CampaignService,
       public homeService: HomeService,  public userService: UserService,
-      private componentFactoryResolver: ComponentFactoryResolver) {
+      private componentFactoryResolver: ComponentFactoryResolver,
+      private connectionService: ConnectionService) {
+    console.log("Home page is loaded.");
     this.headers = {
-      dashboard: { title: 'Encounter Manager' },
+      dashboard: { title: 'RetConnected' },
       campaignjoin: { title: 'Join a Campaign', canGoBack: true },
       campaignload: { title: 'Load an Existing Campaign', canGoBack: true },
       campaignnew: { title: 'Create a New Campaign', canGoBack: true },
@@ -75,7 +77,7 @@ export class HomePage {
           this.loadComponent('dashboard');
         } else {
           if (data.campaign) {
-            this.userService.setCurrentCampaign(data.campaign).then(() => {
+            this.campaignService.setCurrentCampaign(data.campaign).then(() => {
               this.loadComponent('dashboard');
             });
           } else {
@@ -91,6 +93,7 @@ export class HomePage {
 
     if (current) {
       this.navCtrl.parent.select(1);
+      this.connectionService.advertiseCampaign(current);
     }
   }
 }

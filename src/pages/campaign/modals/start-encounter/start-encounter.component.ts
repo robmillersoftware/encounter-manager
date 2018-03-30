@@ -2,7 +2,7 @@ import { Component } from '@angular/core';
 import { ViewController } from 'ionic-angular';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { CampaignService } from '@shared/services';
-import { Campaign, Encounter, Location } from '@shared/objects';
+import { Campaign, EncounterFactory, Location } from '@shared/objects';
 
 @Component({
   selector: 'page-start-encounter',
@@ -31,7 +31,7 @@ export class StartEncounterModal {
   }
 
   public async startEncounter() {
-    let encounter = new Encounter();
+    let encounter = EncounterFactory.createEncounter();
     let selectedLocation: Location =
         this.campaign.locations.find(loc => this.encounterInfo.value.encounterLoc === loc.name);
 

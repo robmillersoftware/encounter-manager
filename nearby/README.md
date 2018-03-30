@@ -1,0 +1,2 @@
+Nearby Devices Cordova Plugin
+=============================

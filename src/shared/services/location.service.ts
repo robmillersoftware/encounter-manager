@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { StorageService } from './';
+import { StorageService } from '@shared/services';
 import { Location } from '@shared/objects';
 
 @Injectable()

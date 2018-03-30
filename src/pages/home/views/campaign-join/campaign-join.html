@@ -1,10 +1,18 @@
 <ion-content>
   <ion-list>
-    <!--<ion-item *ngFor ="let p of peers;">
-      <h2>{{p}}</h2>
-    </ion-item>-->
-    <ion-item>
-      <h2>{{services}}</h2>
+    <ion-item *ngFor ="let c of campaigns;">
+        <ion-card (click)="loadCampaign(c);" tappable>
+            <ion-card-header>
+                <ion-grid>
+                    <ion-row>
+                        <ion-col>
+                            <h2>{{c.name}}</h2>
+                        </ion-col>
+                    </ion-row>
+                </ion-grid>
+            </ion-card-header>
+            <ion-card-content><p>{{c.description}}</p></ion-card-content>
+        </ion-card>
     </ion-item>
   </ion-list>
 </ion-content>

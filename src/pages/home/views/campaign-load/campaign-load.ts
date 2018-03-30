@@ -40,10 +40,9 @@ export class CampaignLoad implements HomeViewComponent {
     }
   }
 
-  loadCampaign(campaign: Campaign) {
+  async loadCampaign(campaign: Campaign) {
     this.campaignService.setCurrentCampaign(campaign).then(() => {
-      this.callback('tabChange', 'campaign');
+      this.callback('tabChange', 'campaign')
     });
   }
 }
-

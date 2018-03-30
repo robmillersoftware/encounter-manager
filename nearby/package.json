@@ -1,0 +1,12 @@
+{
+  "name": "NearbyPlugin",
+  "version": "1.0.0",
+  "cordova": {
+    "id": "cordova-plugin-nearby",
+    "platforms": [
+      "android",
+      "ios"
+    ]
+  },
+  "description": "Allows cordova applications to directly connect to local devices"
+}

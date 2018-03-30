@@ -12,8 +12,6 @@ import { EncounterPage, NotesPage, TabsPage, ChatPage } from '@pages';
 
 import { StatusBar } from '@ionic-native/status-bar';
 import { SplashScreen } from '@ionic-native/splash-screen';
-import { BLE } from '@ionic-native/ble';
-import { Diagnostic } from '@ionic-native/diagnostic';
 
 @NgModule({
   declarations: [
@@ -42,8 +40,6 @@ import { Diagnostic } from '@ionic-native/diagnostic';
   providers: [
     StatusBar,
     SplashScreen,
-    BLE,
-    Diagnostic,
     {provide: ErrorHandler, useClass: IonicErrorHandler}
   ]
 })

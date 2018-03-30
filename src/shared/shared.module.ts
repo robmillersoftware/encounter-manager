@@ -5,7 +5,8 @@ import { NgModule } from '@angular/core';
 import { IonicStorageModule } from '@ionic/storage';
 import { IonicModule, IonicApp } from 'ionic-angular';
 
-import { EncTile, EncChat, EncPlayerCard, EncNpcCard, EncCampaignCard, EncLocCard } from '@shared/components';
+import { EncTile, EncChat, EncPlayerCard, EncNpcCard, EncCampaignCard, EncLocCard }
+  from '@shared/components';
 
 import { StorageService, CharacterService, LocationService, UserService,
     ConnectionService, CampaignService } from '@shared/services';

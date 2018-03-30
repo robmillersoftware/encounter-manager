@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<plugin xmlns="http://apache.org/cordova/ns/plugins/1.0"
+  id="cordova-plugin-nearby"
+  version="1.0.0">
+  <name>NearbyPlugin</name>
+  <description>Allows Cordova applications to wirelessly connect to nearby devices without LAN.</description>
+  <author>Rob Miller</author>
+  <license>MIT</license>
+  <keywords>nearby,wifi,bluetooth,connect,wireless</keywords>
+  <repo></repo>
+  <issue></issue>
+
+<!-- android -->
+  <platform name="android">
+    <framework src="com.google.android.gms:play-services-nearby:12.0.0" />
+    <config-file target="AndroidManifest.xml" parent="/manifest">
+      <uses-permission android:name="android.permission.BLUETOOTH" />
+    </config-file>
+    <config-file target="AndroidManifest.xml" parent="/manifest">
+      <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
+    </config-file>
+    <config-file target="AndroidManifest.xml" parent="/manifest">
+      <uses-permission android:name="android.permission.CHANGE_WIFI_STATE" />
+    </config-file>
+    <config-file target="AndroidManifest.xml" parent="/manifest">
+      <uses-permission android:name="android.permission.BLUETOOTH_ADMIN" />
+    </config-file>
+    <config-file target="AndroidManifest.xml" parent="/manifest">
+      <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
+    </config-file>
+
+    <js-module src="www/plugin.js" name="plugin">
+      <clobbers target="NearbyPlugin" />
+    </js-module>
+
+    <config-file target="res/xml/config.xml" parent="/*">
+      <feature name="NearbyPlugin">
+      <param name="android-package" value="com.rmiller.NearbyPlugin" />
+      <param name="onload" value="true" />
+      </feature>
+    </config-file>
+
+    <source-file src="src/android/com/rmiller/NearbyPlugin.java"
+      target-dir="src/com/rmiller" />
+  </platform>
+
+  <!-- ios -->
+  <platform name="ios">
+    <js-module src="www/plugin.js" name="plugin">
+      <runs/>
+      <clobbers target="MyCordovaPlugin" />
+    </js-module>
+    <config-file target="config.xml" parent="/*">
+      <feature name="MyCordovaPlugin">
+        <param name="ios-package" value="MyCordovaPlugin" onload="true" />
+      </feature>
+    </config-file>
+
+    <header-file src="src/ios/MyCordovaPlugin.h" />
+    <source-file src="src/ios/MyCordovaPlugin.m" />
+  </platform>
+</plugin>

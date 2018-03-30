@@ -2,7 +2,7 @@ import { Component, Input } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { HomeViewComponent } from '../home-view.component';
 import { CampaignService, UserService, CharacterService, LocationService } from '@shared/services';
-import { Campaign, Location, Character } from '@shared/objects';
+import { CampaignFactory, PlayerFactory, Location, Character } from '@shared/objects';
 
 @Component({
   templateUrl: './campaign-new.html'
@@ -22,7 +22,7 @@ export class CampaignNew implements HomeViewComponent {
       private characterService: CharacterService, private locationService: LocationService,
       private formBuilder: FormBuilder) {
     this.campaign = this.formBuilder.group({
-      campaignName: ['', Validators.compose[Validators.required, this.userService.hasCampaign().bind(this.userService)]],
+      campaignName: ['', Validators.required],
       campaignDesc: [''],
       campaignChars: [''],
       campaignLocs: ['']
@@ -46,49 +46,45 @@ export class CampaignNew implements HomeViewComponent {
     this.allLocations = Array.from(map.values());
   }
 
-  createCampaign() {
+  async createCampaign() {
     let obj = this;
+    let selectedChars = new Array<Character>();
+    let selectedLocs = new Array<Location>();
 
-    if (obj.campaign.get('campaignName').hasError('has_campaign')) {
-      obj.submitAttempted = true;
-    } else {
-      obj.submitAttempted = false;
-
-      let selectedChars = new Array<Character>();
-      let selectedLocs = new Array<Location>();
-
-      if (obj.campaign.value.campaignChars) {
-        obj.campaign.value.campaignChars.forEach(char => {
-          obj.allCharacters.forEach(item => {
-            let stripped = char.replace(/\s+$/, "");
-            if (item.name.trim() === stripped.trim()) {
-              selectedChars.push(item);
-            }
-          });
+    if (obj.campaign.value.campaignChars) {
+      obj.campaign.value.campaignChars.forEach(char => {
+        obj.allCharacters.forEach(item => {
+          let stripped = char.replace(/\s+$/, "");
+          if (item.name.trim() === stripped.trim()) {
+            selectedChars.push(item);
+          }
         });
-      }
-
-      if (obj.campaign.value.campaignLocs) {
-        obj.campaign.value.campaignLocs.forEach(loc => {
-          obj.allLocations.forEach(item => {
-            let stripped = loc.replace(/\s+$/, "");
-            if (item.name.trim() === stripped.trim()) {
-              selectedLocs.push(item);
-            }
-          });
-        });
-      }
-
-      let newCamp = new Campaign(
-        obj.campaign.value.campaignName,
-        obj.campaign.value.campaignDesc,
-        selectedChars,
-        selectedLocs);
-
-      obj.campaignService.addCampaign(newCamp).then(() => {
-        obj.callback('pageChange', 'campaign-load');
       });
     }
+
+    if (obj.campaign.value.campaignLocs) {
+      obj.campaign.value.campaignLocs.forEach(loc => {
+        obj.allLocations.forEach(item => {
+          let stripped = loc.replace(/\s+$/, "");
+          if (item.name.trim() === stripped.trim()) {
+            selectedLocs.push(item);
+          }
+        });
+      });
+    }
+
+    let username = await this.userService.getName();
+    let gm = PlayerFactory.createPlayer(username, "", true, null);
+
+    let newCamp = CampaignFactory.createCampaign(
+      obj.campaign.value.campaignName,
+      obj.campaign.value.campaignDesc,
+      selectedChars,
+      selectedLocs,
+      [gm]);
+
+    obj.campaignService.addCampaign(newCamp).then(() => {
+      obj.callback('pageChange', 'campaign-load');
+    });
   }
 }
-

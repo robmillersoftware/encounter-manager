@@ -1,110 +1,93 @@
 import { Injectable } from '@angular/core';
 import { Platform } from 'ionic-angular';
-import { CampaignFactory, Campaign } from '@shared/objects';
+import { CampaignFactory, Campaign, MessageFactory, Player, PlayerFactory } from '@shared/objects';
 import { UserService } from '@shared/services';
-import { Globals } from '@globals';
+import { Globals, debugMap, parseIdentifier } from '@globals';
+import { BehaviorSubject } from 'rxjs/BehaviorSubject';
 
 @Injectable()
 export class ConnectionService {
   private isIos: boolean;
   private isCordova: boolean;
 
+  public localCampaigns: BehaviorSubject<Map<string, Campaign>>;
+  public campaignPlayers: BehaviorSubject<Map<string, string>>;
+
   constructor(private platform: Platform, private userService: UserService) {
     this.isIos = this.platform.is("ios");
     this.isCordova = this.platform.is("cordova");
+    this.localCampaigns = new BehaviorSubject(null);
+    this.campaignPlayers = new BehaviorSubject(null);
 
     if (this.isCordova && window["NearbyPlugin"]) {
-      window["NearbyPlugin"].setToken(Globals.connectionToken);
       this.setIdentifier();
+      window["NearbyPlugin"].setServiceId(Globals.serviceId);
     }
 
     console.log("Connection Service initialized. IsCordova? " + this.isCordova);
   }
 
   private async setIdentifier() {
-    let identifier = {
-      name: await this.userService.getName(),
-      id: await this.userService.getId()
-    };
-
-    window["NearbyPlugin"].setIdentifier(JSON.stringify(identifier));
+    window["NearbyPlugin"].setIdentifier(await this.userService.getIdentifier());
   }
 
   public advertiseCampaign(c: Campaign) {
     if (this.isCordova && window["NearbyPlugin"]) {
       console.log("Advertising campaign has been called. With campaign: "
         + CampaignFactory.toBroadcast(c));
-      window["NearbyPlugin"].startAdvertising(CampaignFactory.toBroadcast(c), Globals.serviceId);
-    }
-  }
 
-  public discoverCampaigns(userName: string, callback: any) {
-    if (this.isCordova && window["NearbyPlugin"]) {
-      console.log("Discovering campaigns.");
-      window["NearbyPlugin"].startDiscovery({user: userName, token: Globals.connectionToken }, Globals.serviceId, callback);
-    }
-  }
-
-  /*public subscribeToBroadcasts(cb) {
-    if (!this.broadcastSubject) {
-      this.broadcastSubject = new BehaviorSubject<Array<Object>>([]);
-
-      if (this.isCordova && window["WifiDirect"]) {
-        console.log("Subscribing to broadcasts")
-        window["WifiDirect"].subscribeToBroadcasts(broadcast => {
-          let dataObjects: Array<Object> = Object.keys(broadcast).map(v => {
-            return JSON.parse(broadcast[v].data);
-          });
-
-          console.log("Received broadcast messages:\n" + dataObjects.map(v => {
-            return JSON.stringify(v);
-          }).join('\n'));
-
-          this.broadcastSubject.next(dataObjects);
-        });
-      }
-      this.broadcastSubject.subscribe(cb);
-    }
-  }
-
-  public broadcastMessage(msg: string, state: string = '') {
-    let broadcast = {
-      type: BroadcastTypes.MESSAGE,
-      shouldRemove: true,
-      message: msg
-    }
-
-    console.log("Broadcasting: " + JSON.stringify(broadcast));
-
-    if (this.isCordova) {
-      window["WifiDirect"].broadcast(JSON.stringify(broadcast), state);
-    }
-  }
-
-  public broadcastCampaign(campaign: Campaign, state: string = '') {
-    let broadcast = {
-      type: BroadcastTypes.CAMPAIGN,
-      shouldRemove: true,
-      campaign: CampaignFactory.toBroadcast(campaign)
-    }
-
-    if (this.isCordova) {
-      window["WifiDirect"].broadcast(JSON.stringify(broadcast), state);
-    }
-  }
-
-  public createGroup(callback: any) {
-    if (this.isCordova) {
-      window["WifiDirect"].createGroup(callback);
-    }
-  }
-
-  public joinCampaign(campaign: Campaign, callback: any) {
-    if (this.isCordova) {
-      window["WifiDirect"].joinGroup(campaign.gm.device, obj => {
-        console.log("AYY JOINING: " + JSON.stringify(obj));
-        callback(false);
+      window["NearbyPlugin"].startAdvertising(CampaignFactory.toBroadcast(c), connection => {
+        console.log("GOT CONNECTION STUFFS: " + JSON.stringify(connection));
+        console.log(connection);
       });
     }
-  }*/
+  }
+
+  public discoverCampaigns() {
+    if (this.isCordova && window["NearbyPlugin"]) {
+      window["NearbyPlugin"].startDiscovery(campaigns => {
+        let messages = MessageFactory.fromJSON(campaigns);
+        let messagesObj = JSON.parse(messages.msg);
+        let campaignMap: Map<string, Campaign> = this.localCampaigns.getValue();
+
+        if (campaignMap === null) {
+          campaignMap = new Map<string, Campaign>();
+        }
+
+        Object.keys(messagesObj).forEach(key => {
+          campaignMap.set(messages.src, CampaignFactory.fromBroadcast(messagesObj[key]));
+        });
+
+        this.localCampaigns.next(campaignMap);
+      });
+    }
+  }
+
+  public async connectToCampaign(name: string) {
+    let map: Map<string, Campaign> = this.localCampaigns.value;
+
+    if (!map) {
+      console.log("No value has been assigned to localCampaigns");
+      return;
+    }
+
+    Array.from(map.keys()).forEach(key => {
+      let c: Campaign = map.get(key);
+      if (c.name === name) {
+        window["NearbyPlugin"].connectToCampaign(parseIdentifier(key).endpoint);
+      }
+    });
+  }
+
+  public stopDiscovery() {
+    if (this.isCordova && window["NearbyPlugin"]) {
+      window["NearbyPlugin"].stopDiscovery();
+    }
+  }
+
+  public stopAdvertising() {
+    if (this.isCordova && window["NearbyPlugin"]) {
+      window["NearbyPlugin"].stopAdvertising();
+    }
+  }
 }

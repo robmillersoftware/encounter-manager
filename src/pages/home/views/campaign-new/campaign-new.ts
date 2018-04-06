@@ -3,6 +3,7 @@ import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { HomeViewComponent } from '../home-view.component';
 import { CampaignService, UserService, CharacterService, LocationService } from '@shared/services';
 import { CampaignFactory, PlayerFactory, Location, Character } from '@shared/objects';
+import { generateIdentifier } from '@globals';
 
 @Component({
   templateUrl: './campaign-new.html'
@@ -73,8 +74,8 @@ export class CampaignNew implements HomeViewComponent {
       });
     }
 
-    let username = await this.userService.getName();
-    let gm = PlayerFactory.createPlayer(username, "", true, null);
+    let identifier = await this.userService.getIdentifier();
+    let gm = PlayerFactory.createPlayer(identifier, true, null);
 
     let newCamp = CampaignFactory.createCampaign(
       obj.campaign.value.campaignName,

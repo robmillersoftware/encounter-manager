@@ -60,7 +60,6 @@ export class CampaignFactory {
 
   static fromBroadcast(broadcast: string): Campaign {
     let b = <CampaignBroadcast>JSON.parse(broadcast);
-
     return new Campaign({name: b.n, description: b.d});
   }
 

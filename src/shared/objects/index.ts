@@ -1,5 +1,4 @@
 export * from '@shared/objects/payload';
-export * from '@shared/objects/message';
 export * from '@shared/objects/campaign';
 export * from '@shared/objects/location';
 export * from '@shared/objects/character';

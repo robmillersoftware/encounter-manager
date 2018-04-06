@@ -1,33 +1,30 @@
-import { Character } from '@shared/objects';
+import { Character, CharacterFactory } from '@shared/objects';
 
 interface PlayerData {
-  name: string,
-  id: string,
+  identifier: string,
   isGm: boolean,
   characters?: Array<Character>
 }
 
 export class Player {
-  public name: string;
-  public id: string;
+  public identifier: string;
   public characters: Array<Character>;
   public isGm: boolean;
 
   constructor(data: PlayerData) {
-    this.name = data.name;
-    this.id = data.id;
+    this.identifier = data.identifier;
     this.isGm = data.isGm;
     this.characters = data.hasOwnProperty('characters') ? data.characters : new Array<Character>();
   }
 }
 
 class PlayerBroadcast {
-  constructor(public n: string, public i: string, public g: boolean) {}
+  constructor(public i: string, public g: boolean, public c: string) {}
 }
 
 export class PlayerFactory {
-  static createPlayer(name: string, id: string, isGm: boolean, characters: Array<Character>): Player {
-    return new Player({name: name, id: id, isGm: isGm, characters: characters});
+  static createPlayer(identifier: string, isGm: boolean, characters: Array<Character>): Player {
+    return new Player({identifier: identifier, isGm: isGm, characters: characters});
   }
 
   static fromJSON(json: string): Player {
@@ -35,11 +32,22 @@ export class PlayerFactory {
   }
 
   static toBroadcast(player: Player): string {
-    return JSON.stringify(new PlayerBroadcast(player.name, player.id, player.isGm));
+    let charStr = "[]";
+
+    if (player.characters) {
+      charStr = JSON.stringify(player.characters);
+    }
+
+    return JSON.stringify(new PlayerBroadcast(player.identifier, player.isGm, charStr));
   }
 
   static fromBroadcast(p: string): Player {
     let pBroadcast = <PlayerBroadcast>JSON.parse(p);
-    return new Player({name: pBroadcast.n, id: pBroadcast.i, isGm: pBroadcast.g});
+    let cBroadcast = JSON.parse(pBroadcast.c);
+    let characters = new Array<Character>();
+    for (let char in cBroadcast) {
+      characters.push(CharacterFactory.fromJSON(char));
+    }
+    return new Player({identifier: pBroadcast.i, isGm: pBroadcast.g, characters: characters});
   }
 }

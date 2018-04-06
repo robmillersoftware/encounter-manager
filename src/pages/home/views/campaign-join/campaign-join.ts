@@ -1,7 +1,7 @@
 import { Component, Input } from '@angular/core';
 import { HomeViewComponent } from '../home-view.component';
 import { ConnectionService, CampaignService, UserService } from '@shared/services';
-import { Campaign, CampaignFactory, MessageFactory } from '@shared/objects';
+import { Campaign, CampaignFactory, MessageFactory, Player, PlayerFactory } from '@shared/objects';
 
 @Component({
   templateUrl: './campaign-join.html'
@@ -19,19 +19,24 @@ export class CampaignJoin implements HomeViewComponent {
   }
 
   async startDiscovery() {
-    let name: string = await this.userService.getName();
-    this.connectionService.discoverCampaigns(name, campaignMessage => {
-      console.log("GOT MESSAGE: " + JSON.stringify(campaignMessage));
-      //let message = MessageFactory.fromJSON(campaignMessage);
-      //this.campaigns.add(CampaignFactory.fromBroadcast(message.data));
+    this.connectionService.localCampaigns.subscribe((campaigns: Map<string, Campaign>) => {
+      if (campaigns) {
+        campaigns.forEach((value, key) => {
+          this.campaigns.add(value);
+        });
+      }
     });
+
+    this.connectionService.discoverCampaigns();
   }
 
   getTitle() {
     return "Join a Campaign";
   }
 
-  loadCampaign(campaign: Campaign) {
-
+  async loadCampaign(campaign: Campaign) {
+    let identifier = await this.userService.getIdentifier();
+    this.connectionService.connectToCampaign(campaign.name);
+    this.connectionService.stopDiscovery();
   }
 }

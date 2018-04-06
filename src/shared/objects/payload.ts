@@ -1,39 +1,34 @@
-export enum PayloadTypes {
-  BYTES,
-  FILE,
-  STREAM
+import { debugMap } from '@globals';
+
+interface PayloadData {
+  src: string,
+  payload: any,
+  dest: string,
+  type: string
 }
 
-export namespace PayloadTypes {
-  export function fromString(str: string): PayloadTypes {
-    switch(str) {
-      case "BYTES":
-        return PayloadTypes.BYTES;
-      case "FILE":
-        return PayloadTypes.FILE;
-      case "STREAM":
-        return PayloadTypes.STREAM;
-    }
-  }
-}
+export class Payload {
+  public src: string;
+  public dest: string;
+  public type: string;
+  public payload: any;
 
-export class PayloadDescription {
-  private descriptors: Map<string, string>;
-
-  constructor(public type: PayloadTypes) {
-    this.descriptors = new Map<string, string>();
-  }
-
-  public addDescriptor(key: string, value: string) {
-    this.descriptors.set(key, value);
-  }
-
-  public contains(key: string): boolean {
-    return this.descriptors.has(key);
+  constructor(data: PayloadData) {
+    this.payload = data.payload;
+    this.src = data.src;
+    this.dest = data.dest;
+    this.type = data.type;
   }
 }
 
-export interface Payload {
-  description: PayloadDescription,
-  data: any
+export class PayloadFactory {
+  public static createPayload(payload: any, src: string, dest: string, type: string) {
+    return new Payload({payload: payload, src: src, dest: dest, type: type});
+  }
+
+  public static fromJSON(json: string): Payload {
+    let obj = JSON.parse(json);
+
+    return new Payload({ payload: obj.payload, src: obj.src, dest: obj.dest, type: obj.type });
+  }
 }

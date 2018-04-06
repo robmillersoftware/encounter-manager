@@ -41,10 +41,20 @@ export enum BroadcastTypes {
 * This method is an abstraction for printing a map to the console
 * @param map The map to print. Keys must be strings, values can be anything
 */
-export function debugMap(map: Map<string, any>) {
-console.log(JSON.stringify(Array.from(map.entries()).reduce(
-  (json, [key, value]) => {
-    json[key] = value;
-    return json;
-  }, {})));
+export function debugMap(map: Map<string, any>): string {
+  return JSON.stringify(Array.from(map.entries()).reduce(
+    (json, [key, value]) => {
+      json[key] = value;
+      return json;
+  }, {}));
+}
+
+export function generateIdentifier(userName: string, id: string, endpoint: string): string {
+  return JSON.stringify({n: userName, i: id, e: endpoint});
+}
+
+export function parseIdentifier(id: string): any {
+  let obj = JSON.parse(id);
+
+  return {userName: obj.n, id: obj.i, endpoint: obj.e};
 }

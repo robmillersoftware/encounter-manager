@@ -50,15 +50,14 @@ public class NearbyPlugin extends CordovaPlugin {
   protected static final int REQUEST_CODE = 0;
 
   private Map<String, String> endpoints = new HashMap<String, String>();
-  protected String userName;
   protected ConnectionsClient connectionsClient;
 
-  //String that identifies the application
-  protected String token;
-
-  //JSON string that contains name and id fields
+  //These variables identify the application using NearbyPlugin
   protected String identifier;
+  protected String serviceId;
+
   protected CallbackContext endpointCbContext;
+  protected CallbackContext connectionsCallback;
 
   protected PayloadCallback payloadCallback = new PayloadCallback() {
     @Override
@@ -95,6 +94,11 @@ public class NearbyPlugin extends CordovaPlugin {
         JSONObject user = new JSONObject(connectionInfo.getEndpointName());
         if (token.equals(user.getString("token"))) {
           connectionsClient.acceptConnection(endpointId, payloadCallback);
+
+          user.put("e", endpointId);
+          PluginResult result = new PluginResult(Status.OK, user);
+          result.setKeepCallback(true);
+          connectionsCallback.sendPluginResult(result);
         }
       } catch (JSONException ex) {
         Log.e(TAG, "JSON Exception: " + ex.getMessage());
@@ -131,19 +135,25 @@ public class NearbyPlugin extends CordovaPlugin {
 
       endpoints.put(endpointId, discoveredEndpointInfo.getEndpointName());
       JSONObject json = new JSONObject(endpoints);
+
+      JSONObject id = null;
+      try {
+        id = new JSONObject(discoveredEndpointInfo.getEndpointName());
+        id.put("e", endpointId);
+      } catch(JSONException e) {
+        Log.d(TAG, "Error getting identifier from endpoint: " + e.getMessage());
+      }
+
+      if (id == null) {
+        id = new JSONObject();T
+      }
+
       MessagePayload payload = new MessagePayload(json.toString(),
-        discoveredEndpointInfo.getEndpointName(), identifier);
+        id.toString(), identifier, "CAMPAIGN");
+
       PluginResult result = new PluginResult(Status.OK, payload.toJSON());
       result.setKeepCallback(true);
       endpointCbContext.sendPluginResult(result);
-
-      try {
-        JSONObject obj = new JSONObject();
-        obj.put("token", token);
-        connectionsClient.requestConnection(obj.toString(), endpointId, connectionLifecycleCallback);
-      } catch (JSONException ex) {
-        Log.d(TAG, "JSON Exception: " + ex.getMessage());
-      }
     }
 
     @Override
@@ -177,50 +187,74 @@ public class NearbyPlugin extends CordovaPlugin {
 
   @Override
   public boolean execute(String action, JSONArray args, final CallbackContext callbackContext) throws JSONException {
-    if(action.equals("startAdvertising")) {
-      this.userName = args.getString(0);
-      this.connectionsClient.startAdvertising(args.getString(0), args.getString(1),
-        this.connectionLifecycleCallback, new AdvertisingOptions(Strategy.P2P_CLUSTER))
-      .addOnSuccessListener(new OnSuccessListener<Void>() {
-        @Override
-        public void onSuccess(Void unusedResult) {
-          Log.d(TAG, "Successfully started advertising");
+    switch(action.toLowerCase()) {
+      case "startadvertising":
+        this.connectionsCallback = callbackContext;
+        this.startAdvertising(args.getString(0);
+        break;
+      case "stopadvertising":
+        Log.d(TAG, "Stopping advertising.");
+        this.connectionsClient.stopAdvertising();
+        break;
+      case "setidentifier":
+        this.identifier = args.getString(0);
+        break;
+      case "setserviceid":
+        this.serviceId = args.getString(0);
+        break;
+      case "startdiscovery":
+        this.endpointCbContext = callbackContext;
+        this.connectionsClient.startDiscovery(args.getString(0), this.endpointDiscoveryCallback,
+          new DiscoveryOptions(Strategy.P2P_CLUSTER))
+        .addOnSuccessListener(new OnSuccessListener<Void>() {
+          @Override
+          public void onSuccess(Void unusedResult) {
+            Log.d(TAG, "Successfully started discovery");
+          }
+        })
+        .addOnFailureListener(new OnFailureListener() {
+          @Override
+          public void onFailure(Exception e) {
+            Log.e(TAG, "Unable to start service discovery: " + e.getMessage());
+          }
+        });
+        break;
+      case "stopdiscovery":
+        Log.d(TAG, "Turning off discovery.");
+        this.connectionsClient.stopDiscovery();
+        break;
+      case "sendbytes":
+        this.sendPayloadBytes(args.getString(0), args.getString(1));
+        break;
+      case "connecttocampaign":
+        Log.d(TAG, "IDENTIFIER IS: " + this.identifier);
+        try {
+          JSONObject obj = new JSONObject();
+          this.connectionsClient.requestConnection(this.identifier, args.getString(0), connectionLifecycleCallback);
+        } catch (JSONException ex) {
+          Log.d(TAG, "JSON Exception: " + ex.getMessage());
         }
-      })
-      .addOnFailureListener(new OnFailureListener() {
-        @Override
-        public void onFailure(Exception e) {
-          Log.e(TAG, "Unable to start advertising: " + e.getMessage());
-        }
-      });
-    } else if(action.equals("stopAdvertising")) {
-      this.connectionsClient.stopAdvertising();
-    } else if (action.equals("setToken")) {
-      this.token = args.getString(0);
-    } else if (action.equals("setIdentifier")) {
-      this.identifier = args.getString(0);
-    } else if (action.equals("startDiscovery")) {
-      this.endpointCbContext = callbackContext;
-      this.connectionsClient.startDiscovery(args.getString(1), this.endpointDiscoveryCallback,
-        new DiscoveryOptions(Strategy.P2P_CLUSTER))
-      .addOnSuccessListener(new OnSuccessListener<Void>() {
-        @Override
-        public void onSuccess(Void unusedResult) {
-          Log.d(TAG, "Successfully started discovery");
-        }
-      })
-      .addOnFailureListener(new OnFailureListener() {
-        @Override
-        public void onFailure(Exception e) {
-          Log.e(TAG, "Unable to start service discovery: " + e.getMessage());
-        }
-      });
-    } else if (action.equals("stopDiscovery")) {
-      this.connectionsClient.stopDiscovery();
-    } else if (action.equals("sendBytes")) {
-      this.sendPayloadBytes(args.getString(0), args.getString(1));
+        break;
     }
+
     return true;
+  }
+
+  private void startAdvertising(String broadcast) {
+    this.connectionsClient.startAdvertising(broadcast, this.serviceId),
+      this.connectionLifecycleCallback, new AdvertisingOptions(Strategy.P2P_CLUSTER))
+    .addOnSuccessListener(new OnSuccessListener<Void>() {
+      @Override
+      public void onSuccess(Void unusedResult) {
+        Log.d(TAG, "Successfully started advertising");
+      }
+    })
+    .addOnFailureListener(new OnFailureListener() {
+      @Override
+      public void onFailure(Exception e) {
+        Log.e(TAG, "Unable to start advertising: " + e.getMessage());
+      }
+    });
   }
 
   /**
@@ -269,15 +303,45 @@ public class NearbyPlugin extends CordovaPlugin {
     Log.d(TAG, "Did we find google services? " + services);
   }
 
+  public static String generateIdentifier(String name, String id, String endpoint) {
+    JSONObject obj = new JSONObject();
+
+    try {
+      obj.put("n", name);
+      obj.put("i", id);
+      obj.put("e", endpoint);
+    } catch(JSONException e) {
+      Log.d(TAG, "Error generating identifier: " + e.getMessage());
+    }
+
+    return obj.toString();
+  }
+
+  public static JSONObject parseIdentifier(String id) {
+    JSONObject rtn = new JSONObject();
+
+    try {
+      JSONObject obj = new JSONObject(id);
+      rtn.put("name", obj.getString("n"));
+      rtn.put("id", obj.getString("i"));
+      rtn.put("endpoint", obj.getString("e"));
+    } catch(JSONException e) {
+      Log.d(TAG, "Error parsing identifier: " + e.getMessage());
+    }
+
+    return rtn;
+  }
+
   private class MessagePayload {
     public Map<String, String> description;
     public String data;
 
-    public MessagePayload(String msg, String to, String from) {
+    public MessagePayload(String msg, String src, String dest, String type) {
       this.data = msg;
-      this.description.put("type", "BYTES");
-      this.description.put("to", to);
-      this.description.put("from", from);
+      this.description = new HashMap<String, String>();
+      this.description.put("src", src);
+      this.description.put("dest", dest);
+      this.description.put("type", type);
     }
 
     public String toJSON() {
@@ -290,7 +354,7 @@ public class NearbyPlugin extends CordovaPlugin {
       } catch (JSONException e) {
         Log.d(TAG, "Error converting MessagePayload: " + e.getMessage());
       }
-      
+
       return obj.toString();
     }
   }

@@ -1,7 +1,7 @@
 /**
 * This service manages the campaign storage for the application
 * @author Rob Miller
-* @author robmillersoftware@gmail.com
+* @copyright 2018
 */
 import { Injectable } from '@angular/core';
 import { BehaviorSubject } from 'rxjs/BehaviorSubject';

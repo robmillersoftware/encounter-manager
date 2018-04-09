@@ -3,12 +3,18 @@ import { HomeViewComponent } from '../home-view.component';
 import { CampaignService } from '@shared/services';
 import { Campaign } from '@shared/objects';
 
+/**
+* This class represents the view for loading and deleting campaigns
+* @author Rob Miller
+* @copyright 2018
+*/
 @Component({
   templateUrl: './campaign-load.html'
 })
 export class CampaignLoad implements HomeViewComponent {
   @Input() data: any;
   @Input() name: string;
+  @Input() id: any;
   @Input() callback: any;
 
   public campaigns: Array<Campaign>;
@@ -17,16 +23,18 @@ export class CampaignLoad implements HomeViewComponent {
     this.getCampaigns();
   }
 
-  getTitle() {
-    return "Select a Campaign To Load";
-  }
-
-  async getCampaigns() {
+  /**
+  * Queries local storage for a list of campaigns
+  */
+  private async getCampaigns() {
     let map: Map<string, Campaign> = await this.campaignService.getCampaigns();
     this.campaigns = Array.from(map.values());
   }
 
-  deleteCampaign(name: string) {
+  /**
+  * Button callback for deleting campaigns
+  */
+  private deleteCampaign(name: string) {
     this.campaigns.forEach((campaign, i) => {
       if (campaign.name === name) {
         this.campaigns.splice(i, 1);
@@ -35,12 +43,17 @@ export class CampaignLoad implements HomeViewComponent {
 
     this.campaignService.removeCampaign(name);
 
+    //If there are no campaigns left, then go back to the dashboard
     if (this.campaigns.length === 0) {
-      this.callback('pageChange', 'dashboard')
+      this.callback('viewChange', 'dashboard')
     }
   }
 
-  async loadCampaign(campaign: Campaign) {
+  /**
+  * Button callback for loading a campaign
+  * @param campaign
+  */
+  private async loadCampaign(campaign: Campaign) {
     this.campaignService.setCurrentCampaign(campaign).then(() => {
       this.callback('tabChange', 'campaign')
     });

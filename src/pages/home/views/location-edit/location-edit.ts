@@ -3,22 +3,24 @@ import { HomeViewComponent } from '../home-view.component';
 import { LocationService } from '@shared/services';
 import { Location } from '@shared/objects';
 
+/**
+* This class represents the view for editing/viewing/deleting locations.
+* @author Rob Miller
+* @copyright 2018
+*/
 @Component({
-  templateUrl: './location-list.html'
+  templateUrl: './location-edit.html'
 })
-export class LocationList implements HomeViewComponent {
+export class LocationEdit implements HomeViewComponent {
   @Input() data: any;
   @Input() name: string;
+  @Input() id: any;
   @Input() callback: any;
 
   public locations: Location[];
 
   constructor(private locationService: LocationService) {
     this.getLocations();
-  }
-
-  getTitle() {
-    return "Edit Locations";
   }
 
   async getLocations() {
@@ -35,4 +37,3 @@ export class LocationList implements HomeViewComponent {
     }
   }
 }
-

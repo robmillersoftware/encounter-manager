@@ -6,7 +6,7 @@ import { IonicPageModule } from 'ionic-angular';
 import { SharedModule } from '@shared/shared.module';
 
 import { HomePage } from './home.component';
-import { CharacterList, CharacterNew, LocationList,
+import { CharacterEdit, CharacterNew, LocationEdit,
     LocationNew, Dashboard, CampaignNew, CampaignJoin, CampaignLoad } from './views';
 
 import { HomeService } from './home.service';
@@ -17,15 +17,15 @@ import { HomeDirective } from './home.directive';
     declarations: [
         HomePage,
         CampaignNew, CampaignLoad, CampaignJoin,
-        CharacterList, CharacterNew,
-        LocationList, LocationNew,
+        CharacterEdit, CharacterNew,
+        LocationEdit, LocationNew,
         Dashboard,
         HomeDirective],
     entryComponents: [
         HomePage,
         CampaignNew, CampaignLoad, CampaignJoin,
-        CharacterList, CharacterNew,
-        LocationList, LocationNew,
+        CharacterEdit, CharacterNew,
+        LocationEdit, LocationNew,
         Dashboard],
     providers: [HomeService],
     exports: [HomePage]

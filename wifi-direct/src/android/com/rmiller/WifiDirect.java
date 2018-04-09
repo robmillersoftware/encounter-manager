@@ -32,7 +32,7 @@ import java.util.ArrayList;
 /**
  * A Cordova plugin that wraps the Wifi P2P Android API
  * @author Rob Miller
- * @author robmillersoftware@gmail.com
+ * @copyright 2018
  **/
 public class WifiDirect extends CordovaPlugin implements ChannelListener {
   protected static final String TAG = "WifiDirect";

@@ -4,41 +4,38 @@ import { HomeViewComponent } from '../home-view.component';
 import { LocationService } from '@shared/services';
 import { LocationFactory } from '@shared/objects';
 
+/**
+* This class represents the view for creating a new location
+* @author Rob Miller
+* @copyright 2018
+*/
 @Component({
   templateUrl: './location-new.html'
 })
 export class LocationNew implements HomeViewComponent {
   @Input() data: any;
   @Input() name: string;
+  @Input() id: any;
   @Input() callback: any;
 
-  public location: FormGroup;
-  public submitAttempted: boolean;
+  public locationInfo: FormGroup;
 
   constructor(private locationService: LocationService, private formBuilder: FormBuilder) {
-    this.location = this.formBuilder.group({
+    this.locationInfo = this.formBuilder.group({
       locName: ['', Validators.required],
       locDesc: ['']
     });
   }
 
-  getTitle() {
-    return "Create New Location";
-  }
+  /**
+  * Submit callback that creates a new location and adds it to local storage. It then
+  * Navigates to the edit page
+  */
+  private createLocation() {
+    let loc = LocationFactory.createLocation(this.locationInfo.value.locName, this.locationInfo.value.locDesc);
 
-  createLocation() {
-    let obj = this;
-
-    if (obj.location.get('locName').hasError('has_location')) {
-      obj.submitAttempted = true;
-    } else {
-      obj.submitAttempted = false;
-
-      let loc = LocationFactory.createLocation(obj.location.value.locName, obj.location.value.locDesc);
-
-      obj.locationService.addLocation(loc).then(() => {
-        obj.callback('pageChange', 'location-edit');
-      });
-    }
+    this.locationService.addLocation(loc).then(() => {
+      this.callback('viewChange', 'location-edit');
+    });
   }
 }

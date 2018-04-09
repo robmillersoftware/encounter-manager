@@ -1,73 +1,110 @@
 import { Injectable } from '@angular/core';
 import { Platform } from 'ionic-angular';
-import { CampaignFactory, Campaign, MessageFactory, Player, PlayerFactory } from '@shared/objects';
-import { UserService } from '@shared/services';
-import { Globals, debugMap, parseIdentifier } from '@globals';
+import { CampaignFactory, Campaign, PayloadFactory, Payload } from '@shared/objects';
+import { UserService, StorageService } from '@shared/services';
+import { Globals, parseIdentifier } from '@globals';
 import { BehaviorSubject } from 'rxjs/BehaviorSubject';
 
+/**
+* This service handles connections between peer devices
+*
+* @author Rob Miller
+* @copyright 2018
+*/
 @Injectable()
 export class ConnectionService {
   private isIos: boolean;
   private isCordova: boolean;
 
-  public localCampaigns: BehaviorSubject<Map<string, Campaign>>;
+  //Gets updated whenever new campaigns are discovered with Nearby. The key is an
+  //identifier
+  public remoteCampaigns: BehaviorSubject<Map<string, Campaign>>;
+
+  //Gets updated when information about players on the same campaign as you is found
   public campaignPlayers: BehaviorSubject<Map<string, string>>;
 
-  constructor(private platform: Platform, private userService: UserService) {
+  constructor(private platform: Platform, private userService: UserService,
+      private storageService: StorageService) {
     this.isIos = this.platform.is("ios");
     this.isCordova = this.platform.is("cordova");
-    this.localCampaigns = new BehaviorSubject(null);
+    this.remoteCampaigns = new BehaviorSubject(null);
     this.campaignPlayers = new BehaviorSubject(null);
 
     if (this.isCordova && window["NearbyPlugin"]) {
+      //The identifier for this user and the service id for the app should be set
+      //before calling any NearbyPlugin methods
       this.setIdentifier();
       window["NearbyPlugin"].setServiceId(Globals.serviceId);
     }
 
-    console.log("Connection Service initialized. IsCordova? " + this.isCordova);
+    console.log("Connection Service initialized.");
   }
 
+  /**
+  * Sets the identifier on the Nearby plugin. It is a JSON object that is attached
+  * to every message sent from or received by this application
+  */
   private async setIdentifier() {
     window["NearbyPlugin"].setIdentifier(await this.userService.getIdentifier());
   }
 
+  /**
+  * Advertises a campaign using the NearbyPlugin. In order to ensure we are under
+  * the maximum bytes, the campaign is condensed into a broadcast JSON string
+  * @param c the campaign to advertise
+  */
   public advertiseCampaign(c: Campaign) {
     if (this.isCordova && window["NearbyPlugin"]) {
-      console.log("Advertising campaign has been called. With campaign: "
-        + CampaignFactory.toBroadcast(c));
-
       window["NearbyPlugin"].startAdvertising(CampaignFactory.toBroadcast(c), connection => {
+        //This method is called when a connection is established
         console.log("GOT CONNECTION STUFFS: " + JSON.stringify(connection));
         console.log(connection);
       });
     }
   }
 
-  public discoverCampaigns() {
+  /**
+  * Get a map of remote campaigns with key of endpoint id and value of campaign object
+  * @return Map<string, Campaign>
+  */
+  private async getRemoteCampaigns() {
+    return await this.storageService.get('remoteCampaigns');
+  }
+  /**
+  * Discover nearby campaigns using the Nearby plugin. It listens for advertisements
+  * specifically broadcasting a campaign object
+  */
+  public async discoverCampaigns() {
     if (this.isCordova && window["NearbyPlugin"]) {
-      window["NearbyPlugin"].startDiscovery(campaigns => {
-        let messages = MessageFactory.fromJSON(campaigns);
-        let messagesObj = JSON.parse(messages.msg);
-        let campaignMap: Map<string, Campaign> = this.localCampaigns.getValue();
+      window["NearbyPlugin"].startDiscovery(discovered => {
+        //data should be a JSON string matching a Payload object
+        let data: Payload = PayloadFactory.fromJSON(discovered);
 
-        if (campaignMap === null) {
-          campaignMap = new Map<string, Campaign>();
+        if (!data) {
+          console.error("Improperly formatted payload sent by NearbyPlugin: "
+            + discovered);
+          return;
         }
 
-        Object.keys(messagesObj).forEach(key => {
-          campaignMap.set(messages.src, CampaignFactory.fromBroadcast(messagesObj[key]));
-        });
-
-        this.localCampaigns.next(campaignMap);
+        if (data.payload) {
+          let campaigns: Map<string, Campaign> = this.remoteCampaigns.value;
+          let identifier = parseIdentifier(data.src);
+          campaigns.set(identifier.endpoint, CampaignFactory.fromBroadcast(data.payload));
+          this.remoteCampaigns.next(data.payload);
+        }
       });
     }
   }
 
+  /**
+  * Connects to a remote campaign with the specified name
+  * @param name
+  */
   public async connectToCampaign(name: string) {
-    let map: Map<string, Campaign> = this.localCampaigns.value;
+    let map: Map<string, Campaign> = this.remoteCampaigns.value;
 
     if (!map) {
-      console.log("No value has been assigned to localCampaigns");
+      console.log("No value has been assigned to remoteCampaigns");
       return;
     }
 
@@ -79,12 +116,18 @@ export class ConnectionService {
     });
   }
 
+  /**
+  * Stop the Nearby plugin from looking for campaigns
+  */
   public stopDiscovery() {
     if (this.isCordova && window["NearbyPlugin"]) {
       window["NearbyPlugin"].stopDiscovery();
     }
   }
 
+  /**
+  * Stop advertising the current campaign
+  */
   public stopAdvertising() {
     if (this.isCordova && window["NearbyPlugin"]) {
       window["NearbyPlugin"].stopAdvertising();

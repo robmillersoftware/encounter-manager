@@ -1,11 +1,22 @@
+/**
+* This file contains all classes and methods relating to Player objects
+* @author Rob Miller
+* @copyright 2018
+*/
 import { Character, CharacterFactory } from '@shared/objects';
 
+/**
+* This interface is used to construct Player objects
+*/
 interface PlayerData {
   identifier: string,
   isGm: boolean,
   characters?: Array<Character>
 }
 
+/**
+* This class represents a player in a campaign
+*/
 export class Player {
   public identifier: string;
   public characters: Array<Character>;
@@ -18,36 +29,27 @@ export class Player {
   }
 }
 
-class PlayerBroadcast {
-  constructor(public i: string, public g: boolean, public c: string) {}
-}
-
+/**
+* This class is responsible for the creation and manipulation of Player objects
+*/
 export class PlayerFactory {
+  /**
+  * Creates a Player object with the given parameters
+  * @param identifier
+  * @param isGm
+  * @param characters
+  * @return the created Player
+  */
   static createPlayer(identifier: string, isGm: boolean, characters: Array<Character>): Player {
     return new Player({identifier: identifier, isGm: isGm, characters: characters});
   }
 
+  /**
+  * Parses a player object from a JSON string
+  * @param json
+  * @return parsed Player
+  */
   static fromJSON(json: string): Player {
     return new Player(<PlayerData>JSON.parse(json));
-  }
-
-  static toBroadcast(player: Player): string {
-    let charStr = "[]";
-
-    if (player.characters) {
-      charStr = JSON.stringify(player.characters);
-    }
-
-    return JSON.stringify(new PlayerBroadcast(player.identifier, player.isGm, charStr));
-  }
-
-  static fromBroadcast(p: string): Player {
-    let pBroadcast = <PlayerBroadcast>JSON.parse(p);
-    let cBroadcast = JSON.parse(pBroadcast.c);
-    let characters = new Array<Character>();
-    for (let char in cBroadcast) {
-      characters.push(CharacterFactory.fromJSON(char));
-    }
-    return new Player({identifier: pBroadcast.i, isGm: pBroadcast.g, characters: characters});
   }
 }

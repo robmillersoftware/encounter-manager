@@ -1,11 +1,8 @@
 <p>Create New Campaign</p>
-<form [formGroup]="campaign" (ngSubmit)="createCampaign()">
+<form [formGroup]="campaignInfo" (ngSubmit)="createCampaign()">
     <ion-item>
         <ion-label class="form-label" fixed>Name </ion-label>
-        <ion-input class="form-input-text" [class.invalid]="campaign.get('campaignName').hasError('has_campaign') && submitAttempted" type="text" formControlName="campaignName"></ion-input>
-    </ion-item>
-    <ion-item *ngIf="campaign.get('campaignName').hasError('has_campaign') && submitAttempted">
-        <p color="red">A campaign with that name already exists</p>
+        <ion-input class="form-input-text" type="text" formControlName="campaignName"></ion-input>
     </ion-item>
     <ion-item class="formField">
         <ion-label class="form-label" fixed>Description </ion-label>
@@ -27,5 +24,5 @@
             </ion-option>
         </ion-select>
     </ion-item>
-    <button ion-button type="submit" [disabled]="!campaign.valid">Create</button>
+    <button ion-button type="submit" [disabled]="!campaignInfo.valid">Create</button>
 </form>

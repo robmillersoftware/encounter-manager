@@ -1,5 +1,6 @@
 import { Component, Input } from '@angular/core';
 import { HomeViewComponent } from '../home-view.component';
+import { HomeViews } from '@pages/home/home.service';
 import { CampaignService } from '@shared/services';
 import { Campaign } from '@shared/objects';
 
@@ -20,21 +21,13 @@ export class CampaignLoad implements HomeViewComponent {
   public campaigns: Array<Campaign>;
 
   constructor(private campaignService: CampaignService) {
-    this.getCampaigns();
-  }
-
-  /**
-  * Queries local storage for a list of campaigns
-  */
-  private async getCampaigns() {
-    let map: Map<string, Campaign> = await this.campaignService.getCampaigns();
-    this.campaigns = Array.from(map.values());
+    this.campaigns = Array.from(this.campaignService.getCampaigns().values());
   }
 
   /**
   * Button callback for deleting campaigns
   */
-  private deleteCampaign(name: string) {
+  public deleteCampaign(name: string) {
     this.campaigns.forEach((campaign, i) => {
       if (campaign.name === name) {
         this.campaigns.splice(i, 1);
@@ -45,7 +38,7 @@ export class CampaignLoad implements HomeViewComponent {
 
     //If there are no campaigns left, then go back to the dashboard
     if (this.campaigns.length === 0) {
-      this.callback('viewChange', 'dashboard')
+      this.callback('viewChange', HomeViews.DASHBOARD);
     }
   }
 
@@ -53,9 +46,8 @@ export class CampaignLoad implements HomeViewComponent {
   * Button callback for loading a campaign
   * @param campaign
   */
-  private async loadCampaign(campaign: Campaign) {
-    this.campaignService.setCurrentCampaign(campaign).then(() => {
-      this.callback('tabChange', 'campaign')
-    });
+  public async loadCampaign(campaign: Campaign) {
+    this.campaignService.joinCampaign(campaign);
+    this.callback('tabChange', 0);
   }
 }

@@ -1,11 +1,30 @@
+<ion-header>
+  <ion-navbar>
+    <ion-buttons *ngIf="headerData.canGoBack" left>
+      <button ion-button icon-only (click)="navTo('viewChange')">
+        <ion-icon name="arrow-back"></ion-icon>
+      </button>
+    </ion-buttons>
+    <ion-title>{{headerData.title}}</ion-title>
+    <ion-buttons *ngIf="headerData.menuAvailable" end>
+      <button ion-button menuToggle>
+        <ion-icon name="menu"></ion-icon>
+      </button>
+    </ion-buttons>
+  </ion-navbar>
+</ion-header>
+
+<ion-menu [content]="content" side="right">
+  <ion-content>
+    <ion-list>
+      <button ion-item menuClose *ngFor="let o of headerData.menuOptions" (click)="handleMenu(o)">
+        {{o}}
+      </button>
+    </ion-list>
+  </ion-content>
+</ion-menu>
+<ion-nav #content></ion-nav>
+
 <ion-content class="has-tabs-bottom">
-    <ion-navbar>
-        <ion-buttons *ngIf="headerData.canGoBack" left>
-            <button ion-button icon-only (click)="navTo('viewChange')">
-                <ion-icon name="arrow-back"></ion-icon>
-            </button>
-        </ion-buttons>
-        <ion-title>{{headerData.title}}</ion-title>
-    </ion-navbar>
     <ng-template home-host></ng-template>
 </ion-content>

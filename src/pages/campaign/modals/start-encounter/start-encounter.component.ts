@@ -19,11 +19,9 @@ export class StartEncounterModal {
       encounterParticipants: ['']
     });
 
-    this.getCampaign();
-  }
-
-  private async getCampaign() {
-    this.campaignService.getCurrentCampaign().then(c => this.campaign = c);
+    this.campaignService.currentCampaignSubject.subscribe((c) => {
+      this.campaign = c;
+    });
   }
 
   public closeModal(didSubmit: boolean) {
@@ -31,24 +29,31 @@ export class StartEncounterModal {
   }
 
   public async startEncounter() {
+    console.log("check1");
     let encounter = EncounterFactory.createEncounter();
+        console.log("check2");
     let selectedLocation: Location =
         this.campaign.locations.find(loc => this.encounterInfo.value.encounterLoc === loc.name);
 
+    console.log("check3");
     encounter.location = selectedLocation;
-
+    console.log("check4");
     if (this.encounterInfo.value.encounterParticipants) {
+          console.log("check5");
       this.encounterInfo.value.encounterParticipants.forEach(char => {
+            console.log("check6");
         let stripped = char.replace(/\s+$/, '');
         let idx = this.campaign.characters.findIndex(c => c.name.trim() === stripped.trim());
-
+        console.log("check7");
         if (idx >= 0) {
           encounter.participants.push(this.campaign.characters[idx]);
+          console.log("check8");
         }
       });
     }
 
     this.campaignService.startEncounter(encounter);
+    console.log("check9");
     this.closeModal(true);
   }
 }

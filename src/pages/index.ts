@@ -5,3 +5,4 @@ export * from '@pages/home/home.component';
 export * from '@pages/notes/notes.component';
 export * from '@pages/options/options.component';
 export * from '@pages/tabs/tabs.component';
+export * from '@pages/main/main.component';

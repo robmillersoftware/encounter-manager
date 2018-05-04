@@ -1,0 +1,5 @@
+.modal-content {
+    @include center;
+    background-color: map-get($colors, tertiary-light) !important;
+    width: 300px !important;
+}

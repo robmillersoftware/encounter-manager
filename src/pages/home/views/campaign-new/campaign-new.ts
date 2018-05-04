@@ -1,6 +1,7 @@
 import { Component, Input } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { HomeViewComponent } from '../home-view.component';
+import { HomeViews } from '@pages/home/home.service';
 import { CampaignService, UserService, CharacterService, LocationService } from '@shared/services';
 import { CampaignFactory, PlayerFactory, Location, Character } from '@shared/objects';
 
@@ -34,30 +35,14 @@ export class CampaignNew implements HomeViewComponent {
       campaignLocs: ['']
     });
 
-    this.getCharacters();
-    this.getLocations();
-  }
-
-  /**
-  * Retrieve a list of characters from local storage
-  */
-  private async getCharacters() {
-    let map: Map<string, Character> = await this.characterService.getCharacters();
-    this.allCharacters = Array.from(map.values());
-  }
-
-  /**
-  * Retrieve a list of locations from local storage
-  */
-  private async getLocations() {
-    let map: Map<string, Location> = await this.locationService.getLocations();
-    this.allLocations = Array.from(map.values());
+    this.allCharacters = Array.from(this.characterService.getCharacters().values());
+    this.allLocations = Array.from(this.locationService.getLocations().values());
   }
 
   /**
   * Submit callback that creates a campaign in local storage
   */
-  private async createCampaign() {
+  public async createCampaign() {
     let selectedChars = new Array<Character>();
     let selectedLocs = new Array<Location>();
 
@@ -99,8 +84,7 @@ export class CampaignNew implements HomeViewComponent {
       selectedLocs,
       [gm]);
 
-    this.campaignService.addCampaign(newCamp).then(() => {
-      this.callback('viewChange', 'campaign-load');
-    });
+    this.campaignService.addCampaign(newCamp);
+    this.callback('viewChange', HomeViews.CAMPAIGN_LOAD);
   }
 }

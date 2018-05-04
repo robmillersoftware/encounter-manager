@@ -1,6 +1,6 @@
 import { Component, ComponentFactoryResolver, ViewChild } from '@angular/core';
-import { IonicPage, NavController } from 'ionic-angular';
-import { UserService, CampaignService, ConnectionService } from '@shared/services';
+import { ModalController, IonicPage, NavController, Events } from 'ionic-angular';
+import { UserService, CampaignService, ConnectionService, NavigationService } from '@shared/services';
 import { HomeViewComponent } from './views';
 import { HomeDirective } from './home.directive';
 import { HomeService, HomeViews } from './home.service';
@@ -20,15 +20,19 @@ export class HomePage {
   @ViewChild(HomeDirective) homeHost: HomeDirective;
 
   //This represents information about the view currently being displayed
-  private headerData: any;
+  public headerData: any;
+  private views: any;
 
-  //This contains information about all of the home page views
-  private headers: any;
-
-  constructor(public navCtrl: NavController, public campaignService: CampaignService,
+  constructor(public modalCtrl: ModalController, public navCtrl: NavController, public campaignService: CampaignService,
       public homeService: HomeService,  public userService: UserService,
-      private componentFactoryResolver: ComponentFactoryResolver,
-      private connectionService: ConnectionService) {
+      private componentFactoryResolver: ComponentFactoryResolver, private connectionService: ConnectionService,
+      private navService: NavigationService, private events: Events) {
+
+    this.views = this.homeService.getViews();
+    this.navService.headerData.subscribe((data) => {
+      this.headerData = data;
+    });
+
     console.log("Home page is loaded.");
   }
 
@@ -45,14 +49,13 @@ export class HomePage {
   * @param name
   */
   private loadComponent(id: any) {
-    let views = this.homeService.getViews();
-    let viewToLoad = views.find((v) => v.id === id);
-
+    let viewToLoad = this.views.find((v) => v.id === id);
     if (!viewToLoad) {
-      console.error('Unable to find view for state: ' + HomeViews[id]);
+      console.error('Unable to find view for state: ' + id);
       return null;
     }
 
+    console.log("Loading " + viewToLoad.name + " view");
     //Loads the component under the home directive
     let componentFactory = this.componentFactoryResolver.resolveComponentFactory(viewToLoad.component);
     let viewContainerRef = this.homeHost.viewContainerRef;
@@ -66,7 +69,7 @@ export class HomePage {
     (<HomeViewComponent>componentRef.instance).callback = this.navTo.bind(this);
 
     //Switch to the proper view data
-    this.headerData = viewToLoad.data;
+    this.navService.setHeaderData(viewToLoad.data);
   }
 
   /**
@@ -75,26 +78,19 @@ export class HomePage {
   * @param operation This is the operation to be performed
   * @param data This is data containing information about the operation
   */
-  private navTo(operation: string, data: any) {
+  private navTo(operation: string, id: any) {
     switch(operation) {
       case 'tabChange':
-        //Navigate back to the dashboard before changing tabs if we're coming from
-        //loading or joining a campaign
-        if (this.headerData.id === HomeViews.CAMPAIGN_LOAD
-            || this.headerData.id === HomeViews.CAMPAIGN_JOIN) {
-          this.loadComponent('dashboard');
-        }
-        if (data === 'campaign') {
-          this.checkCurrentCampaign();
-        }
-
+        //Currently we only handle tab changes to the Campaign tab. This can be
+        //expanded later
+        this.checkCurrentCampaign();
         break;
       case 'viewChange':
         //A view change without data should return to the default (i.e. the dashboard)
-        if (!data) {
-          this.loadComponent('dashboard');
+        if (!id) {
+          this.loadComponent(HomeViews.DASHBOARD);
         } else {
-          this.loadComponent(data);
+          this.loadComponent(id);
         }
         break;
     }
@@ -105,12 +101,18 @@ export class HomePage {
   * to the Campaign tab and start advertising the campaign through the connection service.
   * This is called when the app first loads and after loading or joining a campaign
   */
-  private async checkCurrentCampaign() {
-    let current = await this.campaignService.getCurrentCampaign();
+  private checkCurrentCampaign() {
+    let current = this.campaignService.getCurrentCampaign();
 
     if (current) {
+      console.log("Current campaign is " + current.toString());
+      this.loadComponent(HomeViews.DASHBOARD);
       this.navCtrl.parent.select(1);
       this.connectionService.advertiseCampaign(current);
     }
+  }
+
+  public handleMenu(title: string) {
+    this.events.publish(title);
   }
 }

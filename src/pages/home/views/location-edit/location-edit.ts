@@ -20,12 +20,7 @@ export class LocationEdit implements HomeViewComponent {
   public locations: Location[];
 
   constructor(private locationService: LocationService) {
-    this.getLocations();
-  }
-
-  async getLocations() {
-    let map = await this.locationService.getLocations();
-    this.locations = Array.from(map.values());
+    this.locations = Array.from(this.locationService.getLocations().values());
   }
 
   deleteLocation(name: string) {

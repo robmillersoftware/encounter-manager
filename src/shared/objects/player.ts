@@ -3,7 +3,7 @@
 * @author Rob Miller
 * @copyright 2018
 */
-import { Character, CharacterFactory } from '@shared/objects';
+import { Character } from '@shared/objects';
 
 /**
 * This interface is used to construct Player objects

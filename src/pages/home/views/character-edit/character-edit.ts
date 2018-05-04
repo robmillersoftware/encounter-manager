@@ -20,21 +20,13 @@ export class CharacterEdit implements HomeViewComponent {
   public characters: Character[];
 
   constructor(private characterService: CharacterService) {
-    this.getCharacters();
-  }
-
-  /**
-  * Get a list of characters from storage
-  */
-  private async getCharacters() {
-    let map = await this.characterService.getCharacters();
-    this.characters = Array.from(map.values());
+    this.characters = Array.from(this.characterService.getCharacters().values());
   }
 
   /**
   * Button callback for deleting a character from local storage
   */
-  private deleteCharacter(name: string) {
+  public deleteCharacter(name: string) {
     let idx = this.characters.findIndex(item => item.name === name);
 
     if (idx !== -1) {

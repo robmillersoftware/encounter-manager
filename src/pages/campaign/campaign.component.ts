@@ -13,7 +13,7 @@ export class CampaignPage {
     hideOverlay: boolean = true;
 
     constructor(public navCtrl: NavController, private campaignService: CampaignService, private modalCtrl: ModalController) {
-        this.campaignService.campaignSubject.subscribe(c => {
+        this.campaignService.currentCampaignSubject.subscribe(c => {
             this.campaign = c;
         });
     }

@@ -8,7 +8,7 @@ import { HomeModule } from '@pages/home/home.component.module';
 import { CampaignModule } from '@pages/campaign/campaign.component.module';
 import { OptionsModule } from '@pages/options/options.component.module';
 
-import { EncounterPage, NotesPage, TabsPage, ChatPage } from '@pages';
+import { EncounterPage, NotesPage, TabsPage, ChatPage, MainPage } from '@pages';
 
 import { StatusBar } from '@ionic-native/status-bar';
 import { SplashScreen } from '@ionic-native/splash-screen';
@@ -19,7 +19,8 @@ import { SplashScreen } from '@ionic-native/splash-screen';
     EncounterPage,
     NotesPage,
     ChatPage,
-    TabsPage
+    TabsPage,
+    MainPage
   ],
   imports: [
     SharedModule,
@@ -35,7 +36,8 @@ import { SplashScreen } from '@ionic-native/splash-screen';
     EncounterPage,
     NotesPage,
     ChatPage,
-    TabsPage
+    TabsPage,
+    MainPage
   ],
   providers: [
     StatusBar,

@@ -20,21 +20,17 @@ export class AddCharacterModal {
   constructor(public viewCtrl: ViewController, public formBuilder: FormBuilder,
       public campaignService: CampaignService, public characterService: CharacterService) {
     this.availableChars = new Array();
+    this.campaign = this.campaignService.getCurrentCampaign();
     this.getCharacters();
   }
 
-  async getCharacters() {
-    this.characterService.getCharacters().then(characters => {
-      this.campaignService.getCurrentCampaign().then(campaign => {
-        this.campaign = campaign;
-        let available = Array.from(characters.values())
-          .filter((char: any) =>
-            campaign.characters.findIndex(c => c.name === char.name) < 0);
+  public getCharacters() {
+    let characters: Map<string, Character> = this.characterService.getCharacters();
+    let available = Array.from(characters.values()).filter((char: any) =>
+      this.campaign.characters.findIndex(c => c.name === char.name) < 0);
 
-        available.forEach((char: any) => {
-          this.availableChars.push(new CharCheckbox(char));
-        });
-      });
+    available.forEach((char: any) => {
+      this.availableChars.push(new CharCheckbox(char));
     });
   }
 
@@ -43,16 +39,14 @@ export class AddCharacterModal {
   }
 
   addCharacters() {
-    let obj = this;
     this.availableChars.forEach((char, idx) => {
       if (char.state) {
-        obj.campaign.characters.push(char.character);
+        this.campaign.characters.push(char.character);
         this.availableChars.splice(idx, 1);
       }
     });
 
-    this.campaignService.updateCampaign(this.campaign).then(() => {
-      obj.closeModal(true);
-    });
+    this.campaignService.updateCampaign(this.campaign);
+    this.closeModal(true);
   }
 }

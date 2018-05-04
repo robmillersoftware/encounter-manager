@@ -1,6 +1,7 @@
 import { Component, Input } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { HomeViewComponent } from '../home-view.component';
+import { HomeViews } from '@pages/home/home.service';
 import { CharacterService } from '@shared/services';
 import { CharacterFactory } from '@shared/objects';
 
@@ -30,11 +31,10 @@ export class CharacterNew implements HomeViewComponent {
   /**
   * Submit callback that creates a new character and adds it to local storage
   */
-  private createCharacter() {
+  public createCharacter() {
     let char = CharacterFactory.createCharacter(this.characterInfo.value.charName, this.characterInfo.value.charDesc);
 
-    this.characterService.addCharacter(char).then(() => {
-      this.callback('viewChange', 'character-edit');
-    });
+    this.characterService.addCharacter(char);
+    this.callback('viewChange', HomeViews.CHARACTER_EDIT);
   }
 }

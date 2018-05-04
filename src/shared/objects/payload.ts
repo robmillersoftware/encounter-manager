@@ -52,7 +52,14 @@ let parseData = (payload: PayloadData): PayloadData => {
       rtn = PayloadFactory.createMessage(payload.payload, payload.src, payload.dest);
       break;
     case PayloadTypes[PayloadTypes.CAMPAIGN]:
-      let campaign: Campaign = CampaignFactory.fromBroadcast(payload.payload);
+      let obj = JSON.parse(payload.payload);
+      let broadcast = null;
+
+      Object.keys(obj).forEach(key => {
+        broadcast = obj[key];
+      });
+
+      let campaign: Campaign = CampaignFactory.fromBroadcast(broadcast);
       rtn = PayloadFactory.createCampaign(campaign, payload.src, payload.dest);
       break;
   }

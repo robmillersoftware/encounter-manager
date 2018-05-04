@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 import { StorageService } from '@shared/services';
 import { Character } from '@shared/objects';
+import { BehaviorSubject } from 'rxjs/BehaviorSubject';
 
 /**
 * This service manages CRUD operations for characters in local storage
@@ -9,50 +10,64 @@ import { Character } from '@shared/objects';
 */
 @Injectable()
 export class CharacterService {
-    constructor(public storage: StorageService) {}
+  public characterSubject: BehaviorSubject<Map<string, Character>>;
 
-    /**
-    * Get a list of characters from local storage
-    */
-    private async queryCharacters() {
-        return await this.storage.get('characters');
-    }
+  constructor(public storage: StorageService) {
+    this.characterSubject = new BehaviorSubject<Map<string, Character>>(new Map());
+    this.loadCharacters();
+  }
 
-    /**
-    * Forwards the results of queryCharacters
-    * @return Map<string, Character>
-    */
-    public async getCharacters() {
-        return await this.queryCharacters();
-    }
+  /**
+  * Loads the initial list of characters into the behavior subject
+  */
+  private async loadCharacters() {
+      let characters: Map<string, Character> = await this.storage.get('characters');
 
-    /**
-    * Creates a new character in local storage
-    * @param char
-    */
-    public async addCharacter(char: Character) {
-        let characters = await this.queryCharacters();
+      if (characters) {
+        this.setCharacters(characters);
+      }
+  }
 
-        //If the character already exists, do nothing
-        if (!characters.has(char.name)) {
-            characters.set(char.name, char);
-        }
+  private setCharacters(chars: Map<string, Character>) {
+    this.characterSubject.next(chars);
+    this.storage.set('characters', chars);
+  }
 
-        this.storage.set('characters', characters);
-    }
+  /**
+  * Returns the current value of the charactes behaviorsubject
+  * @return Map<string, Character>
+  */
+  public getCharacters() {
+      return this.characterSubject.value;
+  }
 
-    /**
-    * Remove a character with the given name from local storage
-    * @param charName
-    */
-    async removeCharacter(charName: string) {
-        let characters = await this.queryCharacters();
+  /**
+  * Adds a new character to the behaviorsubject and local storage
+  * @param char
+  */
+  public addCharacter(char: Character) {
+      let characters = this.characterSubject.value;
 
-        //If a matching character can't be found do nothing
-        if (characters.has(charName)) {
-            characters.delete(charName);
-        }
+      //If the character already exists, do nothing
+      if (!characters.has(char.name)) {
+          characters.set(char.name, char);
+      }
 
-        this.storage.set('characters', characters);
-    }
+      this.setCharacters(characters);
+  }
+
+  /**
+  * Remove a character with the given name from local storage
+  * @param charName
+  */
+  public removeCharacter(charName: string) {
+      let characters = this.characterSubject.value;
+
+      //If a matching character can't be found do nothing
+      if (characters.has(charName)) {
+          characters.delete(charName);
+      }
+
+      this.setCharacters(characters);
+  }
 }

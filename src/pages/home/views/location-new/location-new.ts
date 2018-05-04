@@ -1,6 +1,7 @@
 import { Component, Input } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { HomeViewComponent } from '../home-view.component';
+import { HomeViews } from '@pages/home/home.service';
 import { LocationService } from '@shared/services';
 import { LocationFactory } from '@shared/objects';
 
@@ -31,11 +32,10 @@ export class LocationNew implements HomeViewComponent {
   * Submit callback that creates a new location and adds it to local storage. It then
   * Navigates to the edit page
   */
-  private createLocation() {
+  public createLocation() {
     let loc = LocationFactory.createLocation(this.locationInfo.value.locName, this.locationInfo.value.locDesc);
 
-    this.locationService.addLocation(loc).then(() => {
-      this.callback('viewChange', 'location-edit');
-    });
+    this.locationService.addLocation(loc);
+    this.callback('viewChange', HomeViews.LOCATION_EDIT);
   }
 }

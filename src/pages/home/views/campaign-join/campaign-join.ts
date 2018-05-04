@@ -1,4 +1,4 @@
-import { Component, Input } from '@angular/core';
+import { Component, Input, NgZone } from '@angular/core';
 import { HomeViewComponent } from '../home-view.component';
 import { ConnectionService, CampaignService, UserService } from '@shared/services';
 import { Campaign } from '@shared/objects';
@@ -20,7 +20,7 @@ export class CampaignJoin implements HomeViewComponent {
   public campaigns: Set<Campaign>;
 
   constructor(public connectionService: ConnectionService, public campaignService: CampaignService,
-      public userService: UserService) {
+      public userService: UserService, public zone: NgZone) {
     this.campaigns = new Set<Campaign>();
     this.startDiscovery();
   }
@@ -32,8 +32,10 @@ export class CampaignJoin implements HomeViewComponent {
     //First we subscribe to changes in the list of remote campaigns in the connection service
     this.connectionService.remoteCampaigns.subscribe((campaigns: Map<string, Campaign>) => {
       if (campaigns) {
-        campaigns.forEach((value, key) => {
-          this.campaigns.add(value);
+        this.zone.run(() => {
+          campaigns.forEach((value, key) => {
+            this.campaigns.add(value);
+          });
         });
       }
     });
@@ -46,8 +48,13 @@ export class CampaignJoin implements HomeViewComponent {
   * Button callback that loads the remote campaign, saves it to local storage, and
   * then stops service discovery
   */
-  private async loadCampaign(campaign: Campaign) {
-    this.connectionService.connectToCampaign(campaign.name);
-    this.connectionService.stopDiscovery();
+  public async loadCampaign(campaign: Campaign) {
+    this.connectionService.connectToCampaign(campaign.name, success => {
+      if (success) {
+        this.connectionService.stopDiscovery();
+        this.campaignService.joinCampaign(campaign);
+        this.callback('tabChange');
+      }
+    });
   }
 }

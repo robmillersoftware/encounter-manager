@@ -29,7 +29,7 @@ $app-direction: ltr;
       -ms-transform: translate(-50%, -50%);
       -o-transform: translate(-50%, -50%);
       transform: translate(-50%, -50%);
-  }   
+  }
 }
 
 $colors: (
@@ -58,6 +58,8 @@ $colors: (
 
 $toolbar-background: map-get($colors, primary-darker);
 $background-color: map-get($colors, tertiary-light);
+
+$header-height: 5.5rem;
 
 // App iOS Variables
 // --------------------------------------------------

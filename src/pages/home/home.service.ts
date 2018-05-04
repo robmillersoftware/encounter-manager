@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HomeView, CharacterEdit, CharacterNew, LocationEdit,
   LocationNew, Dashboard, CampaignNew, CampaignJoin, CampaignLoad } from './views';
+import { HeaderData } from '@shared/objects';
 
 /**
 * Enumerates the various home page views
@@ -26,38 +27,39 @@ export class HomeService {
   public getViews() {
     return [
       new HomeView(CharacterEdit, 'character-edit', HomeViews.CHARACTER_EDIT,
-        { title: 'Edit Existing Characters', canGoBack: true }),
+        new HeaderData('Edit Existing Characters', true )),
       new HomeView(CharacterNew, 'character-new',  HomeViews.CHARACTER_NEW,
-        { title: 'Create a New Character', canGoBack: true }),
+        new HeaderData('Create a New Character', true )),
       new HomeView(LocationEdit, 'location-edit', HomeViews.LOCATION_EDIT,
-        { title: 'Edit Existing Locations', canGoBack: true }),
+        new HeaderData('Edit Existing Locations', true )),
       new HomeView(LocationNew, 'location-new', HomeViews.LOCATION_NEW,
-        { title: 'Create a New Location', canGoBack: true }),
+        new HeaderData('Create a New Location', true )),
       new HomeView(CampaignNew, 'campaign-new', HomeViews.CAMPAIGN_NEW,
-        { title: 'Create a New Campaign', canGoBack: true }),
+        new HeaderData('Create a New Campaign', true )),
       new HomeView(CampaignJoin, 'campaign-join', HomeViews.CAMPAIGN_JOIN,
-        { title: 'Join a Campaign', canGoBack: true }),
+        new HeaderData('Join a Campaign', true )),
       new HomeView(CampaignLoad, 'campaign-load', HomeViews.CAMPAIGN_LOAD,
-        { title: 'Load an Existing Campaign', canGoBack: true }),
+        new HeaderData('Load an Existing Campaign', true )),
       new HomeView(Dashboard, 'dashboard', HomeViews.DASHBOARD,
-        { title: 'RetConnected' })
+        new HeaderData('RetConnected', false, true,
+          ['Account'] ))
     ];
   }
 
   //These objects contain static information for the dashboard UI buttons
   public static campaignTiles: Array<Object> = [
-    {title: 'Join', image: '', data: { state: 'join', page: 'campaign' }},
-    {title: 'New', image: '', data: { state: 'new', page: 'campaign' }},
-    {title: 'Load', image: '', data: { state: 'load', page: 'campaign' }}
+    {title: 'Join', image: '', id: HomeViews.CAMPAIGN_JOIN},
+    {title: 'New', image: '', id: HomeViews.CAMPAIGN_NEW},
+    {title: 'Load', image: '', id: HomeViews.CAMPAIGN_LOAD}
   ];
 
   public static characterTiles: Array<Object> = [
-    {title: 'Create', image: '', data: { state: 'new', page: 'character' }},
-    {title: 'View/Edit', image: '', data: { state: 'edit', page: 'character' }}
+    {title: 'Create', image: '', id: HomeViews.CHARACTER_NEW},
+    {title: 'View/Edit', image: '', id: HomeViews.CHARACTER_EDIT}
   ];
 
   public static locationTiles: Array<Object> = [
-    {title: 'Create', image: '', data: { state: 'new', page: 'location' }},
-    {title: 'View/Edit', image: '', data: { state: 'edit', page: 'location' }}
+    {title: 'Create', image: '', id: HomeViews.LOCATION_NEW},
+    {title: 'View/Edit', image: '', id: HomeViews.LOCATION_EDIT}
   ];
 }

@@ -12,7 +12,7 @@ import { StorageService, ConnectionService } from '@shared/services';
 export class CampaignService {
   //Anything that subscribes to this will be notified when the current campaign
   //changes
-  public campaignSubject: BehaviorSubject<Campaign>;
+  public currentCampaignSubject: BehaviorSubject<Campaign>;
 
   //Updates subscribers whenever a campaign is loaded or unloaded
   public campaignLoaded: BehaviorSubject<boolean>;
@@ -23,27 +23,96 @@ export class CampaignService {
   //Updates subscribers with a true/false value as to whether any campaigns have been saved
   public hasCampaigns: BehaviorSubject<boolean>;
 
+  //Maintains a list of campaigns from local storage
+  public campaignSubject: BehaviorSubject<Map<string, Campaign>>;
+
   constructor(public storage: StorageService, public connectionService: ConnectionService) {
-    this.campaignSubject = new BehaviorSubject<Campaign>(null);
-    this.campaignLoaded = new BehaviorSubject<boolean>(null);
-    this.encounterStarted = new BehaviorSubject<boolean>(null);
-    this.hasCampaigns = new BehaviorSubject<boolean>(null);
-    this.loadCampaign();
+    this.currentCampaignSubject = new BehaviorSubject<Campaign>(null);
+    this.campaignLoaded = new BehaviorSubject<boolean>(false);
+    this.encounterStarted = new BehaviorSubject<boolean>(false);
+    this.hasCampaigns = new BehaviorSubject<boolean>(false);
+    this.campaignSubject = new BehaviorSubject<Map<string, Campaign>>(new Map());
+
+    this.loadCampaigns();
+  }
+
+  /**
+  * Initializes the application by loading any active campaigns
+  */
+  private async loadCampaigns() {
+    let campaigns: Map<string, Campaign> = await this.storage.get('campaigns');
+
+    if (campaigns) {
+      this.setCampaigns(campaigns);
+    }
+    let campaign: Campaign = await this.getCurrentCampaign();
+    let isLoaded:boolean = campaign ? true : false;
+
+    this.currentCampaignSubject.next(campaign);
+    this.campaignLoaded.next(isLoaded);
+
+    if (isLoaded) {
+      this.encounterStarted.next(campaign.activeEncounter ? true : false);
+    }
+  }
+
+  private setCampaigns(campaigns: Map<string, Campaign>) {
+    this.campaignSubject.next(campaigns);
+    this.storage.set('campaigns', campaigns);
+  }
+
+  public getCampaigns(): Map<string, Campaign> {
+    return this.campaignSubject.value;
+  }
+  /**
+  * Sets the current campaign
+  * @param c The campaign to set
+  */
+  private setCurrentCampaign(c: Campaign) {
+    this.currentCampaignSubject.next(c);
+    this.storage.set('currentCampaign', c);
+    this.campaignLoaded.next(c ? true : false);
+
+    if (c) {
+      this.encounterStarted.next(c.activeEncounter ? true : false);
+    }
+  }
+
+  public joinCampaign(c: Campaign) {
+    if (!c) {
+      console.log("Unable to join campaign. Value is null");
+      return;
+    }
+
+    let campaign = this.getCampaign(c.name);
+    if (!campaign) {
+      this.addCampaign(c);
+      campaign = c;
+    }
+
+    this.setCurrentCampaign(campaign);
+  }
+
+  /**
+  * Returns the current campaign
+  */
+  public getCurrentCampaign(): Campaign {
+    return this.currentCampaignSubject.value;
   }
 
   /**
   * Starts an encounter on the current campaign if there is none active
   * @param enc The new encounter
   */
-  public async startEncounter(enc: Encounter) {
-    let campaign: Campaign = await this.getCurrentCampaign();
+  public startEncounter(enc: Encounter) {
+    let campaign: Campaign = this.currentCampaignSubject.value;
     let isLoaded: boolean = campaign ? true : false;
 
     if (isLoaded && !campaign.activeEncounter) {
       campaign.activeEncounter = enc;
       this.encounterStarted.next(true);
 
-      this.storage.set('currentCampaign', campaign);
+      this.setCurrentCampaign(campaign);
       this.updateCampaign(campaign);
     }
   }
@@ -51,8 +120,8 @@ export class CampaignService {
   /**
   * Ends the active encounter on the current campaign
   */
-  public async endEncounter() {
-    let campaign: Campaign = await this.getCurrentCampaign();
+  public endEncounter() {
+    let campaign: Campaign = this.currentCampaignSubject.value;
     let isLoaded: boolean = campaign ? true : false;
 
     if (isLoaded) {
@@ -60,66 +129,30 @@ export class CampaignService {
       campaign.activeEncounter = null;
       this.encounterStarted.next(false);
 
-      this.storage.set('currentCampaign', campaign);
+      this.setCurrentCampaign(campaign);
       this.updateCampaign(campaign);
     }
-  }
-
-  /**
-  * Returns the current campaign
-  */
-  public async getCurrentCampaign() {
-    return this.storage.get('currentCampaign').then(c => c);
   }
 
   /**
   * Updates an existing campaign
   * @param c The updated version of a campaign
   */
-  public async updateCampaign(c: Campaign) {
+  public updateCampaign(c: Campaign) {
     if (!c) return;
 
-    let campaigns = await this.queryCampaigns();
+    let campaigns: Map<string, Campaign> = this.campaignSubject.value;
     campaigns.set(c.name, c);
 
-    this.setCurrentCampaign(c);
-  }
-
-  /**
-  * Sets the current campaign. If it is a remote campaign we are trying to
-  * join, it also adds it to the list of campaigns
-  * @param c The campaign to set
-  * @param isRemote true if the campaign came from a network service
-  */
-  public async setCurrentCampaign(c: Campaign, isRemote: boolean = false) {
-    this.storage.set('currentCampaign', c);
-
-    this.campaignSubject.next(c);
-    this.campaignLoaded.next(c ? true : false);
-
-    if (c) {
-      this.encounterStarted.next(c.activeEncounter ? true : false);
-      if (isRemote && !await this.findCampaign(c.name)) {
-        await this.addCampaign(c);
-      }
-    }
-  }
-
-  /**
-  * Returns a map of campaigns
-  */
-  public async getCampaigns() {
-    let map: Map<string, Campaign> = await this.queryCampaigns();
-    this.hasCampaigns.next(map && map.size > 0 ? true : false);
-    return map;
+    this.setCampaigns(campaigns);
   }
 
   /**
   * Adds a new campaign to the list of campaigns
   * @param c The campaign to add
   */
-  public async addCampaign(c: Campaign) {
-    let campaigns: Map<string, Campaign> = await this.queryCampaigns();
+  public addCampaign(c: Campaign) {
+    let campaigns: Map<string, Campaign> = this.campaignSubject.value;
 
     if (!campaigns.has(c.name)) {
       campaigns.set(c.name, c);
@@ -133,16 +166,16 @@ export class CampaignService {
   * Removes an existing campaign from the list by name
   * @param cName The name of the campaign to remove
   */
-  public async removeCampaign(cName: string) {
-    let campaigns: Map<string, Campaign> = await this.queryCampaigns();
-    let current: Campaign = await this.getCurrentCampaign();
+  public removeCampaign(cName: string) {
+    let campaigns: Map<string, Campaign> = this.campaignSubject.value;
+    let current: Campaign = this.currentCampaignSubject.value;
 
     if (campaigns.has(cName)) {
       campaigns.delete(cName);
     }
 
     this.hasCampaigns.next(campaigns.size > 0 ? true : false);
-    this.storage.set('campaigns', Array.from(campaigns.values()));
+    this.setCampaigns(campaigns);
 
     if (current && current.name === cName) {
       this.setCurrentCampaign(null);
@@ -153,37 +186,12 @@ export class CampaignService {
   * Finds a campaign by name
   * @param cName The campaign name to search for
   */
-  public async findCampaign(cName: string) {
-    let campaigns: Map<string, Campaign> = await this.queryCampaigns();
+  public getCampaign(cName: string): Campaign {
+    let campaigns: Map<string, Campaign> = this.campaignSubject.value;
     if (campaigns.has(cName)) {
-      return true;
+      return campaigns.get(cName);
     }
 
-    return false;
+    return null;
   }
-
-  /**
-  * Private function to get a list of campaigns to work with
-  * @returns a map of campaigns
-  */
-  private async queryCampaigns() {
-    return this.storage.get('campaigns').then(val => val);
-  }
-
-  /**
-  * Initializes the application by loading any active campaigns
-  */
-  private async loadCampaign() {
-    let campaign: Campaign = await this.getCurrentCampaign();
-
-    let isLoaded:boolean = campaign ? true : false;
-
-    this.campaignSubject.next(campaign);
-    this.campaignLoaded.next(isLoaded);
-
-    if (isLoaded) {
-      this.encounterStarted.next(campaign.activeEncounter ? true : false);
-    }
-  }
-
 }

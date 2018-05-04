@@ -4,7 +4,6 @@
 * @copyright 2018
 */
 import { Character, Location, Player, Encounter } from '@shared/objects';
-import { Globals } from '@globals';
 
 /**
 * This interface is used to construct Campaign objects

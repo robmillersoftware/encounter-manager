@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { Platform } from 'ionic-angular';
 import { CampaignFactory, Campaign, PayloadFactory, Payload } from '@shared/objects';
-import { UserService, StorageService } from '@shared/services';
+import { UserService } from '@shared/services';
 import { Globals, parseIdentifier } from '@globals';
 import { BehaviorSubject } from 'rxjs/BehaviorSubject';
 
@@ -21,31 +21,28 @@ export class ConnectionService {
   public remoteCampaigns: BehaviorSubject<Map<string, Campaign>>;
 
   //Gets updated when information about players on the same campaign as you is found
-  public campaignPlayers: BehaviorSubject<Map<string, string>>;
+  public connections: BehaviorSubject<Array<string>>;
 
-  constructor(private platform: Platform, private userService: UserService,
-      private storageService: StorageService) {
+  constructor(private platform: Platform, private userService: UserService) {
     this.isIos = this.platform.is("ios");
     this.isCordova = this.platform.is("cordova");
     this.remoteCampaigns = new BehaviorSubject(null);
-    this.campaignPlayers = new BehaviorSubject(null);
+    this.connections = new BehaviorSubject(null);
 
-    if (this.isCordova && window["NearbyPlugin"]) {
-      //The identifier for this user and the service id for the app should be set
-      //before calling any NearbyPlugin methods
-      this.setIdentifier();
-      window["NearbyPlugin"].setServiceId(Globals.serviceId);
-    }
+    this.platform.ready().then(() => {
+      if (this.isCordova && window["NearbyPlugin"]) {
+        //Listen for updates to the user and change the registered identifier as appropriate
+        this.userService.userSubject.subscribe((u) => {
+          if (u) {
+            window["NearbyPlugin"].setIdentifier(this.userService.getIdentifier());
+          }
+        });
+
+        window["NearbyPlugin"].setServiceId(Globals.serviceId);
+      }
+    });
 
     console.log("Connection Service initialized.");
-  }
-
-  /**
-  * Sets the identifier on the Nearby plugin. It is a JSON object that is attached
-  * to every message sent from or received by this application
-  */
-  private async setIdentifier() {
-    window["NearbyPlugin"].setIdentifier(await this.userService.getIdentifier());
   }
 
   /**
@@ -53,23 +50,17 @@ export class ConnectionService {
   * the maximum bytes, the campaign is condensed into a broadcast JSON string
   * @param c the campaign to advertise
   */
-  public advertiseCampaign(c: Campaign) {
+  public async advertiseCampaign(c: Campaign) {
     if (this.isCordova && window["NearbyPlugin"]) {
       window["NearbyPlugin"].startAdvertising(CampaignFactory.toBroadcast(c), connection => {
         //This method is called when a connection is established
-        console.log("GOT CONNECTION STUFFS: " + JSON.stringify(connection));
-        console.log(connection);
+        let connArr = this.connections.value;
+        connArr.push(JSON.stringify(connection));
+        this.connections.next(connArr);
       });
     }
   }
 
-  /**
-  * Get a map of remote campaigns with key of endpoint id and value of campaign object
-  * @return Map<string, Campaign>
-  */
-  private async getRemoteCampaigns() {
-    return await this.storageService.get('remoteCampaigns');
-  }
   /**
   * Discover nearby campaigns using the Nearby plugin. It listens for advertisements
   * specifically broadcasting a campaign object
@@ -88,9 +79,14 @@ export class ConnectionService {
 
         if (data.payload) {
           let campaigns: Map<string, Campaign> = this.remoteCampaigns.value;
+
+          if (!campaigns) {
+            campaigns = new Map<string, Campaign>();
+          }
+
           let identifier = parseIdentifier(data.src);
-          campaigns.set(identifier.endpoint, CampaignFactory.fromBroadcast(data.payload));
-          this.remoteCampaigns.next(data.payload);
+          campaigns.set(identifier.endpoint, data.payload);
+          this.remoteCampaigns.next(campaigns);
         }
       });
     }
@@ -100,20 +96,31 @@ export class ConnectionService {
   * Connects to a remote campaign with the specified name
   * @param name
   */
-  public async connectToCampaign(name: string) {
-    let map: Map<string, Campaign> = this.remoteCampaigns.value;
-
-    if (!map) {
-      console.log("No value has been assigned to remoteCampaigns");
-      return;
-    }
-
-    Array.from(map.keys()).forEach(key => {
-      let c: Campaign = map.get(key);
-      if (c.name === name) {
-        window["NearbyPlugin"].connectToCampaign(parseIdentifier(key).endpoint);
+  public async connectToCampaign(name: string, callback: any) {
+    if (this.isCordova && window["NearbyPlugin"]) {
+      let map: Map<string, Campaign> = this.remoteCampaigns.value;
+      if (!map) {
+        console.log("No value has been assigned to remoteCampaigns");
+        return;
       }
-    });
+
+      Array.from(map.keys()).forEach(key => {
+        let c: Campaign = map.get(key);
+        if (c.name === name) {
+          window["NearbyPlugin"].connectToCampaign(key, result => {
+            if (!this.connections.value) {
+              this.connections.next(new Array<string>());
+            }
+
+            let connArr = this.connections.value;
+            connArr.push(JSON.stringify(result));
+            this.connections.next(connArr);
+
+            callback(true);
+          });
+        }
+      });
+    }
   }
 
   /**

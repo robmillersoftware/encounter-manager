@@ -39,6 +39,7 @@ import com.google.android.gms.tasks.OnFailureListener;
 import android.support.v4.app.ActivityCompat;
 import android.Manifest;
 import android.content.pm.PackageManager;
+import java.util.Iterator;
 
 /**
  * A Cordova plugin that wraps the Wifi P2P Android API
@@ -48,6 +49,9 @@ import android.content.pm.PackageManager;
 public class NearbyPlugin extends CordovaPlugin {
   protected static final String TAG = "NearbyPlugin";
   protected static final int REQUEST_CODE = 0;
+
+  //Wrapper for database operations
+  protected NearbyRepository repository;
 
   protected ConnectionsClient connectionsClient;
 
@@ -90,9 +94,9 @@ public class NearbyPlugin extends CordovaPlugin {
         + ", isIncoming: " + connectionInfo.isIncomingConnection());
 
       try {
-        JSONObject user = new JSONObject(connectionInfo.getEndpointName());
-        connectionsClient.acceptConnection(endpointId, payloadCallback);
+        connectionsClient.acceptConnection(connectionInfo.getEndpointName(), payloadCallback);
 
+        JSONObject user = new JSONObject(connectionInfo.getEndpointName());
         user.put("e", endpointId);
         PluginResult result = new PluginResult(Status.OK, user);
         result.setKeepCallback(true);
@@ -129,32 +133,37 @@ public class NearbyPlugin extends CordovaPlugin {
       Log.d(TAG, "Discovered endpoint: " + endpointId + ", name: " + discoveredEndpointInfo.getEndpointName()
         + ", service: " + discoveredEndpointInfo.getServiceId());
 
-      JSONObject endpointIdJson = null;
+      JSONObject payloadJson = null;
+      JSONObject idJson = null;
 
       try {
-        endpointIdJson = new JSONObject(discoveredEndpointInfo.getEndpointName());
-        endpointIdJson.put("e", endpointId);
+        JSONObject endpointJson = new JSONObject(discoveredEndpointInfo.getEndpointName());
+        Iterator<String> keys = endpointJson.keys();
+
+        while( keys.hasNext() ) {
+          String id = keys.next();
+          String value = endpointJson.getString(id);
+
+          idJson = new JSONObject(id);
+          idJson.put("e", endpointId);
+
+          payloadJson = new JSONObject();
+          payloadJson.put(id, value);
+        }
       } catch(JSONException e) {
         Log.d(TAG, "Error getting identifier from endpoint: " + e.getMessage());
       }
 
-      if (endpointIdJson == null) {
-        endpointIdJson = new JSONObject();
+      if (idJson == null) {
+        Log.e(TAG, "Unable to parse remote identifier from key: " + payloadJson.toString());
+      } else {
+        NearbyPayload payload = new NearbyPayload(payloadJson.toString(),
+          idJson.toString(), identifier, "CAMPAIGN");
+
+        PluginResult result = new PluginResult(Status.OK, payload.toJSON());
+        result.setKeepCallback(true);
+        endpointCbContext.sendPluginResult(result);
       }
-
-      JSONObject endpointDataJson = new JSONObject();
-      try {
-        endpointDataJson.put(endpointId, discoveredEndpointInfo.getEndpointName());
-      } catch(JSONException e) {
-        Log.d(TAG, "Error setting endpoint information: " + e.getMessage());
-      }
-
-      NearbyPayload payload = new NearbyPayload(endpointDataJson.toString(),
-        endpointIdJson.toString(), identifier, "CAMPAIGN");
-
-      PluginResult result = new PluginResult(Status.OK, payload.toJSON());
-      result.setKeepCallback(true);
-      endpointCbContext.sendPluginResult(result);
     }
 
     @Override
@@ -172,6 +181,8 @@ public class NearbyPlugin extends CordovaPlugin {
     }
 
     connectionsClient = Nearby.getConnectionsClient(cordova.getActivity().getApplicationContext());
+
+    this.repository = new NearbyRepository(cordova.getActivity().getApplicationContext());
     Log.d(TAG, "Initializing Nearby");
   }
 
@@ -198,14 +209,16 @@ public class NearbyPlugin extends CordovaPlugin {
         this.connectionsClient.stopAdvertising();
         break;
       case "setidentifier":
+        Log.d(TAG, "Setting endpoint identifier: " + args.getString(0));
         this.identifier = args.getString(0);
         break;
       case "setserviceid":
+        Log.d(TAG, "Setting service id: " + args.getString(0));
         this.serviceId = args.getString(0);
         break;
       case "startdiscovery":
         this.endpointCbContext = callbackContext;
-        this.connectionsClient.startDiscovery(args.getString(0), this.endpointDiscoveryCallback,
+        this.connectionsClient.startDiscovery(this.serviceId, this.endpointDiscoveryCallback,
           new DiscoveryOptions(Strategy.P2P_CLUSTER))
         .addOnSuccessListener(new OnSuccessListener<Void>() {
           @Override
@@ -228,7 +241,10 @@ public class NearbyPlugin extends CordovaPlugin {
         this.sendPayloadBytes(args.getString(0), args.getString(1));
         break;
       case "connecttocampaign":
-        Log.d(TAG, "IDENTIFIER IS: " + this.identifier);
+        if (this.connectionsCallback == null) {
+          this.connectionsCallback = callbackContext;
+        }
+
         try {
           JSONObject obj = new JSONObject();
           this.connectionsClient.requestConnection(this.identifier, args.getString(0), connectionLifecycleCallback);
@@ -242,7 +258,15 @@ public class NearbyPlugin extends CordovaPlugin {
   }
 
   private void startAdvertising(String broadcast) {
-    this.connectionsClient.startAdvertising(broadcast, this.serviceId,
+    JSONObject campaignInfo = new JSONObject();
+
+    try {
+      campaignInfo.put(identifier, broadcast);
+    } catch(JSONException e) {
+      Log.e(TAG, "Unable to create campaignInfo");
+    }
+
+    this.connectionsClient.startAdvertising(campaignInfo.toString(), this.serviceId,
       this.connectionLifecycleCallback, new AdvertisingOptions(Strategy.P2P_CLUSTER))
     .addOnSuccessListener(new OnSuccessListener<Void>() {
       @Override
@@ -291,6 +315,8 @@ public class NearbyPlugin extends CordovaPlugin {
   @Override
   public void onPause(boolean multitasking) {
     super.onPause(multitasking);
+    this.connectionsClient.stopAdvertising();
+    this.connectionsClient.stopDiscovery();
     Log.d(TAG, "Pausing NearbyPlugin");
   }
 
@@ -300,7 +326,6 @@ public class NearbyPlugin extends CordovaPlugin {
 
     boolean services = this.checkPlayServices();
     Log.d(TAG, "Resuming NearbyPlugin");
-    Log.d(TAG, "Did we find google services? " + services);
   }
 
   public static String generateIdentifier(String name, String id, String endpoint) {

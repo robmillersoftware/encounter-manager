@@ -1,0 +1,19 @@
+<div class="modal-content">
+  <ion-toolbar>
+    <ion-buttons end>
+      <button ion-button (click)="closeModal(false)">
+        <ion-icon name="close"></ion-icon>
+      </button>
+    </ion-buttons>
+    <ion-title>Choose Participants</ion-title>
+  </ion-toolbar>
+  <form *ngIf="campaign" [formGroup]="conversationInfo" (ngSubmit)="setParticipants()">
+    <div *ngFor="let participant of possibleParticipants">
+      <ion-item>
+        <ion-checkbox (ionChange)="onChange(participant.name, $event.checked)"></ion-checkbox>
+        <ion-label>{{participant.name}}</ion-label>
+      </ion-item>
+    </div>
+    <button ion-button type="submit" [disabled]="!conversationInfo.valid">Begin</button>
+  </form>
+</div>

@@ -3,3 +3,7 @@
     background-color: map-get($colors, tertiary-light) !important;
     width: 300px !important;
 }
+
+.preference-label {
+  color: map-get($colors, primary-darker);
+}

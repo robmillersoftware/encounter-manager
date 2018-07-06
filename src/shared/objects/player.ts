@@ -4,6 +4,7 @@
 * @copyright 2018
 */
 import { Character } from '@shared/objects';
+import { parseIdentifier } from '@globals';
 
 /**
 * This interface is used to construct Player objects
@@ -18,12 +19,17 @@ interface PlayerData {
 * This class represents a player in a campaign
 */
 export class Player {
-  public identifier: string;
+  public name: string;
+  public id: string;
+  public endpoint: string;
   public characters: Array<Character>;
   public isGm: boolean;
 
   constructor(data: PlayerData) {
-    this.identifier = data.identifier;
+    let identifier = parseIdentifier(data.identifier);
+    this.name = identifier.userName;
+    this.id = identifier.id;
+    this.endpoint = identifier.endpoint;
     this.isGm = data.isGm;
     this.characters = data.hasOwnProperty('characters') ? data.characters : new Array<Character>();
   }

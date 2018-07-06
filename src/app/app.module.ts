@@ -6,9 +6,10 @@ import { MyApp } from './app.component';
 import { SharedModule } from '@shared/shared.module';
 import { HomeModule } from '@pages/home/home.component.module';
 import { CampaignModule } from '@pages/campaign/campaign.component.module';
+import { ChatModule } from '@pages/chat/chat.component.module';
 import { OptionsModule } from '@pages/options/options.component.module';
 
-import { EncounterPage, NotesPage, TabsPage, ChatPage, MainPage } from '@pages';
+import { EncounterPage, NotesPage, TabsPage, MainPage } from '@pages';
 
 import { StatusBar } from '@ionic-native/status-bar';
 import { SplashScreen } from '@ionic-native/splash-screen';
@@ -18,7 +19,6 @@ import { SplashScreen } from '@ionic-native/splash-screen';
     MyApp,
     EncounterPage,
     NotesPage,
-    ChatPage,
     TabsPage,
     MainPage
   ],
@@ -28,6 +28,7 @@ import { SplashScreen } from '@ionic-native/splash-screen';
     IonicModule.forRoot(MyApp),
     HomeModule,
     CampaignModule,
+    ChatModule,
     OptionsModule,
   ],
   bootstrap: [IonicApp],
@@ -35,7 +36,6 @@ import { SplashScreen } from '@ionic-native/splash-screen';
     MyApp,
     EncounterPage,
     NotesPage,
-    ChatPage,
     TabsPage,
     MainPage
   ],

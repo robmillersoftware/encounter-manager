@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { StorageService } from '@shared/services';
+import { StorageService } from '@shared/persistence';
 import { Location } from '@shared/objects';
 import { BehaviorSubject } from 'rxjs/BehaviorSubject';
 

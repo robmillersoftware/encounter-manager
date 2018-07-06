@@ -37,11 +37,37 @@ export class Campaign {
     console.log("Building campaign: " + JSON.stringify(data));
     this.name = data.name;
     this.description = data.description;
-    this.characters = data.hasOwnProperty('characters') ? data.characters : new Array<Character>();
-    this.locations = data.hasOwnProperty('locations') ? data.locations : new Array<Location>();
-    this.players = data.hasOwnProperty('players') ? data.players: new Array<Player>();
-    this.encounterHistory = data.hasOwnProperty('encounterHistory') ? data.encounterHistory : new Array<Encounter>();
-    this.currentEncounters = data.hasOwnProperty('currentEncounters') ? data.currentEncounters : new Array<Encounter>();
+
+    if (data.hasOwnProperty('characters') && data.characters != null) {
+      this.characters = data.characters;
+    } else {
+      this.characters = new Array<Character>();
+    }
+
+    if (data.hasOwnProperty('locations') && data.locations != null) {
+      this.locations = data.locations;
+    } else {
+      this.locations = new Array<Location>();
+    }
+
+    if (data.hasOwnProperty('players') && data.players != null) {
+      this.players = data.players;
+    } else {
+      this.players = new Array<Player>();
+    }
+
+    if (data.hasOwnProperty('encounterHistory') && data.encounterHistory != null) {
+      this.encounterHistory = data.encounterHistory;
+    } else {
+      this.encounterHistory = new Array<Encounter>();
+    }
+
+    if (data.hasOwnProperty('currentEncounters') && data.currentEncounters != null) {
+      this.currentEncounters = data.currentEncounters;
+    } else {
+      this.currentEncounters = new Array<Encounter>();
+    }
+
     this.activeEncounter = data.hasOwnProperty('activeEncounter') ? data.activeEncounter : null;
   }
 }

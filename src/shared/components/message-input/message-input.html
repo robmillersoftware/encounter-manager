@@ -1,0 +1,5 @@
+<form [formGroup]="messageInfo" (ngSubmit)="addMessage()">
+  <ion-item class="formField">
+      <ion-input class="form-input-text" type="text" formControlName="msgText"></ion-input>
+  </ion-item>
+</form>

@@ -1,9 +1,11 @@
 import { Component, ComponentFactoryResolver, ViewChild } from '@angular/core';
 import { ModalController, IonicPage, NavController, Events } from 'ionic-angular';
-import { UserService, CampaignService, ConnectionService, NavigationService } from '@shared/services';
+import { ConnectionService, NavigationService } from '@shared/services';
+import { CampaignStorage, UserStorage } from '@shared/persistence';
 import { HomeViewComponent } from './views';
 import { HomeDirective } from './home.directive';
 import { HomeService, HomeViews } from './home.service';
+import { PlayerFactory } from '@shared/objects';
 
 /**
 * This class contains the logic and several views for the home page of the application.
@@ -23,8 +25,8 @@ export class HomePage {
   public headerData: any;
   private views: any;
 
-  constructor(public modalCtrl: ModalController, public navCtrl: NavController, public campaignService: CampaignService,
-      public homeService: HomeService,  public userService: UserService,
+  constructor(public modalCtrl: ModalController, public navCtrl: NavController, public campaignStorage: CampaignStorage,
+      public homeService: HomeService,  public userStorage: UserStorage,
       private componentFactoryResolver: ComponentFactoryResolver, private connectionService: ConnectionService,
       private navService: NavigationService, private events: Events) {
 
@@ -93,6 +95,8 @@ export class HomePage {
           this.loadComponent(id);
         }
         break;
+      default:
+        this.loadComponent(HomeViews.DASHBOARD);
     }
   }
 
@@ -102,13 +106,17 @@ export class HomePage {
   * This is called when the app first loads and after loading or joining a campaign
   */
   private checkCurrentCampaign() {
-    let current = this.campaignService.getCurrentCampaign();
+    let current = this.campaignStorage.getCurrentCampaign();
 
     if (current) {
       console.log("Current campaign is " + current.toString());
       this.loadComponent(HomeViews.DASHBOARD);
       this.navCtrl.parent.select(1);
-      this.connectionService.advertiseCampaign(current);
+      this.connectionService.advertiseCampaign(current, identifier => {
+        let player = PlayerFactory.createPlayer(identifier, false, null);
+        current.players.push(player);
+        this.campaignStorage.updateCampaign(current);
+      });
     }
   }
 

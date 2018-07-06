@@ -1,6 +1,6 @@
 import { Component, Input } from '@angular/core';
 import { HomeViewComponent } from '../home-view.component';
-import { CharacterService } from '@shared/services';
+import { CharacterStorage } from '@shared/persistence';
 import { Character } from '@shared/objects';
 
 /**
@@ -19,8 +19,8 @@ export class CharacterEdit implements HomeViewComponent {
 
   public characters: Character[];
 
-  constructor(private characterService: CharacterService) {
-    this.characters = Array.from(this.characterService.getCharacters().values());
+  constructor(private characterStorage: CharacterStorage) {
+    this.characters = Array.from(this.characterStorage.getCharacters().values());
   }
 
   /**
@@ -31,7 +31,11 @@ export class CharacterEdit implements HomeViewComponent {
 
     if (idx !== -1) {
       this.characters.splice(idx, 1);
-      this.characterService.removeCharacter(name);
+      this.characterStorage.removeCharacter(name);
+
+      if (this.characters.length == 0) {
+        this.callback();
+      }
     }
   }
 }

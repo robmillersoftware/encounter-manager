@@ -1,10 +1,15 @@
 <div class="modal-content">
-    <ion-toolbar>
-        <ion-buttons end>
-            <button ion-button (click)="closeModal(false)">
-                <ion-icon name="close"></ion-icon>
-            </button>
-        </ion-buttons>
-        <ion-title>Account Settings</ion-title>
-    </ion-toolbar>
+  <ion-toolbar>
+    <ion-buttons end>
+      <button ion-button (click)="closeModal(false)">
+        <ion-icon name="close"></ion-icon>
+      </button>
+    </ion-buttons>
+    <ion-title>Account Settings</ion-title>
+  </ion-toolbar>
+  <ion-item>
+    <ion-label class="preference-label">Username:</ion-label>
+    <ion-input type="text" placeholder="{{user.name}}" [(ngModel)]="user.name"
+      (ionBlur)="onBlur($event)"></ion-input>
+  </ion-item>
 </div>

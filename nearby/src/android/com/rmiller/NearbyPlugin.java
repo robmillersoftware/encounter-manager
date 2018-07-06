@@ -11,35 +11,21 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import android.app.Activity;
 import android.content.Context;
-import android.content.IntentFilter;
 import android.util.Log;
-import java.util.Map;
-import java.util.HashMap;
-import java.util.ArrayList;
 import java.util.Set;
 import java.io.UnsupportedEncodingException;
 import com.google.android.gms.common.GoogleApiAvailability;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.nearby.Nearby;
-import com.google.android.gms.nearby.connection.ConnectionsStatusCodes;
 import com.google.android.gms.nearby.connection.ConnectionsClient;
-import com.google.android.gms.nearby.connection.ConnectionInfo;
-import com.google.android.gms.nearby.connection.ConnectionResolution;
 import com.google.android.gms.nearby.connection.AdvertisingOptions;
 import com.google.android.gms.nearby.connection.Strategy;
-import com.google.android.gms.nearby.connection.DiscoveredEndpointInfo;
-import com.google.android.gms.nearby.connection.EndpointDiscoveryCallback;
 import com.google.android.gms.nearby.connection.DiscoveryOptions;
-import com.google.android.gms.nearby.connection.ConnectionLifecycleCallback;
 import com.google.android.gms.nearby.connection.Payload;
-import com.google.android.gms.nearby.connection.PayloadCallback;
-import com.google.android.gms.nearby.connection.PayloadTransferUpdate;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.OnFailureListener;
-import android.support.v4.app.ActivityCompat;
 import android.Manifest;
 import android.content.pm.PackageManager;
-import java.util.Iterator;
 
 /**
  * A Cordova plugin that wraps the Wifi P2P Android API
@@ -50,9 +36,6 @@ public class NearbyPlugin extends CordovaPlugin {
   protected static final String TAG = "NearbyPlugin";
   protected static final int REQUEST_CODE = 0;
 
-  //Wrapper for database operations
-  protected NearbyRepository repository;
-
   protected ConnectionsClient connectionsClient;
 
   //These variables identify the application using NearbyPlugin
@@ -60,117 +43,11 @@ public class NearbyPlugin extends CordovaPlugin {
   protected String serviceId;
 
   protected CallbackContext endpointCbContext;
-  protected CallbackContext connectionsCallback;
+  protected CallbackContext messageHandler;
 
-  protected PayloadCallback payloadCallback = new PayloadCallback() {
-    @Override
-    public void onPayloadReceived(String endpointId, Payload payload) {
-      switch(payload.getType()) {
-        case Payload.Type.STREAM:
-          break;
-        case Payload.Type.FILE:
-          break;
-        case Payload.Type.BYTES:
-          try {
-            Log.d(TAG, "Got message: " + new String(payload.asBytes(), "UTF-8"));
-          } catch (UnsupportedEncodingException e) {
-            Log.e(TAG, "UTF-8 is unsupported");
-          }
-          break;
-      }
-    }
-
-    @Override
-    public void onPayloadTransferUpdate(String endpointId, PayloadTransferUpdate update) {
-
-    }
-  };
-
-  private final ConnectionLifecycleCallback connectionLifecycleCallback = new ConnectionLifecycleCallback() {
-    @Override
-    public void onConnectionInitiated(String endpointId, ConnectionInfo connectionInfo) {
-      Log.d(TAG, "Connection initiated from endpoint: " + endpointId + ", name: "
-        + connectionInfo.getEndpointName() + ", auth: " + connectionInfo.getAuthenticationToken()
-        + ", isIncoming: " + connectionInfo.isIncomingConnection());
-
-      try {
-        connectionsClient.acceptConnection(connectionInfo.getEndpointName(), payloadCallback);
-
-        JSONObject user = new JSONObject(connectionInfo.getEndpointName());
-        user.put("e", endpointId);
-        PluginResult result = new PluginResult(Status.OK, user);
-        result.setKeepCallback(true);
-        connectionsCallback.sendPluginResult(result);
-      } catch (JSONException ex) {
-        Log.e(TAG, "JSON Exception: " + ex.getMessage());
-      }
-    }
-
-    @Override
-    public void onConnectionResult(String endpointId, ConnectionResolution resolution) {
-      switch(resolution.getStatus().getStatusCode()) {
-        case ConnectionsStatusCodes.STATUS_OK:
-          Log.d(TAG, "Connection to endpoint " + endpointId + " was successful.");
-          break;
-        case ConnectionsStatusCodes.STATUS_CONNECTION_REJECTED:
-          Log.d(TAG, "Connection rejected");
-          break;
-        case ConnectionsStatusCodes.STATUS_ERROR:
-          Log.d(TAG, "There was an error connecting to endpoint " + endpointId);
-          break;
-      }
-    }
-
-    @Override
-    public void onDisconnected(String endpointId) {
-      Log.d(TAG, "Disconnected from endpoint: " + endpointId);
-    }
-  };
-
-  private final EndpointDiscoveryCallback endpointDiscoveryCallback = new EndpointDiscoveryCallback() {
-    @Override
-    public void onEndpointFound(String endpointId, DiscoveredEndpointInfo discoveredEndpointInfo) {
-      Log.d(TAG, "Discovered endpoint: " + endpointId + ", name: " + discoveredEndpointInfo.getEndpointName()
-        + ", service: " + discoveredEndpointInfo.getServiceId());
-
-      JSONObject payloadJson = null;
-      JSONObject idJson = null;
-
-      try {
-        JSONObject endpointJson = new JSONObject(discoveredEndpointInfo.getEndpointName());
-        Iterator<String> keys = endpointJson.keys();
-
-        while( keys.hasNext() ) {
-          String id = keys.next();
-          String value = endpointJson.getString(id);
-
-          idJson = new JSONObject(id);
-          idJson.put("e", endpointId);
-
-          payloadJson = new JSONObject();
-          payloadJson.put(id, value);
-        }
-      } catch(JSONException e) {
-        Log.d(TAG, "Error getting identifier from endpoint: " + e.getMessage());
-      }
-
-      if (idJson == null) {
-        Log.e(TAG, "Unable to parse remote identifier from key: " + payloadJson.toString());
-      } else {
-        NearbyPayload payload = new NearbyPayload(payloadJson.toString(),
-          idJson.toString(), identifier, "CAMPAIGN");
-
-        PluginResult result = new PluginResult(Status.OK, payload.toJSON());
-        result.setKeepCallback(true);
-        endpointCbContext.sendPluginResult(result);
-      }
-    }
-
-    @Override
-    public void onEndpointLost(String endpointId) {
-      Log.d(TAG, "Lost endpoint: " + endpointId);
-    }
-  };
+  private final NearbyPayloadCb payloadCallback = new NearbyPayloadCb();
+  private NearbyConnectionLifecycleCb connectionLifecycleCallback;
+  private final NearbyEndpointDiscoveryCb endpointDiscoveryCallback = new NearbyEndpointDiscoveryCb();
 
   @Override
   public void initialize(CordovaInterface cordova, CordovaWebView webView) {
@@ -181,8 +58,8 @@ public class NearbyPlugin extends CordovaPlugin {
     }
 
     connectionsClient = Nearby.getConnectionsClient(cordova.getActivity().getApplicationContext());
+    connectionLifecycleCallback = new NearbyConnectionLifecycleCb(connectionsClient);
 
-    this.repository = new NearbyRepository(cordova.getActivity().getApplicationContext());
     Log.d(TAG, "Initializing Nearby");
   }
 
@@ -201,7 +78,7 @@ public class NearbyPlugin extends CordovaPlugin {
   public boolean execute(String action, JSONArray args, final CallbackContext callbackContext) throws JSONException {
     switch(action.toLowerCase()) {
       case "startadvertising":
-        this.connectionsCallback = callbackContext;
+        this.connectionLifecycleCallback.setCallbackContext(callbackContext);
         this.startAdvertising(args.getString(0));
         break;
       case "stopadvertising":
@@ -211,13 +88,14 @@ public class NearbyPlugin extends CordovaPlugin {
       case "setidentifier":
         Log.d(TAG, "Setting endpoint identifier: " + args.getString(0));
         this.identifier = args.getString(0);
+        this.payloadCallback.setIdentifier(this.identifier);
         break;
       case "setserviceid":
         Log.d(TAG, "Setting service id: " + args.getString(0));
         this.serviceId = args.getString(0);
         break;
       case "startdiscovery":
-        this.endpointCbContext = callbackContext;
+        this.endpointDiscoveryCallback.setCallbackContext(callbackContext);
         this.connectionsClient.startDiscovery(this.serviceId, this.endpointDiscoveryCallback,
           new DiscoveryOptions(Strategy.P2P_CLUSTER))
         .addOnSuccessListener(new OnSuccessListener<Void>() {
@@ -241,9 +119,7 @@ public class NearbyPlugin extends CordovaPlugin {
         this.sendPayloadBytes(args.getString(0), args.getString(1));
         break;
       case "connecttocampaign":
-        if (this.connectionsCallback == null) {
-          this.connectionsCallback = callbackContext;
-        }
+        this.connectionLifecycleCallback.setCallbackContext(callbackContext);
 
         try {
           JSONObject obj = new JSONObject();
@@ -251,6 +127,9 @@ public class NearbyPlugin extends CordovaPlugin {
         } catch (JSONException ex) {
           Log.d(TAG, "JSON Exception: " + ex.getMessage());
         }
+        break;
+      case "setmessagehandler":
+        this.payloadCallback.setHandler(callbackContext);
         break;
     }
 
@@ -286,12 +165,11 @@ public class NearbyPlugin extends CordovaPlugin {
   *
   */
   private void sendPayloadBytes(String user, String data) {
-/*    try {
+    try {
       this.connectionsClient.sendPayload(keys.toArray(new String[keys.size()])[0], Payload.fromBytes(data.getBytes("UTF-8")));
     } catch (UnsupportedEncodingException ex) {
       Log.d(TAG, "Unsupported UTF-8 encoding");
     }
-*/
   }
 
   /**
@@ -355,34 +233,5 @@ public class NearbyPlugin extends CordovaPlugin {
     }
 
     return rtn;
-  }
-
-  private class NearbyPayload {
-    public String payload;
-    public String src;
-    public String dest;
-    public String type;
-
-    public NearbyPayload(String payload, String src, String dest, String type) {
-      this.payload = payload;
-      this.src = src;
-      this.dest = dest;
-      this.type = type;
-    }
-
-    public String toJSON() {
-      JSONObject obj = new JSONObject();
-
-      try {
-        obj.put("payload", this.payload);
-        obj.put("src", this.src);
-        obj.put("dest", this.dest);
-        obj.put("type", this.type);
-      } catch (JSONException e) {
-        Log.d(TAG, "Error converting NearbyPayload: " + e.getMessage());
-      }
-
-      return obj.toString();
-    }
   }
 }

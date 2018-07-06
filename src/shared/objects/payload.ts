@@ -3,14 +3,15 @@
 * @author Rob Miller
 * @copyright 2018
 */
-import { Campaign, CampaignFactory } from '@shared/objects';
+import { Campaign, Message, CampaignFactory } from '@shared/objects';
 
 /**
 * This enum represents the different payload types that are supported
 */
-enum PayloadTypes {
+export enum PayloadTypes {
   MESSAGE,
-  CAMPAIGN
+  CAMPAIGN,
+  CHAT_UPDATE
 }
 
 /**
@@ -90,7 +91,7 @@ export class PayloadFactory {
   * @param dest
   * @return the created message payload
   */
-  public static createMessage(message: string, src: string, dest: string): Payload {
+  public static createMessage(message: Message, src: string, dest: string): Payload {
     return new Payload({payload: message, src: src, dest: dest, type: "MESSAGE"})
   }
 

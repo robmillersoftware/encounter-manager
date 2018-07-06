@@ -1,0 +1,11 @@
+<div *ngIf="local" class="talk-bubble tri-right round border right-top">
+  <div class="talktext">
+    <p>{{message.contents}}</p>
+  </div>
+</div>
+
+<div *ngIf="!local" class="talk-bubble tri-right round border left-top">
+  <div class="talktext">
+    <p>{{message.contents}}</p>
+  </div>
+</div>

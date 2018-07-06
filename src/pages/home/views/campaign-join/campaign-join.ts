@@ -1,6 +1,7 @@
 import { Component, Input, NgZone } from '@angular/core';
 import { HomeViewComponent } from '../home-view.component';
-import { ConnectionService, CampaignService, UserService } from '@shared/services';
+import { CampaignStorage, UserStorage } from '@shared/persistence';
+import { ConnectionService } from '@shared/services';
 import { Campaign } from '@shared/objects';
 
 /**
@@ -19,8 +20,8 @@ export class CampaignJoin implements HomeViewComponent {
 
   public campaigns: Set<Campaign>;
 
-  constructor(public connectionService: ConnectionService, public campaignService: CampaignService,
-      public userService: UserService, public zone: NgZone) {
+  constructor(public connectionService: ConnectionService, public campaignStorage: CampaignStorage,
+      public userStorage: UserStorage, public zone: NgZone) {
     this.campaigns = new Set<Campaign>();
     this.startDiscovery();
   }
@@ -52,7 +53,7 @@ export class CampaignJoin implements HomeViewComponent {
     this.connectionService.connectToCampaign(campaign.name, success => {
       if (success) {
         this.connectionService.stopDiscovery();
-        this.campaignService.joinCampaign(campaign);
+        this.campaignStorage.setCurrentCampaign(campaign);
         this.callback('tabChange');
       }
     });

@@ -1,23 +1,27 @@
 <div class="overlay" [hidden]="hideOverlay"></div>
 <ion-grid>
-    <ion-row><h3>Campaigns</h3></ion-row>
-    <ion-row nowrap>
-        <ng-template ngFor let-tile [ngForOf]="campaignTiles">
-            <ion-col *ngIf="(tile.title !== 'Resume' || currentCampaign) && (tile.title !== 'Load' || hasCampaigns)">
-                <enc-tile [image]="tile.image" [title]="tile.title" (click)=" navTo(tile.id)"></enc-tile>
-            </ion-col>
-        </ng-template>
-    </ion-row>
-    <ion-row><h3>Characters/NPCs</h3></ion-row>
-    <ion-row>
-        <ion-col *ngFor="let tile of characterTiles">
-            <enc-tile [image]="tile.image" [title]="tile.title" (click)="navTo(tile.id)"></enc-tile>
-        </ion-col>
-    </ion-row>
-    <ion-row><h3>Locations</h3></ion-row>
-    <ion-row>
-        <ion-col *ngFor="let tile of locationTiles">
-            <enc-tile [image]="tile.image" [title]="tile.title" (click)="navTo(tile.id)"></enc-tile>
-        </ion-col>
-    </ion-row>
+  <ion-row><h3>Campaigns</h3></ion-row>
+  <ion-row nowrap>
+    <ng-template ngFor let-tile [ngForOf]="campaignTiles">
+      <ion-col *ngIf="(tile.title !== 'Resume' || currentCampaign) && (tile.title !== 'Load' || hasCampaigns)">
+        <enc-tile [image]="tile.image" [title]="tile.title" (click)=" navTo(tile.id)"></enc-tile>
+      </ion-col>
+    </ng-template>
+  </ion-row>
+  <ion-row><h3>Characters/NPCs</h3></ion-row>
+  <ion-row>
+    <ng-template ngFor let-tile [ngForOf]="characterTiles">
+      <ion-col *ngIf="(tile.title !== 'View/Edit' || hasCharacters)">
+        <enc-tile [image]="tile.image" [title]="tile.title" (click)="navTo(tile.id)"></enc-tile>
+      </ion-col>
+    </ng-template>
+  </ion-row>
+  <ion-row><h3>Locations</h3></ion-row>
+  <ion-row>
+    <ng-template ngFor let-tile [ngForOf]="locationTiles">
+      <ion-col *ngIf="(tile.title !== 'View/Edit' || hasLocations)">
+        <enc-tile [image]="tile.image" [title]="tile.title" (click)="navTo(tile.id)"></enc-tile>
+      </ion-col>
+    </ng-template>
+  </ion-row>
 </ion-grid>

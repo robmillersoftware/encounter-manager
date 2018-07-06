@@ -61,26 +61,9 @@ $background-color: map-get($colors, tertiary-light);
 
 $header-height: 5.5rem;
 
-// App iOS Variables
-// --------------------------------------------------
-// iOS only Sass variables can go here
-
-
-
-
-// App Material Design Variables
-// --------------------------------------------------
-// Material Design only Sass variables can go here
-
-
-
-
-// App Windows Variables
-// --------------------------------------------------
-// Windows only Sass variables can go here
-
-
-
+.modal-label {
+  color: map-get($colors, primary-darker);
+}
 
 // App Theme
 // --------------------------------------------------
@@ -90,18 +73,10 @@ $header-height: 5.5rem;
 // default are overridden.
 
 @import "ionic.theme.default";
-
-
-// Ionicons
-// --------------------------------------------------
-// The premium icon font for Ionic. For more info, please see:
-// http://ionicframework.com/docs/ionicons/
-
 @import "ionic.ionicons";
 
 
 // Fonts
 // --------------------------------------------------
-
 @import "roboto";
 @import "noto-sans";

@@ -3,7 +3,7 @@ var http = require('http'),
     path = require('path');
 
 http.createServer(function(request, response) {
-    var filePath = path.join(__dirname, '../../dist/penandpaper.apk');
+    var filePath = path.join(__dirname, '../../dist/retcon.apk');
     var stat = fileSystem.statSync(filePath);
 
     console.log("Got request. File path: " + filePath);
@@ -13,7 +13,6 @@ http.createServer(function(request, response) {
     });
 
     var readStream = fileSystem.createReadStream(filePath);
-    // We replaced all the event handlers with a simple call to readStream.pipe()
     readStream.pipe(response);
 })
 .listen(2000);

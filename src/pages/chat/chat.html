@@ -1,3 +1,57 @@
-<ion-content class="has-tabs-bottom">
-    <enc-chat></enc-chat>
-</ion-content>
+<div class="overlay" [hidden]="hideOverlay"></div>
+<ion-slides>
+  <ion-slide>
+    <ion-navbar>
+      <ion-title>Conversations</ion-title>
+    </ion-navbar>
+    <ion-segment class="conv-type-segment" [(ngModel)]="conversationType">
+      <ion-segment-button value="ingame">
+        <p>In Game</p>
+      </ion-segment-button>
+      <ion-segment-button value="meta">
+        <p>Meta</p>
+      </ion-segment-button>
+    </ion-segment>
+    <div [ngSwitch]="conversationType">
+      <ion-grid *ngSwitchCase="'ingame'">
+        <ion-row *ngFor="let convo of inGameConversations">
+          <p>CONVERSATION</p>
+        </ion-row>
+        <ion-row justify-content-around>
+          <ion-col col-auto>
+            <div class="add-conversation" (click)="showCreateConversationDialog(false);" tappable>
+              <img src="assets/imgs/plus.png">
+              <p>Create In Game Conversation</p>
+            </div>
+          </ion-col>
+        </ion-row>
+      </ion-grid>
+      <ion-grid *ngSwitchCase="'meta'">
+        <ion-row *ngFor="let convo of metaConversations">
+          <p>CONVERSATION</p>
+        </ion-row>
+        <ion-row justify-content-around>
+          <ion-col col-auto>
+            <div class="add-conversation" (click)="showCreateConversationDialog(true);" tappable>
+              <img src="assets/imgs/plus.png">
+              <p>Create Meta Conversation</p>
+            </div>
+          </ion-col>
+        </ion-row>
+      </ion-grid>
+    </div>
+  </ion-slide>
+  <ion-slide>
+    <ion-navbar>
+      <ion-title>Messages</ion-title>
+    </ion-navbar>
+    <!--<ion-scroll *ngIf="currentConversation" scrollY="true">
+      <ion-grid>
+        <ion-row *ngFor="let message of currentConversation.messages">
+          <message-bubble (message)="message"></message-bubble>
+        </ion-row>
+      </ion-grid>
+    </ion-scroll>-->
+    <message-input (conversation)="currentConversation"></message-input>
+  </ion-slide>
+</ion-slides>

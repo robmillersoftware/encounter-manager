@@ -6,3 +6,5 @@ export * from '@shared/objects/player';
 export * from '@shared/objects/encounter';
 export * from '@shared/objects/user';
 export * from '@shared/objects/header-data';
+export * from '@shared/objects/message';
+export * from '@shared/objects/conversation';

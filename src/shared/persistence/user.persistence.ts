@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { Platform } from 'ionic-angular';
 import { User, UserFactory } from '@shared/objects';
-import { StorageService } from '@shared/services';
+import { StorageService } from '@shared/persistence';
 import { generateIdentifier } from '@globals';
 import { BehaviorSubject } from 'rxjs/BehaviorSubject';
 import * as uuidv4 from 'uuid/v4';
@@ -12,7 +12,7 @@ import * as uuidv4 from 'uuid/v4';
 * @copyright 2018
 */
 @Injectable()
-export class UserService {
+export class UserStorage {
   public userSubject: BehaviorSubject<User>;
 
   constructor(public platform: Platform, public storageService: StorageService) {
@@ -27,14 +27,12 @@ export class UserService {
   * Loads a user from local storage or creates a new one if no user exists
   */
   private async loadUser() {
-    if (!this.userSubject.value) {
-      let user = await this.storageService.get('user');
-      if (!user) {
-        user = UserFactory.createUser("Anonymous", uuidv4());
-      }
-
-      this.setUser(user);
+    let user = await this.storageService.get('user');
+    if (!user) {
+      user = UserFactory.createUser("Anonymous", uuidv4());
     }
+
+    this.setUser(user);
   }
 
   /**
@@ -57,6 +55,8 @@ export class UserService {
   * @param name
   */
   public setName(name: string) {
+    console.log("setting name to " + name);
+    console.log("current name is " + this.userSubject.value);
     let user: User = this.userSubject.value;
     user.name = name;
     this.setUser(user);

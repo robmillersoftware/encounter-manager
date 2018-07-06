@@ -1,103 +1,54 @@
+import { Injectable } from '@angular/core';
+import { Campaign, Player, Encounter } from '@shared/objects';
+import { CampaignStorage } from '@shared/persistence';
+
 /**
-* This service manages the campaign storage for the application
+* This service manages campaigns
+*
 * @author Rob Miller
 * @copyright 2018
 */
-import { Injectable } from '@angular/core';
-import { BehaviorSubject } from 'rxjs/BehaviorSubject';
-import { Campaign, Encounter } from '@shared/objects';
-import { StorageService, ConnectionService } from '@shared/services';
-
 @Injectable()
 export class CampaignService {
-  //Anything that subscribes to this will be notified when the current campaign
-  //changes
-  public currentCampaignSubject: BehaviorSubject<Campaign>;
-
-  //Updates subscribers whenever a campaign is loaded or unloaded
-  public campaignLoaded: BehaviorSubject<boolean>;
-
-  //Updates subscribers whenever there is an active encounter
-  public encounterStarted: BehaviorSubject<boolean>;
-
-  //Updates subscribers with a true/false value as to whether any campaigns have been saved
-  public hasCampaigns: BehaviorSubject<boolean>;
-
-  //Maintains a list of campaigns from local storage
-  public campaignSubject: BehaviorSubject<Map<string, Campaign>>;
-
-  constructor(public storage: StorageService, public connectionService: ConnectionService) {
-    this.currentCampaignSubject = new BehaviorSubject<Campaign>(null);
-    this.campaignLoaded = new BehaviorSubject<boolean>(false);
-    this.encounterStarted = new BehaviorSubject<boolean>(false);
-    this.hasCampaigns = new BehaviorSubject<boolean>(false);
-    this.campaignSubject = new BehaviorSubject<Map<string, Campaign>>(new Map());
-
-    this.loadCampaigns();
-  }
+  constructor(private campaignStorage: CampaignStorage) {}
 
   /**
-  * Initializes the application by loading any active campaigns
+  * Returns a map of campaigns from storage.
+  * @return a map of campaigns with key = campaign name
   */
-  private async loadCampaigns() {
-    let campaigns: Map<string, Campaign> = await this.storage.get('campaigns');
-
-    if (campaigns) {
-      this.setCampaigns(campaigns);
-    }
-    let campaign: Campaign = await this.getCurrentCampaign();
-    let isLoaded:boolean = campaign ? true : false;
-
-    this.currentCampaignSubject.next(campaign);
-    this.campaignLoaded.next(isLoaded);
-
-    if (isLoaded) {
-      this.encounterStarted.next(campaign.activeEncounter ? true : false);
-    }
-  }
-
-  private setCampaigns(campaigns: Map<string, Campaign>) {
-    this.campaignSubject.next(campaigns);
-    this.storage.set('campaigns', campaigns);
-  }
-
   public getCampaigns(): Map<string, Campaign> {
-    return this.campaignSubject.value;
-  }
-  /**
-  * Sets the current campaign
-  * @param c The campaign to set
-  */
-  private setCurrentCampaign(c: Campaign) {
-    this.currentCampaignSubject.next(c);
-    this.storage.set('currentCampaign', c);
-    this.campaignLoaded.next(c ? true : false);
-
-    if (c) {
-      this.encounterStarted.next(c.activeEncounter ? true : false);
-    }
-  }
-
-  public joinCampaign(c: Campaign) {
-    if (!c) {
-      console.log("Unable to join campaign. Value is null");
-      return;
-    }
-
-    let campaign = this.getCampaign(c.name);
-    if (!campaign) {
-      this.addCampaign(c);
-      campaign = c;
-    }
-
-    this.setCurrentCampaign(campaign);
+    return this.campaignStorage.campaigns.value;
   }
 
   /**
-  * Returns the current campaign
+  * Returns the current campaign from storage
   */
   public getCurrentCampaign(): Campaign {
-    return this.currentCampaignSubject.value;
+    return this.campaignStorage.currentCampaign.value;
+  }
+
+  /**
+  * Returns a campaign with the given name
+  * @param name
+  */
+  public getCampaign(name: string): Campaign {
+    return this.campaignStorage.getCampaign(name);
+  }
+
+  /**
+  * Adds a player to a campaign's list of players.
+  * @param c a campaign object
+  * @param p a player object
+  */
+  public addPlayerToCampaign(c: Campaign, p: Player) {
+    let campaign = this.campaignStorage.getCampaign(c.name);
+
+    if (campaign) {
+      campaign.players.push(p);
+      this.campaignStorage.updateCampaign(campaign);
+    }
+
+    return campaign;
   }
 
   /**
@@ -105,15 +56,11 @@ export class CampaignService {
   * @param enc The new encounter
   */
   public startEncounter(enc: Encounter) {
-    let campaign: Campaign = this.currentCampaignSubject.value;
-    let isLoaded: boolean = campaign ? true : false;
+    let campaign: Campaign = this.campaignStorage.getCurrentCampaign();
 
-    if (isLoaded && !campaign.activeEncounter) {
+    if (campaign && !campaign.activeEncounter) {
       campaign.activeEncounter = enc;
-      this.encounterStarted.next(true);
-
-      this.setCurrentCampaign(campaign);
-      this.updateCampaign(campaign);
+      this.campaignStorage.updateCampaign(campaign);
     }
   }
 
@@ -121,75 +68,29 @@ export class CampaignService {
   * Ends the active encounter on the current campaign
   */
   public endEncounter() {
-    let campaign: Campaign = this.currentCampaignSubject.value;
-    let isLoaded: boolean = campaign ? true : false;
+    let campaign: Campaign = this.campaignStorage.getCurrentCampaign();
 
-    if (isLoaded) {
+    if (campaign && campaign.activeEncounter) {
       campaign.encounterHistory.push(campaign.activeEncounter);
       campaign.activeEncounter = null;
-      this.encounterStarted.next(false);
 
-      this.setCurrentCampaign(campaign);
-      this.updateCampaign(campaign);
+      this.campaignStorage.updateCampaign(campaign);
     }
   }
 
   /**
-  * Updates an existing campaign
-  * @param c The updated version of a campaign
+  * Returns a player object representing the GM of the given campaign
+  * @param campaignName the name of the campaign
   */
-  public updateCampaign(c: Campaign) {
-    if (!c) return;
+  public getGm(campaignName: string): Player {
+    let campaign: Campaign = this.campaignStorage.getCampaign(campaignName);
 
-    let campaigns: Map<string, Campaign> = this.campaignSubject.value;
-    campaigns.set(c.name, c);
-
-    this.setCampaigns(campaigns);
-  }
-
-  /**
-  * Adds a new campaign to the list of campaigns
-  * @param c The campaign to add
-  */
-  public addCampaign(c: Campaign) {
-    let campaigns: Map<string, Campaign> = this.campaignSubject.value;
-
-    if (!campaigns.has(c.name)) {
-      campaigns.set(c.name, c);
-      this.hasCampaigns.next(true);
-    }
-
-    this.storage.set('campaigns', Array.from(campaigns.values()));
-  }
-
-  /**
-  * Removes an existing campaign from the list by name
-  * @param cName The name of the campaign to remove
-  */
-  public removeCampaign(cName: string) {
-    let campaigns: Map<string, Campaign> = this.campaignSubject.value;
-    let current: Campaign = this.currentCampaignSubject.value;
-
-    if (campaigns.has(cName)) {
-      campaigns.delete(cName);
-    }
-
-    this.hasCampaigns.next(campaigns.size > 0 ? true : false);
-    this.setCampaigns(campaigns);
-
-    if (current && current.name === cName) {
-      this.setCurrentCampaign(null);
-    }
-  }
-
-  /**
-  * Finds a campaign by name
-  * @param cName The campaign name to search for
-  */
-  public getCampaign(cName: string): Campaign {
-    let campaigns: Map<string, Campaign> = this.campaignSubject.value;
-    if (campaigns.has(cName)) {
-      return campaigns.get(cName);
+    if (campaign) {
+      for (let player of campaign.players) {
+        if (player.isGm) {
+          return player;
+        }
+      }
     }
 
     return null;

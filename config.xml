@@ -87,5 +87,5 @@
         <variable name="GOOGLE_PLAY_SERVICES_VERSION" value="12.0.0" />
     </plugin>
     <engine name="ios" spec="~4.5.4" />
-    <engine name="android" spec="^7.0.0" />
+    <engine name="android" spec="^7.1.0" />
 </widget>

@@ -5,26 +5,30 @@ import { NgModule } from '@angular/core';
 import { IonicStorageModule } from '@ionic/storage';
 import { IonicModule, IonicApp } from 'ionic-angular';
 
-import { EncTile, EncChat, EncPlayerCard, EncNpcCard, EncCampaignCard, EncLocCard, AccountSettingsModal }
-  from '@shared/components';
+import { EncTile, EncChat, EncPlayerCard, EncNpcCard, EncCampaignCard, EncLocCard, AccountSettingsModal,
+  MessageBubble, MessageInput } from '@shared/components';
 
-import { StorageService, CharacterService, LocationService, UserService,
-    ConnectionService, CampaignService, NavigationService } from '@shared/services';
+import { StorageService, CharacterStorage, LocationService, UserStorage, CampaignStorage, ChatStorage } from '@shared/persistence';
+import { ConnectionService, NavigationService, CharacterService, CampaignService, ChatService } from '@shared/services';
 
 @NgModule({
     imports: [IonicModule, IonicStorageModule.forRoot()],
     bootstrap: [IonicApp],
-    declarations: [EncTile, EncChat, EncPlayerCard, EncNpcCard, EncCampaignCard, EncLocCard, AccountSettingsModal],
-    entryComponents: [EncTile, EncChat, EncPlayerCard, EncNpcCard, EncCampaignCard, EncLocCard, AccountSettingsModal],
+    declarations: [EncTile, EncChat, EncPlayerCard, EncNpcCard, EncCampaignCard, EncLocCard, AccountSettingsModal, MessageBubble, MessageInput],
+    entryComponents: [EncTile, EncChat, EncPlayerCard, EncNpcCard, EncCampaignCard, EncLocCard, AccountSettingsModal, MessageBubble, MessageInput],
     providers: [
       StorageService,
       LocationService,
+      CharacterStorage,
+      UserStorage,
+      CampaignStorage,
+      ChatStorage,
       CharacterService,
-      UserService,
-      ConnectionService,
+      NavigationService,
       CampaignService,
-      NavigationService
+      ChatService,
+      ConnectionService
     ],
-    exports: [EncTile, EncChat, EncPlayerCard, EncNpcCard, EncCampaignCard, EncLocCard, AccountSettingsModal, IonicModule],
+    exports: [EncTile, EncChat, EncPlayerCard, EncNpcCard, EncCampaignCard, EncLocCard, AccountSettingsModal, MessageBubble, MessageInput, IonicModule],
 })
 export class SharedModule {}

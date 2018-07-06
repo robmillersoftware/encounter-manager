@@ -1,6 +1,6 @@
 import { Component } from '@angular/core';
 import { ViewController } from 'ionic-angular';
-import { CharacterService, CampaignService } from '@shared/services';
+import { CharacterStorage, CampaignStorage } from '@shared/persistence';
 import { FormBuilder, FormGroup } from '@angular/forms';
 import { Character, Campaign } from '@shared/objects';
 
@@ -18,14 +18,14 @@ export class AddCharacterModal {
   public campaign: Campaign;
 
   constructor(public viewCtrl: ViewController, public formBuilder: FormBuilder,
-      public campaignService: CampaignService, public characterService: CharacterService) {
+      public campaignStorage: CampaignStorage, public characterStorage: CharacterStorage) {
     this.availableChars = new Array();
-    this.campaign = this.campaignService.getCurrentCampaign();
+    this.campaign = this.campaignStorage.getCurrentCampaign();
     this.getCharacters();
   }
 
   public getCharacters() {
-    let characters: Map<string, Character> = this.characterService.getCharacters();
+    let characters: Map<string, Character> = this.characterStorage.getCharacters();
     let available = Array.from(characters.values()).filter((char: any) =>
       this.campaign.characters.findIndex(c => c.name === char.name) < 0);
 
@@ -46,7 +46,7 @@ export class AddCharacterModal {
       }
     });
 
-    this.campaignService.updateCampaign(this.campaign);
+    this.campaignStorage.updateCampaign(this.campaign);
     this.closeModal(true);
   }
 }

@@ -1,7 +1,7 @@
 import { Component, ViewChild } from '@angular/core';
 import { Platform } from 'ionic-angular';
 import { HomePage, EncounterPage, ChatPage, NotesPage, CampaignPage } from '@pages';
-import { CampaignService } from '@shared/services';
+import { CampaignStorage } from '@shared/persistence';
 
 @Component({
     templateUrl: 'tabs.html'
@@ -18,19 +18,21 @@ export class TabsPage {
   private campaignLoaded: boolean;
   private hasEncounter: boolean;
 
-  constructor(public platform: Platform, private campaignService: CampaignService) {
+  constructor(public platform: Platform, private campaignStorage: CampaignStorage) {
     this.homePage = HomePage;
     this.encounterPage = EncounterPage;
     this.chatPage = ChatPage;
     this.notesPage = NotesPage;
     this.campaignPage = CampaignPage;
 
-    this.campaignService.campaignLoaded.subscribe(val => {
-      this.campaignLoaded = val;
-    });
-
-    this.campaignService.encounterStarted.subscribe(val => {
-      this.hasEncounter = val;
+    this.campaignStorage.currentCampaign.subscribe(val => {
+      if (val) {
+        this.campaignLoaded = true;
+        this.hasEncounter = val.activeEncounter != null;
+      } else {
+        this.campaignLoaded = false;
+        this.hasEncounter = false;
+      }
     });
   }
 

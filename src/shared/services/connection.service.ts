@@ -1,8 +1,10 @@
 import { Injectable } from '@angular/core';
 import { Platform } from 'ionic-angular';
-import { CampaignFactory, Campaign, PayloadFactory, Payload } from '@shared/objects';
-import { UserService } from '@shared/services';
-import { Globals, parseIdentifier } from '@globals';
+import { CampaignFactory, Campaign, PlayerFactory, Player,
+  PayloadFactory, Payload, Message } from '@shared/objects';
+import { UserStorage } from '@shared/persistence';
+import { CampaignService } from '@shared/services';
+import { Globals, parseIdentifier, generateIdentifier } from '@globals';
 import { BehaviorSubject } from 'rxjs/BehaviorSubject';
 
 /**
@@ -17,27 +19,31 @@ export class ConnectionService {
   private isCordova: boolean;
 
   //Gets updated whenever new campaigns are discovered with Nearby. The key is an
-  //identifier
+  //identifier JSON object
   public remoteCampaigns: BehaviorSubject<Map<string, Campaign>>;
 
   //Gets updated when information about players on the same campaign as you is found
+  //TODO: evaluate the necessity of this variable
   public connections: BehaviorSubject<Array<string>>;
 
-  constructor(private platform: Platform, private userService: UserService) {
+  constructor(public platform: Platform, public userStorage: UserStorage, public campaignService: CampaignService) {
     this.isIos = this.platform.is("ios");
     this.isCordova = this.platform.is("cordova");
+
     this.remoteCampaigns = new BehaviorSubject(null);
     this.connections = new BehaviorSubject(null);
 
     this.platform.ready().then(() => {
       if (this.isCordova && window["NearbyPlugin"]) {
         //Listen for updates to the user and change the registered identifier as appropriate
-        this.userService.userSubject.subscribe((u) => {
+        this.userStorage.userSubject.subscribe((u) => {
           if (u) {
-            window["NearbyPlugin"].setIdentifier(this.userService.getIdentifier());
+            window["NearbyPlugin"].setIdentifier(this.userStorage.getIdentifier());
           }
         });
 
+        //The service ID is the same for all devices running this app and should only change
+        //between versions
         window["NearbyPlugin"].setServiceId(Globals.serviceId);
       }
     });
@@ -46,17 +52,32 @@ export class ConnectionService {
   }
 
   /**
+  * Registers a callback to handle any messages coming through the Nearby plugin
+  * @param callback a function that takes a JSON object as a parameter
+  */
+  public registerMessageHandler(callback: any) {
+    if (this.isCordova && window["NearbyPlugin"]) {
+      window["NearbyPlugin"].setMessageHandler(callback);
+    }
+  }
+
+  /**
   * Advertises a campaign using the NearbyPlugin. In order to ensure we are under
   * the maximum bytes, the campaign is condensed into a broadcast JSON string
   * @param c the campaign to advertise
   */
-  public async advertiseCampaign(c: Campaign) {
+  public advertiseCampaign(c: Campaign) {
     if (this.isCordova && window["NearbyPlugin"]) {
       window["NearbyPlugin"].startAdvertising(CampaignFactory.toBroadcast(c), connection => {
         //This method is called when a connection is established
+        //TODO: this section might be deleted during the evaluation of the connections object
         let connArr = this.connections.value;
         connArr.push(JSON.stringify(connection));
         this.connections.next(connArr);
+
+        //Add the player to the current campaign
+        let player = PlayerFactory.createPlayer(connection, false, null);
+        this.campaignService.addPlayerToCampaign(c, player);
       });
     }
   }
@@ -65,10 +86,11 @@ export class ConnectionService {
   * Discover nearby campaigns using the Nearby plugin. It listens for advertisements
   * specifically broadcasting a campaign object
   */
-  public async discoverCampaigns() {
+  public discoverCampaigns() {
     if (this.isCordova && window["NearbyPlugin"]) {
       window["NearbyPlugin"].startDiscovery(discovered => {
         //data should be a JSON string matching a Payload object
+        //TODO: Improve error handling here and evaluate the payload object paradigm
         let data: Payload = PayloadFactory.fromJSON(discovered);
 
         if (!data) {
@@ -84,6 +106,7 @@ export class ConnectionService {
             campaigns = new Map<string, Campaign>();
           }
 
+          //Add the discovered campaign to the list of remote campaigns
           let identifier = parseIdentifier(data.src);
           campaigns.set(identifier.endpoint, data.payload);
           this.remoteCampaigns.next(campaigns);
@@ -96,7 +119,7 @@ export class ConnectionService {
   * Connects to a remote campaign with the specified name
   * @param name
   */
-  public async connectToCampaign(name: string, callback: any) {
+  public connectToCampaign(name: string, callback: any) {
     if (this.isCordova && window["NearbyPlugin"]) {
       let map: Map<string, Campaign> = this.remoteCampaigns.value;
       if (!map) {
@@ -112,6 +135,7 @@ export class ConnectionService {
               this.connections.next(new Array<string>());
             }
 
+            //TODO: This smells fishy. Include this in the evaluation of the connections object
             let connArr = this.connections.value;
             connArr.push(JSON.stringify(result));
             this.connections.next(connArr);
@@ -138,6 +162,22 @@ export class ConnectionService {
   public stopAdvertising() {
     if (this.isCordova && window["NearbyPlugin"]) {
       window["NearbyPlugin"].stopAdvertising();
+    }
+  }
+
+  /**
+  * Add a new message to a conversation
+  *
+  * @param message A message object containing what was sent
+  * @param players a list of players to send it to
+  */
+  public sendMessage(message: Message, players: Array<Player>) {
+    if (this.isCordova && window["NearbyPlugin"]) {
+      for (let player of players) {
+        let identifier = generateIdentifier(player.name, player.id, player.endpoint);
+        let payload: Payload = PayloadFactory.createMessage(message, this.userStorage.getIdentifier(), identifier);
+        window["NearbyPlugin"].sendBytes(identifier, payload);
+      }
     }
   }
 }

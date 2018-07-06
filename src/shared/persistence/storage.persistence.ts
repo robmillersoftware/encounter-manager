@@ -22,6 +22,8 @@ export class StorageService {
   */
   public async get(key: string) {
     switch(key) {
+      case 'conversations':
+        return this.storage.get('conversations');
       //Returns a map with key of location name and value of location object
       case 'locations':
         return this.storage.get('locations').then(val => {

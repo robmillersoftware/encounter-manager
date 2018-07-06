@@ -2,7 +2,7 @@ import { Component, Input, NgZone } from '@angular/core';
 import { ModalController, Events } from 'ionic-angular';
 import { HomeViewComponent } from '../home-view.component';
 import { HomeService } from '@pages/home/home.service';
-import { CampaignService } from '@shared/services';
+import { CampaignStorage, CharacterStorage, LocationService } from '@shared/persistence';
 import { AccountSettingsModal } from '@shared/components';
 
 /**
@@ -26,13 +26,31 @@ export class Dashboard implements HomeViewComponent {
 
   //Are there any campaigns in local storage?
   private hasCampaigns: boolean;
+  private hasCharacters: boolean;
+  private hasLocations: boolean;
+
   private hideOverlay: boolean = true;
-  
+
   constructor(public modalCtrl: ModalController, public events: Events,
-      public campaignService: CampaignService, public zone: NgZone) {
-    this.campaignService.hasCampaigns.subscribe(val => {
+      public campaignStorage: CampaignStorage, public characterStorage: CharacterStorage,
+      public locationService: LocationService, public zone: NgZone) {
+    this.campaignStorage.campaigns.subscribe(val => {
+      if (val && val.size > 0) {
+        this.hasCampaigns = true;
+      } else {
+        this.hasCampaigns = false;
+      }
+    });
+
+    this.characterStorage.characterSubject.subscribe(val => {
       this.zone.run(() => {
-        this.hasCampaigns = val;
+        this.hasCharacters = val.size > 0;
+      });
+    });
+
+    this.locationService.locationSubject.subscribe(val => {
+      this.zone.run(() => {
+        this.hasLocations = val.size > 0;
       });
     });
 

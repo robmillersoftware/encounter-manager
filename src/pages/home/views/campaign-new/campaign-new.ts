@@ -2,7 +2,7 @@ import { Component, Input } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { HomeViewComponent } from '../home-view.component';
 import { HomeViews } from '@pages/home/home.service';
-import { CampaignService, UserService, CharacterService, LocationService } from '@shared/services';
+import { CampaignStorage, UserStorage, CharacterStorage, LocationService } from '@shared/persistence';
 import { CampaignFactory, PlayerFactory, Location, Character } from '@shared/objects';
 
 /**
@@ -25,8 +25,8 @@ export class CampaignNew implements HomeViewComponent {
   private allCharacters: Array<Character>;
   private allLocations: Array<Location>;
 
-  constructor(private campaignService: CampaignService, private userService: UserService,
-      private characterService: CharacterService, private locationService: LocationService,
+  constructor(private campaignStorage: CampaignStorage, private userStorage: UserStorage,
+      private characterStorage: CharacterStorage, private locationService: LocationService,
       private formBuilder: FormBuilder) {
     this.campaignInfo = this.formBuilder.group({
       campaignName: ['', Validators.required],
@@ -35,7 +35,7 @@ export class CampaignNew implements HomeViewComponent {
       campaignLocs: ['']
     });
 
-    this.allCharacters = Array.from(this.characterService.getCharacters().values());
+    this.allCharacters = Array.from(this.characterStorage.getCharacters().values());
     this.allLocations = Array.from(this.locationService.getLocations().values());
   }
 
@@ -71,7 +71,7 @@ export class CampaignNew implements HomeViewComponent {
     }
 
     //Create an identifier
-    let identifier = await this.userService.getIdentifier();
+    let identifier = await this.userStorage.getIdentifier();
 
     //Create a GM
     let gm = PlayerFactory.createPlayer(identifier, true, null);
@@ -84,7 +84,7 @@ export class CampaignNew implements HomeViewComponent {
       selectedLocs,
       [gm]);
 
-    this.campaignService.addCampaign(newCamp);
+    this.campaignStorage.addCampaign(newCamp);
     this.callback('viewChange', HomeViews.CAMPAIGN_LOAD);
   }
 }

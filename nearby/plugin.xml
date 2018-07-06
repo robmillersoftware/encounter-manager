@@ -42,11 +42,11 @@
       </feature>
     </config-file>
 
+    <source-file src="src/android/com/rmiller/NearbyEndpointDiscoveryCb.java" target-dir="src/com/rmiller" />
+    <source-file src="src/android/com/rmiller/NearbyConnectionLifecycleCb.java" target-dir="src/com/rmiller" />
     <source-file src="src/android/com/rmiller/NearbyPlugin.java" target-dir="src/com/rmiller" />
-    <source-file src="src/android/com/rmiller/NearbyDatabase.java" target-dir="src/com/rmiller" />
-    <source-file src="src/android/com/rmiller/NearbyRepository.java" target-dir="src/com/rmiller" />
-    <source-file src="src/android/com/rmiller/User.java" target-dir="src/com/rmiller" />
-    <source-file src="src/android/com/rmiller/UserDao.java" target-dir="src/com/rmiller" />
+    <source-file src="src/android/com/rmiller/NearbyPayload.java" target-dir="src/com/rmiller" />
+    <source-file src="src/android/com/rmiller/NearbyPayloadCb.java" target-dir="src/com/rmiller" />
   </platform>
 
   <!-- ios -->

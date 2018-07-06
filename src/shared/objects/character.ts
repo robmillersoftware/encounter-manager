@@ -5,13 +5,16 @@
 * @author Rob Miller
 * @copyright 2018
 */
+import { Player } from '@shared/objects';
 
 /**
 * This interface is used to construct Character objects
 */
 interface CharacterData {
   name: string,
-  description: string
+  description: string,
+  player?: Player,
+  campaignId?: number
 }
 
 /**
@@ -20,10 +23,14 @@ interface CharacterData {
 export class Character {
   public name: string;
   public description: string;
+  public player: Player;
+  public campaignId: number;
 
   constructor(char: CharacterData) {
     this.name = char.name;
     this.description = char.description;
+    this.player = char.hasOwnProperty("player") ? char.player : null;
+    this.campaignId = char.hasOwnProperty("campaignId") ? char.campaignId: -1;
   }
 }
 
@@ -37,8 +44,8 @@ export class CharacterFactory {
   * @param description
   * @return the created Character
   */
-  static createCharacter(name: string, description: string): Character {
-    return new Character({name: name, description: description});
+  static createCharacter(name: string, description: string, player?: Player, id?: number): Character {
+    return new Character({name: name, description: description, player: player, campaignId: id});
   }
 
   /**

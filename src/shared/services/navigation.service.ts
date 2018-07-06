@@ -3,7 +3,7 @@ import { BehaviorSubject } from 'rxjs/BehaviorSubject';
 import { HeaderData } from '@shared/objects';
 
 /**
-* This service manages CRUD operations for characters in local storage
+* This service holds some state information when navigating between pages 
 * @author Rob Miller
 * @copyright 2018
 */

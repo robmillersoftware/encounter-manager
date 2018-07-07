@@ -2,6 +2,9 @@ package com.rmiller;
 
 import com.google.android.gms.nearby.connection.PayloadCallback;
 import com.google.android.gms.nearby.connection.Payload;
+import org.apache.cordova.PluginResult;
+import org.apache.cordova.PluginResult.Status;
+import org.apache.cordova.CallbackContext;
 import java.io.UnsupportedEncodingException;
 import com.google.android.gms.nearby.connection.PayloadTransferUpdate;
 import android.util.Log;

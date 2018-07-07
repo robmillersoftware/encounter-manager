@@ -66,7 +66,7 @@ export class ConnectionService {
   * the maximum bytes, the campaign is condensed into a broadcast JSON string
   * @param c the campaign to advertise
   */
-  public advertiseCampaign(c: Campaign) {
+  public advertiseCampaign(c: Campaign, newPlayerCallback: any) {
     if (this.isCordova && window["NearbyPlugin"]) {
       window["NearbyPlugin"].startAdvertising(CampaignFactory.toBroadcast(c), connection => {
         //This method is called when a connection is established
@@ -176,7 +176,7 @@ export class ConnectionService {
       for (let player of players) {
         let identifier = generateIdentifier(player.name, player.id, player.endpoint);
         let payload: Payload = PayloadFactory.createMessage(message, this.userStorage.getIdentifier(), identifier);
-        window["NearbyPlugin"].sendBytes(identifier, payload);
+        window["NearbyPlugin"].sendBytes(player.endpoint, payload);
       }
     }
   }

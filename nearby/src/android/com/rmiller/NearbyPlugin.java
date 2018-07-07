@@ -4,8 +4,6 @@ import org.apache.cordova.CallbackContext;
 import org.apache.cordova.CordovaInterface;
 import org.apache.cordova.CordovaPlugin;
 import org.apache.cordova.CordovaWebView;
-import org.apache.cordova.PluginResult;
-import org.apache.cordova.PluginResult.Status;
 import org.json.JSONObject;
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -164,9 +162,9 @@ public class NearbyPlugin extends CordovaPlugin {
   /**
   *
   */
-  private void sendPayloadBytes(String user, String data) {
+  private void sendPayloadBytes(String endpoint, String data) {
     try {
-      this.connectionsClient.sendPayload(keys.toArray(new String[keys.size()])[0], Payload.fromBytes(data.getBytes("UTF-8")));
+      this.connectionsClient.sendPayload(endpoint, Payload.fromBytes(data.getBytes("UTF-8")));
     } catch (UnsupportedEncodingException ex) {
       Log.d(TAG, "Unsupported UTF-8 encoding");
     }

@@ -1,9 +1,8 @@
 import { Injectable } from '@angular/core';
 import { Platform } from 'ionic-angular';
-import { CampaignFactory, Campaign, PlayerFactory, Player,
+import { CampaignFactory, Campaign, Player,
   PayloadFactory, Payload, Message } from '@shared/objects';
 import { UserStorage } from '@shared/persistence';
-import { CampaignService } from '@shared/services';
 import { Globals, parseIdentifier, generateIdentifier } from '@globals';
 import { BehaviorSubject } from 'rxjs/BehaviorSubject';
 
@@ -17,6 +16,7 @@ import { BehaviorSubject } from 'rxjs/BehaviorSubject';
 export class ConnectionService {
   private isIos: boolean;
   private isCordova: boolean;
+  private isAdvertising: boolean = false;
 
   //Gets updated whenever new campaigns are discovered with Nearby. The key is an
   //identifier JSON object
@@ -26,7 +26,7 @@ export class ConnectionService {
   //TODO: evaluate the necessity of this variable
   public connections: BehaviorSubject<Array<string>>;
 
-  constructor(public platform: Platform, public userStorage: UserStorage, public campaignService: CampaignService) {
+  constructor(public platform: Platform, public userStorage: UserStorage) {
     this.isIos = this.platform.is("ios");
     this.isCordova = this.platform.is("cordova");
 
@@ -68,6 +68,16 @@ export class ConnectionService {
   */
   public advertiseCampaign(c: Campaign, newPlayerCallback: any) {
     if (this.isCordova && window["NearbyPlugin"]) {
+      if (this.isAdvertising) {
+        this.stopAdvertising();
+
+        //If null is passed in, then just stop advertising and return
+        if (!c) {
+          console.log("Null value passed to advertiseCampaign.")
+          return;
+        }
+      }
+
       window["NearbyPlugin"].startAdvertising(CampaignFactory.toBroadcast(c), connection => {
         //This method is called when a connection is established
         //TODO: this section might be deleted during the evaluation of the connections object
@@ -75,10 +85,10 @@ export class ConnectionService {
         connArr.push(JSON.stringify(connection));
         this.connections.next(connArr);
 
-        //Add the player to the current campaign
-        let player = PlayerFactory.createPlayer(connection, false, null);
-        this.campaignService.addPlayerToCampaign(c, player);
+        newPlayerCallback(connection);
       });
+
+      this.isAdvertising = true;
     }
   }
 
@@ -161,7 +171,9 @@ export class ConnectionService {
   */
   public stopAdvertising() {
     if (this.isCordova && window["NearbyPlugin"]) {
+      console.log("Stopping advertising");
       window["NearbyPlugin"].stopAdvertising();
+      this.isAdvertising = false;
     }
   }
 

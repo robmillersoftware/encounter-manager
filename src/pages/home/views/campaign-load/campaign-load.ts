@@ -1,7 +1,7 @@
 import { Component, Input } from '@angular/core';
 import { HomeViewComponent } from '../home-view.component';
 import { HomeViews } from '@pages/home/home.service';
-import { CampaignStorage } from '@shared/persistence';
+import { CampaignService } from '@shared/services';
 import { Campaign } from '@shared/objects';
 
 /**
@@ -20,8 +20,8 @@ export class CampaignLoad implements HomeViewComponent {
 
   public campaigns: Array<Campaign>;
 
-  constructor(private campaignStorage: CampaignStorage) {
-    this.campaigns = Array.from(this.campaignStorage.getCampaigns().values());
+  constructor(private campaignService: CampaignService) {
+    this.campaigns = Array.from(this.campaignService.getCampaigns().values());
   }
 
   /**
@@ -35,8 +35,7 @@ export class CampaignLoad implements HomeViewComponent {
       }
     });
 
-    console.log("Deleting campaign");
-    this.campaignStorage.deleteCampaign(name);
+    this.campaignService.deleteCampaign(name);
 
     //If there are no campaigns left, then go back to the dashboard
     if (this.campaigns.length === 0) {
@@ -49,7 +48,7 @@ export class CampaignLoad implements HomeViewComponent {
   * @param campaign
   */
   public async loadCampaign(campaign: Campaign) {
-    this.campaignStorage.setCurrentCampaign(campaign);
+    this.campaignService.setCurrentCampaign(campaign);
     this.callback('tabChange', 0);
   }
 }

@@ -114,16 +114,9 @@ export class CampaignStorage {
   */
   public deleteCampaign(cName: string) {
     let campaigns: Map<string, Campaign> = this.campaigns.value;
-    let current: Campaign = this.currentCampaign.value;
-
-    console.log("Campaigns: " + JSON.stringify(campaigns));
+    
     if (campaigns.has(cName)) {
       campaigns.delete(cName);
-
-      if (current && current.name === cName) {
-        console.log("Setting current campaign to null because it was deleted.")
-        this.setCurrentCampaign(null);
-      }
     }
 
     this.setCampaigns(campaigns);

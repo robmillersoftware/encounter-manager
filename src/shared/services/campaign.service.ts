@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 import { Campaign, Player, Encounter } from '@shared/objects';
 import { CampaignStorage } from '@shared/persistence';
+import { ConnectionService } from '@shared/services';
 
 /**
 * This service manages campaigns
@@ -10,7 +11,7 @@ import { CampaignStorage } from '@shared/persistence';
 */
 @Injectable()
 export class CampaignService {
-  constructor(private campaignStorage: CampaignStorage) {}
+  constructor(private campaignStorage: CampaignStorage, private connectionService: ConnectionService) {}
 
   /**
   * Returns a map of campaigns from storage.
@@ -33,6 +34,14 @@ export class CampaignService {
   */
   public getCampaign(name: string): Campaign {
     return this.campaignStorage.getCampaign(name);
+  }
+
+  /**
+  * Wraps the campaign persistence setCurrentCampaign method
+  * @param campaign
+  */
+  public setCurrentCampaign(campaign: Campaign) {
+    this.campaignStorage.setCurrentCampaign(campaign);
   }
 
   /**
@@ -94,5 +103,17 @@ export class CampaignService {
     }
 
     return null;
+  }
+
+  public deleteCampaign(cName: string) {
+    let current: Campaign = this.getCurrentCampaign();
+
+    if (current && current.name === cName) {
+      console.log("Setting current campaign to null because it was deleted.");
+      this.campaignStorage.setCurrentCampaign(null);
+      this.connectionService.advertiseCampaign(null, null);
+    }
+
+    this.campaignStorage.deleteCampaign(cName);
   }
 }

@@ -28,6 +28,6 @@ import { HomeDirective } from './home.directive';
         LocationEdit, LocationNew,
         Dashboard],
     providers: [HomeService],
-    exports: [HomePage]
+    /*exports: [HomePage]*/
 })
 export class HomeModule {}

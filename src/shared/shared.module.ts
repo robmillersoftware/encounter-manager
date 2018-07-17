@@ -8,8 +8,8 @@ import { IonicModule, IonicApp } from 'ionic-angular';
 import { EncTile, EncChat, EncPlayerCard, EncNpcCard, EncCampaignCard, EncLocCard, AccountSettingsModal,
   MessageBubble, MessageInput } from '@shared/components';
 
-import { StorageService, CharacterStorage, LocationService, UserStorage, CampaignStorage, ChatStorage } from '@shared/persistence';
-import { ConnectionService, NavigationService, CharacterService, CampaignService, ChatService } from '@shared/services';
+import { StorageService, CharacterStorage, LocationService, UserStorage, CampaignStorage, ChatStorage, GameStorage } from '@shared/persistence';
+import { ConnectionService, NavigationService, CharacterService, CampaignService, ChatService, GameService } from '@shared/services';
 
 @NgModule({
     imports: [IonicModule, IonicStorageModule.forRoot()],
@@ -23,11 +23,13 @@ import { ConnectionService, NavigationService, CharacterService, CampaignService
       UserStorage,
       CampaignStorage,
       ChatStorage,
+      GameStorage,
       CharacterService,
       NavigationService,
       CampaignService,
       ChatService,
-      ConnectionService
+      ConnectionService,
+      GameService
     ],
     exports: [EncTile, EncChat, EncPlayerCard, EncNpcCard, EncCampaignCard, EncLocCard, AccountSettingsModal, MessageBubble, MessageInput, IonicModule],
 })

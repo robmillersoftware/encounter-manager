@@ -8,3 +8,4 @@ export * from '@shared/objects/user';
 export * from '@shared/objects/header-data';
 export * from '@shared/objects/message';
 export * from '@shared/objects/conversation';
+export * from '@shared/objects/game';

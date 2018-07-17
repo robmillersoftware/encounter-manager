@@ -1,3 +1,38 @@
+### Shared Library
+Any objects/methods that may need to be imported in multiple places should go in the shared folder. It is broken into 4 folders that are all imported by the shared module.
+
+#### Components
+Any directives or components that need to be used on multiple screens go here. Create a subfolder under "components" where you can add html, typescript, and/or scss.
+
+#### Objects
+Objects in the shared/objects folder follow a specific pattern. Each object should reside in its own .ts file. These files should contain a Data interface, a Class matching the name of the file, and a Factory. The Data interface should be passed as the only parameter into the object, and the Factory should take a list of arguments it uses to build the Interface and return the resulting Class. The Class and the Factory should both be exported. For example:
+
+```
+interface ExampleData {
+  someProperty: any
+}
+
+export class Example {
+  public someProperty: any;
+  constructor(data: ExampleData) {
+    this.someProperty = data.someProperty;
+  }
+}
+
+export class ExampleFactory {
+  public buildExample(prop: any): Example {
+    return new Example({someProperty: prop});
+  }
+}
+```
+#### Persistence
+Persistence modules handle CRUD operations for objects put into local storage. Each data type needs its own persistence module. All persistence modules need to import the StorageService module which can be found in storage.persistence.ts. This is a wrapper around the actual get/set calls.
+
+Persistence modules should not be used directly by pages/components/etc, but instead services should be written that use them.
+
+#### Services
+Services handle logic between individual components. For instance, any networking, data persistence, or state-based operations should be handled by a service. Persistence modules should not import services, but services should import persistence modules.
+
 ### Debugging and Testing Strategies
 #### Browser
 To debug in browser, simply run:

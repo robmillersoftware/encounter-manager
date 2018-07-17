@@ -24,7 +24,8 @@ export class StorageService {
     switch(key) {
       case 'conversations':
         return this.storage.get('conversations');
-      //Returns a map with key of location name and value of location object
+      case 'games':
+        return this.storage.get('games');
       case 'locations':
         return this.storage.get('locations').then(val => {
           let map: Map<string, Location> = new Map();
@@ -83,10 +84,19 @@ export class StorageService {
   */
   public async set(key: string, value: any) {
     switch(key) {
+      case 'games':
+        this.storage.set(key, Array.from(value.values()));
+        break;
+      case 'conversations':
+        this.storage.set(key, Array.from(value.values()));
+        break;
       case 'locations':
         this.storage.set(key, Array.from(value.values()));
         break;
       case 'characters':
+        this.storage.set(key, Array.from(value.values()));
+        break;
+      case 'campaigns':
         this.storage.set(key, Array.from(value.values()));
         break;
       //Sets the current campaign on the user object
@@ -94,9 +104,6 @@ export class StorageService {
         let user: User = await this.storage.get('user');
         user.currentCampaign = value;
         this.storage.set('user', user);
-        break;
-      case 'campaigns':
-        this.storage.set(key, Array.from(value.values()));
         break;
       case 'user':
         this.storage.set(key, value);

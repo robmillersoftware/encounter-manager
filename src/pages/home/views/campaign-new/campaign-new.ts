@@ -2,7 +2,10 @@ import { Component, Input } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { HomeViewComponent } from '../home-view.component';
 import { HomeViews } from '@pages/home/home.service';
+
 import { CampaignStorage, UserStorage, CharacterStorage, LocationService } from '@shared/persistence';
+import { GameService } from '@shared/services';
+
 import { CampaignFactory, PlayerFactory, Location, Character } from '@shared/objects';
 
 /**
@@ -27,7 +30,7 @@ export class CampaignNew implements HomeViewComponent {
 
   constructor(private campaignStorage: CampaignStorage, private userStorage: UserStorage,
       private characterStorage: CharacterStorage, private locationService: LocationService,
-      private formBuilder: FormBuilder) {
+      private formBuilder: FormBuilder, private gameService: GameService) {
     this.campaignInfo = this.formBuilder.group({
       campaignName: ['', Validators.required],
       campaignDesc: [''],
@@ -76,9 +79,12 @@ export class CampaignNew implements HomeViewComponent {
     //Create a GM
     let gm = PlayerFactory.createPlayer(identifier, true, null);
 
+    let game = this.gameService.getGame('None');
+
     //Create a new Campaign object
     let newCamp = CampaignFactory.createCampaign(
       this.campaignInfo.value.campaignName,
+      game,
       this.campaignInfo.value.campaignDesc,
       selectedChars,
       selectedLocs,

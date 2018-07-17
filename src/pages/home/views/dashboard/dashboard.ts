@@ -69,6 +69,7 @@ export class Dashboard implements HomeViewComponent {
   * @param data an object containing any data necessary for the navigation method
   */
   navTo(id: any) {
+    this.events.unsubscribe('Account');
     this.callback('viewChange', id);
   }
 }

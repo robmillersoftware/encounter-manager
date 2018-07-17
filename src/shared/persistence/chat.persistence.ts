@@ -1,5 +1,5 @@
 /**
-* This service manages the campaign storage for the application
+* This service manages the chat storage for the application
 * @author Rob Miller
 * @copyright 2018
 */

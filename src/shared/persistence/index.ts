@@ -4,3 +4,4 @@ export * from '@shared/persistence/campaign.persistence';
 export * from '@shared/persistence/character.persistence';
 export * from '@shared/persistence/location.persistence';
 export * from '@shared/persistence/chat.persistence';
+export * from '@shared/persistence/game.persistence';

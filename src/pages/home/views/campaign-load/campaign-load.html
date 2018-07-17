@@ -18,7 +18,16 @@
                         </ion-row>
                     </ion-grid>
                 </ion-card-header>
-                <ion-card-content><p>{{c.description}}</p></ion-card-content>
+                <ion-card-content>
+                  <ion-grid>
+                    <ion-row>
+                      <p>Description: {{c.description}}</p>
+                    </ion-row>
+                    <ion-row>
+                      <p>Game: {{c.game.name}}</p>
+                    </ion-row>
+                  </ion-grid>
+                </ion-card-content>
             </ion-card>
         </ion-item>
     </ion-list>

@@ -3,13 +3,14 @@
 * @author Rob Miller
 * @copyright 2018
 */
-import { Character, Location, Player, Encounter } from '@shared/objects';
+import { Character, Location, Player, Encounter, Game, GameFactory } from '@shared/objects';
 
 /**
 * This interface is used to construct Campaign objects
 */
 interface CampaignData {
   name: string,
+  game: Game,
   description: string,
   characters?: Array<Character>,
   locations?: Array<Location>,
@@ -25,6 +26,7 @@ interface CampaignData {
 */
 export class Campaign {
   public name: string;
+  public game: Game;
   public description: string;
   public characters: Array<Character>;
   public locations: Array<Location>;
@@ -35,7 +37,9 @@ export class Campaign {
 
   constructor(data: CampaignData) {
     console.log("Building campaign: " + JSON.stringify(data));
+    //The first three fields are all required and can't be null
     this.name = data.name;
+    this.game = data.game;
     this.description = data.description;
 
     if (data.hasOwnProperty('characters') && data.characters != null) {
@@ -78,7 +82,7 @@ export class Campaign {
 * naming conventions
 */
 class CampaignBroadcast {
-  constructor(public n: string, public d: string) {}
+  constructor(public n: string, public g: string, public d: string) {}
 }
 
 /**
@@ -94,9 +98,9 @@ export class CampaignFactory {
   * @param {optional} players
   * @return newly created Campaign object
   */
-  static createCampaign(name: string, description: string, characters?: Array<Character>,
+  static createCampaign(name: string, game: Game, description: string, characters?: Array<Character>,
       locations?: Array<Location>, players?: Array<Player>): Campaign {
-    return new Campaign({name: name, description: description, characters: characters,
+    return new Campaign({name: name, game: game, description: description, characters: characters,
       locations: locations, players: players});
   }
 
@@ -115,7 +119,8 @@ export class CampaignFactory {
   * @return CampaignBroadcast JSON string
   */
   static toBroadcast(campaign: Campaign): string {
-    return JSON.stringify(new CampaignBroadcast(campaign.name, campaign.description));
+    return JSON.stringify(new CampaignBroadcast(campaign.name, GameFactory.toJson(campaign.game),
+      campaign.description));
   }
 
   /**
@@ -125,6 +130,7 @@ export class CampaignFactory {
   */
   static fromBroadcast(broadcast: string): Campaign {
     let b = <CampaignBroadcast>JSON.parse(broadcast);
-    return new Campaign({name: b.n, description: b.d});
+    let game: Game = GameFactory.fromJson(b.g);
+    return new Campaign({name: b.n, game: game, description: b.d});
   }
 }

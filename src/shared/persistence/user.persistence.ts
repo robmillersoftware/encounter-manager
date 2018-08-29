@@ -68,7 +68,7 @@ export class UserStorage {
   */
   public getIdentifier(): string {
     let user: User = this.userSubject.value;
-    return generateIdentifier(user.name, user.id, user.endpoint);
+    return generateIdentifier(user.name, user.endpoint);
   }
 
   /**

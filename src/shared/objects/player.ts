@@ -4,14 +4,13 @@
 * @copyright 2018
 */
 import { Character } from '@shared/objects';
-import { parseIdentifier } from '@globals';
 
 /**
 * This interface is used to construct Player objects
 */
 interface PlayerData {
-  identifier: string,
-  isGm: boolean,
+  name: string,
+  endpoint: string,
   characters?: Array<Character>
 }
 
@@ -20,17 +19,12 @@ interface PlayerData {
 */
 export class Player {
   public name: string;
-  public id: string;
   public endpoint: string;
   public characters: Array<Character>;
-  public isGm: boolean;
 
   constructor(data: PlayerData) {
-    let identifier = parseIdentifier(data.identifier);
-    this.name = identifier.userName;
-    this.id = identifier.id;
-    this.endpoint = identifier.endpoint;
-    this.isGm = data.isGm;
+    this.name = data.name;
+    this.endpoint = data.endpoint;
     this.characters = data.hasOwnProperty('characters') ? data.characters : new Array<Character>();
   }
 }
@@ -46,8 +40,8 @@ export class PlayerFactory {
   * @param characters
   * @return the created Player
   */
-  static createPlayer(identifier: string, isGm: boolean, characters: Array<Character>): Player {
-    return new Player({identifier: identifier, isGm: isGm, characters: characters});
+  static createPlayer(name: string, endpoint: string, characters?: Array<Character>): Player {
+    return new Player({name: name, endpoint: endpoint, characters: characters});
   }
 
   /**

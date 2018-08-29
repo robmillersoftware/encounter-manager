@@ -1,6 +1,6 @@
 import { Component } from '@angular/core';
 import { ModalController, NavController } from 'ionic-angular';
-import { CampaignStorage } from '@shared/persistence';
+import { CampaignService } from '@shared/services';
 import { Campaign } from '@shared/objects';
 import { StartEncounterModal, AddCharacterModal, AddLocationModal } from './modals';
 
@@ -12,8 +12,8 @@ export class CampaignPage {
   campaign: Campaign;
   hideOverlay: boolean = true;
 
-  constructor(public navCtrl: NavController, private campaignStorage: CampaignStorage, private modalCtrl: ModalController) {
-    this.campaignStorage.currentCampaign.subscribe(c => {
+  constructor(public navCtrl: NavController, private campaignService: CampaignService, private modalCtrl: ModalController) {
+    this.campaignService.subscribeCurrent(c => {
       this.campaign = c;
     });
   }

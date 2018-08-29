@@ -3,8 +3,8 @@ import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { HomeViewComponent } from '../home-view.component';
 import { HomeViews } from '@pages/home/home.service';
 
-import { CampaignStorage, UserStorage, CharacterStorage, LocationService } from '@shared/persistence';
-import { GameService } from '@shared/services';
+import { UserStorage } from '@shared/persistence';
+import { GameService, CampaignService, CharacterService, LocationService } from '@shared/services';
 
 import { CampaignFactory, PlayerFactory, Location, Character } from '@shared/objects';
 
@@ -28,8 +28,8 @@ export class CampaignNew implements HomeViewComponent {
   private allCharacters: Array<Character>;
   private allLocations: Array<Location>;
 
-  constructor(private campaignStorage: CampaignStorage, private userStorage: UserStorage,
-      private characterStorage: CharacterStorage, private locationService: LocationService,
+  constructor(private campaignService: CampaignService, private userStorage: UserStorage,
+      private characterService: CharacterService, private locationService: LocationService,
       private formBuilder: FormBuilder, private gameService: GameService) {
     this.campaignInfo = this.formBuilder.group({
       campaignName: ['', Validators.required],
@@ -38,7 +38,7 @@ export class CampaignNew implements HomeViewComponent {
       campaignLocs: ['']
     });
 
-    this.allCharacters = Array.from(this.characterStorage.getCharacters().values());
+    this.allCharacters = Array.from(this.characterService.getCharacters().values());
     this.allLocations = Array.from(this.locationService.getLocations().values());
   }
 
@@ -74,11 +74,10 @@ export class CampaignNew implements HomeViewComponent {
     }
 
     //Create an identifier
-    let identifier = await this.userStorage.getIdentifier();
+    let user = await this.userStorage.getUser();
 
     //Create a GM
-    let gm = PlayerFactory.createPlayer(identifier, true, null);
-
+    let gm = PlayerFactory.createPlayer(user.name, user.endpoint);
     let game = this.gameService.getGame('None');
 
     //Create a new Campaign object
@@ -86,11 +85,11 @@ export class CampaignNew implements HomeViewComponent {
       this.campaignInfo.value.campaignName,
       game,
       this.campaignInfo.value.campaignDesc,
+      gm,
       selectedChars,
-      selectedLocs,
-      [gm]);
+      selectedLocs);
 
-    this.campaignStorage.addCampaign(newCamp);
+    this.campaignService.createCampaign(newCamp);
     this.callback('viewChange', HomeViews.CAMPAIGN_LOAD);
   }
 }

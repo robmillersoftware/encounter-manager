@@ -10,7 +10,9 @@ const customConfig = {
                 '@shared': path.resolve('./src/shared'),
                 '@shared/*': path.resolve('./src/shared/*'),
                 '@pages': path.resolve('./src/pages'),
-                '@pages/*': path.resolve('./src/pages/*')
+                '@pages/*': path.resolve('./src/pages/*'),
+                '@networking': path.resolve('./src/networking'),
+                '@networking/*': path.resolve('./src/networking/*')
             }
         }
     },
@@ -21,7 +23,9 @@ const customConfig = {
                 '@shared': path.resolve('./src/shared'),
                 '@shared/*': path.resolve('./src/shared/*'),
                 '@pages': path.resolve('./src/pages'),
-                '@pages/*': path.resolve('./src/pages/*')
+                '@pages/*': path.resolve('./src/pages/*'),
+                '@networking': path.resolve('./src/networking'),
+                '@networking/*': path.resolve('./src/networking/*')
             }
         }
     }

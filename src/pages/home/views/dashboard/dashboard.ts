@@ -2,7 +2,7 @@ import { Component, Input, NgZone } from '@angular/core';
 import { ModalController, Events } from 'ionic-angular';
 import { HomeViewComponent } from '../home-view.component';
 import { HomeService } from '@pages/home/home.service';
-import { CampaignStorage, CharacterStorage, LocationService } from '@shared/persistence';
+import { CampaignService, CharacterService, LocationService } from '@shared/services';
 import { AccountSettingsModal } from '@shared/components';
 
 /**
@@ -32,9 +32,9 @@ export class Dashboard implements HomeViewComponent {
   private hideOverlay: boolean = true;
 
   constructor(public modalCtrl: ModalController, public events: Events,
-      public campaignStorage: CampaignStorage, public characterStorage: CharacterStorage,
+      public campaignService: CampaignService, public characterService: CharacterService,
       public locationService: LocationService, public zone: NgZone) {
-    this.campaignStorage.campaigns.subscribe(val => {
+    this.campaignService.subscribe(val => {
       if (val && val.size > 0) {
         this.hasCampaigns = true;
       } else {
@@ -42,13 +42,13 @@ export class Dashboard implements HomeViewComponent {
       }
     });
 
-    this.characterStorage.characterSubject.subscribe(val => {
+    this.characterService.subscribe(val => {
       this.zone.run(() => {
         this.hasCharacters = val.size > 0;
       });
     });
 
-    this.locationService.locationSubject.subscribe(val => {
+    this.locationService.subscribe(val => {
       this.zone.run(() => {
         this.hasLocations = val.size > 0;
       });

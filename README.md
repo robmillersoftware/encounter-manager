@@ -1,3 +1,32 @@
+### Development Machine setup
+#### Prerequisites
+* Install the latest version of NodeJS
+* Install the latest Gradle or Android Studio
+* Install the latest Android SDK, including the build tools and the platform-tools
+* Install the latest JDK
+* Make sure ANDROID_HOME is set to your SDK directory
+* Add ANDROID_HOME and ANDROID_HOME/bin to your PATH
+* Set the NODE_PATH environment variable to your project's root directory
+* Run ```npm install -g ionic cordova```
+
+**NOTE**: If you get an error when trying to run npm scripts due to the 'node' command not being found. This is due to an update in NodeJS. The executable is now named 'nodejs'. You can either install the nodejs-legacy package or make a symbolic link or alias to fix the issue
+
+#### Project setup
+1) Email robmillersoftware@gmail.com to get invited to the GitHub project.
+2) Set up an [SSH key](https://help.github.com/articles/connecting-to-github-with-ssh/)
+3) Clone the project source code: ```git clone git@github.com:robmillersoftware/encounter-manager.git```
+4) Run ```npm install```
+5) Run ```ionic serve``` to view the project in a browser
+
+See [Debugging and Testing Strategies](#debugging) below for more information and for connecting to a device.
+
+### Networking
+Retconnected uses an unstructured P2P network to communicate between devices. The network architecture is divided between 4 distinct layers in a hierarchy:
+  1) The lowest level consists of the Nearby Plugin (located in the nearby folder). This communicates with hardware to connect devices and send data
+  2) Comms is the next lowest level. This level is an abstraction to make the P2P network platform agnostic. Currently, only P2P is supported but eventually Wifi, Cellular Data, Wifi Direct, and even Bluetooth can be supported by adding an entry to this layer.
+  3) P2P is the next layer. This layer is the bridge between the UI and the networking logic. It is here where the network topology is managed.
+  4) The top layer consists of the NetworkingService. This service provides the entry point for other modules to make use of P2P networking.
+
 ### Shared Library
 Any objects/methods that may need to be imported in multiple places should go in the shared folder. It is broken into 4 folders that are all imported by the shared module.
 
@@ -33,6 +62,7 @@ Persistence modules should not be used directly by pages/components/etc, but ins
 #### Services
 Services handle logic between individual components. For instance, any networking, data persistence, or state-based operations should be handled by a service. Persistence modules should not import services, but services should import persistence modules.
 
+<a name="debugging"></a>
 ### Debugging and Testing Strategies
 #### Browser
 To debug in browser, simply run:

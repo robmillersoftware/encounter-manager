@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { Campaign, Player, Encounter } from '@shared/objects';
 import { CampaignStorage } from '@shared/persistence';
-import { ConnectionService } from '@shared/services';
+import { NetworkingService } from '@networking';
 
 /**
 * This service manages campaigns
@@ -11,7 +11,31 @@ import { ConnectionService } from '@shared/services';
 */
 @Injectable()
 export class CampaignService {
-  constructor(private campaignStorage: CampaignStorage, private connectionService: ConnectionService) {}
+  constructor(private campaignStorage: CampaignStorage, private network: NetworkingService) {}
+
+  /**
+  * Adds a new campaign to campaign storage
+  * @param c the campaign to add
+  */
+  public createCampaign(c: Campaign) {
+    this.campaignStorage.addCampaign(c);
+  }
+
+  /**
+  * Subscribes to the current campaign BehaviorSubject
+  * @param callback the method to execute when the BehaviorSubject changes
+  */
+  public subscribeCurrent(callback: any) {
+    this.campaignStorage.currentCampaign.subscribe(callback);
+  }
+
+  /**
+  * Subscribes to the list of campaigns
+  * @param callback the method to execute when the BehaviorSubject changes
+  */
+  public subscribe(callback: any) {
+    this.campaignStorage.campaigns.subscribe(callback);
+  }
 
   /**
   * Returns a map of campaigns from storage.
@@ -94,15 +118,7 @@ export class CampaignService {
   public getGm(campaignName: string): Player {
     let campaign: Campaign = this.campaignStorage.getCampaign(campaignName);
 
-    if (campaign) {
-      for (let player of campaign.players) {
-        if (player.isGm) {
-          return player;
-        }
-      }
-    }
-
-    return null;
+    return campaign ? campaign.gm : null;
   }
 
   public deleteCampaign(cName: string) {
@@ -111,9 +127,21 @@ export class CampaignService {
     if (current && current.name === cName) {
       console.log("Setting current campaign to null because it was deleted.");
       this.campaignStorage.setCurrentCampaign(null);
-      this.connectionService.advertiseCampaign(null, null);
+      this.network.stopBroadcast();
     }
 
     this.campaignStorage.deleteCampaign(cName);
+  }
+
+  /**
+  * Updates an existing campaign
+  * @param c The updated version of a campaign
+  */
+  public updateCampaign(c: Campaign) {
+    if (this.getCurrentCampaign().name === c.name) {
+      this.setCurrentCampaign(c);
+    }
+
+    this.campaignStorage.updateCampaign(c);
   }
 }

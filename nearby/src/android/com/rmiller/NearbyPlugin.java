@@ -11,6 +11,7 @@ import android.app.Activity;
 import android.content.Context;
 import android.util.Log;
 import java.util.Set;
+import java.util.List;
 import java.io.UnsupportedEncodingException;
 import com.google.android.gms.common.GoogleApiAvailability;
 import com.google.android.gms.common.ConnectionResult;
@@ -22,6 +23,7 @@ import com.google.android.gms.nearby.connection.DiscoveryOptions;
 import com.google.android.gms.nearby.connection.Payload;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.OnFailureListener;
+import com.google.gson.Gson;
 import android.Manifest;
 import android.content.pm.PackageManager;
 
@@ -36,21 +38,31 @@ public class NearbyPlugin extends CordovaPlugin {
 
   protected ConnectionsClient connectionsClient;
 
-  //These variables identify the application using NearbyPlugin
+  //This is the unique identifier for this instance of an application
   protected String identifier;
+
+  //This is a string that uniquely identifies the application as a whole. This allows users of an
+  //application find each other
   protected String serviceId;
 
+  //These are callbacks executed on the Javascript side
   protected CallbackContext endpointCbContext;
   protected CallbackContext messageHandler;
 
+  //This callback is executed when a payload is received
   private final NearbyPayloadCb payloadCallback = new NearbyPayloadCb();
+
+  //This callback is executed when there is a change to a connection
   private NearbyConnectionLifecycleCb connectionLifecycleCallback;
+
+  //This callback is executed when a new endpoint is discovered
   private final NearbyEndpointDiscoveryCb endpointDiscoveryCallback = new NearbyEndpointDiscoveryCb();
 
   @Override
   public void initialize(CordovaInterface cordova, CordovaWebView webView) {
     super.initialize(cordova, webView);
 
+    //Location is required for Google Nearby to work
     if (!cordova.hasPermission(Manifest.permission.ACCESS_COARSE_LOCATION)) {
       cordova.requestPermission(this, REQUEST_CODE, Manifest.permission.ACCESS_COARSE_LOCATION);
     }
@@ -65,6 +77,7 @@ public class NearbyPlugin extends CordovaPlugin {
   public void onRequestPermissionResult(int requestCode, String[] permissions,
       int[] grantResults) throws JSONException {
     for (int r : grantResults) {
+      //We only care if the permission was denied
       if (r == PackageManager.PERMISSION_DENIED) {
         Log.e(TAG, "Permission denied for ACCESS_COARSE_LOCATION");
         return;
@@ -76,24 +89,17 @@ public class NearbyPlugin extends CordovaPlugin {
   public boolean execute(String action, JSONArray args, final CallbackContext callbackContext) throws JSONException {
     switch(action.toLowerCase()) {
       case "startadvertising":
-        this.connectionLifecycleCallback.setCallbackContext(callbackContext);
         this.startAdvertising(args.getString(0));
         break;
       case "stopadvertising":
         Log.d(TAG, "Stopping advertising.");
         this.connectionsClient.stopAdvertising();
         break;
-      case "setidentifier":
-        Log.d(TAG, "Setting endpoint identifier: " + args.getString(0));
-        this.identifier = args.getString(0);
-        this.payloadCallback.setIdentifier(this.identifier);
-        break;
       case "setserviceid":
         Log.d(TAG, "Setting service id: " + args.getString(0));
         this.serviceId = args.getString(0);
         break;
       case "startdiscovery":
-        this.endpointDiscoveryCallback.setCallbackContext(callbackContext);
         this.connectionsClient.startDiscovery(this.serviceId, this.endpointDiscoveryCallback,
           new DiscoveryOptions(Strategy.P2P_CLUSTER))
         .addOnSuccessListener(new OnSuccessListener<Void>() {
@@ -113,12 +119,12 @@ public class NearbyPlugin extends CordovaPlugin {
         Log.d(TAG, "Turning off discovery.");
         this.connectionsClient.stopDiscovery();
         break;
-      case "sendbytes":
-        this.sendPayloadBytes(args.getString(0), args.getString(1));
+      case "send":
+        Gson gson = new Gson();
+        List<String> endpoints = gson.fromJson(args.getString(0), List.class);
+        this.sendPayloadBytes(endpoints, args.getString(1));
         break;
-      case "connecttocampaign":
-        this.connectionLifecycleCallback.setCallbackContext(callbackContext);
-
+      case "connect":
         try {
           JSONObject obj = new JSONObject();
           this.connectionsClient.requestConnection(this.identifier, args.getString(0), connectionLifecycleCallback);
@@ -126,24 +132,29 @@ public class NearbyPlugin extends CordovaPlugin {
           Log.d(TAG, "JSON Exception: " + ex.getMessage());
         }
         break;
-      case "setmessagehandler":
+      case "disconnect":
+        Log.d(TAG, "Disconnecting from endpoint: " + args.getString(0));
+        this.connectionsClient.disconnectFromEndpoint(args.getString(0));
+        break;
+      case "disconnectall":
+        Log.d(TAG, "Disconnecting from all endpoints.");
+        this.connectionsClient.stopAllEndpoints();
+        break;
+      case "setdatahandler":
         this.payloadCallback.setHandler(callbackContext);
+        this.connectionsLifecycleCallback.setHandler(callbackContext);
+        this.endpointDiscoveryCallback.setHandler(callbackContext);
         break;
     }
 
     return true;
   }
 
+  /**
+  * Advertises the given broadcast message
+  */
   private void startAdvertising(String broadcast) {
-    JSONObject campaignInfo = new JSONObject();
-
-    try {
-      campaignInfo.put(identifier, broadcast);
-    } catch(JSONException e) {
-      Log.e(TAG, "Unable to create campaignInfo");
-    }
-
-    this.connectionsClient.startAdvertising(campaignInfo.toString(), this.serviceId,
+    this.connectionsClient.startAdvertising(broadcast, this.serviceId,
       this.connectionLifecycleCallback, new AdvertisingOptions(Strategy.P2P_CLUSTER))
     .addOnSuccessListener(new OnSuccessListener<Void>() {
       @Override
@@ -160,11 +171,11 @@ public class NearbyPlugin extends CordovaPlugin {
   }
 
   /**
-  *
+  * Sends data to given endpoints
   */
-  private void sendPayloadBytes(String endpoint, String data) {
+  private void sendPayloadBytes(List<String> endpoints, String data) {
     try {
-      this.connectionsClient.sendPayload(endpoint, Payload.fromBytes(data.getBytes("UTF-8")));
+      this.connectionsClient.sendPayload(endpoints, Payload.fromBytes(data.getBytes("UTF-8")));
     } catch (UnsupportedEncodingException ex) {
       Log.d(TAG, "Unsupported UTF-8 encoding");
     }
@@ -199,37 +210,7 @@ public class NearbyPlugin extends CordovaPlugin {
   @Override
   public void onResume(boolean multitasking) {
     super.onResume(multitasking);
-
-    boolean services = this.checkPlayServices();
+    this.checkPlayServices();
     Log.d(TAG, "Resuming NearbyPlugin");
-  }
-
-  public static String generateIdentifier(String name, String id, String endpoint) {
-    JSONObject obj = new JSONObject();
-
-    try {
-      obj.put("n", name);
-      obj.put("i", id);
-      obj.put("e", endpoint);
-    } catch(JSONException e) {
-      Log.d(TAG, "Error generating identifier: " + e.getMessage());
-    }
-
-    return obj.toString();
-  }
-
-  public static JSONObject parseIdentifier(String id) {
-    JSONObject rtn = new JSONObject();
-
-    try {
-      JSONObject obj = new JSONObject(id);
-      rtn.put("name", obj.getString("n"));
-      rtn.put("id", obj.getString("i"));
-      rtn.put("endpoint", obj.getString("e"));
-    } catch(JSONException e) {
-      Log.d(TAG, "Error parsing identifier: " + e.getMessage());
-    }
-
-    return rtn;
   }
 }

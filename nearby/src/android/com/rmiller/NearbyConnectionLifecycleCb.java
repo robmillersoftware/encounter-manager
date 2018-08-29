@@ -21,7 +21,10 @@ public class NearbyConnectionLifecycleCb extends ConnectionLifecycleCallback {
     this.connectionsClient = client;
   }
 
-  public void setCallbackContext(CallbackContext cb) {
+  /**
+  * Sets the callback to be exeuted when a new connection is made
+  */
+  public void setHandler(CallbackContext cb) {
     this.callback = cb;
   }
 
@@ -34,6 +37,7 @@ public class NearbyConnectionLifecycleCb extends ConnectionLifecycleCallback {
     try {
       this.connectionsClient.acceptConnection(connectionInfo.getEndpointName(), payloadCallback);
 
+      NearbyPayload connection = new NearbyPayload(connectionInfo.getEndpointName(), endpointId, null, NearbyPayload.PayloadTypes.DISCOVERED);
       JSONObject user = new JSONObject(connectionInfo.getEndpointName());
       user.put("e", endpointId);
       PluginResult result = new PluginResult(Status.OK, user);
@@ -46,6 +50,8 @@ public class NearbyConnectionLifecycleCb extends ConnectionLifecycleCallback {
 
   @Override
   public void onConnectionResult(String endpointId, ConnectionResolution resolution) {
+    PluginResult result;
+
     switch(resolution.getStatus().getStatusCode()) {
       case ConnectionsStatusCodes.STATUS_OK:
         Log.d("NearbyPlugin", "Connection to endpoint " + endpointId + " was successful.");
@@ -55,6 +61,13 @@ public class NearbyConnectionLifecycleCb extends ConnectionLifecycleCallback {
         break;
       case ConnectionsStatusCodes.STATUS_ERROR:
         Log.d("NearbyPlugin", "There was an error connecting to endpoint " + endpointId);
+        result = new PluginResult(Status.OK, "remove");
+        this.callback.sendPluginResult(result);
+        break;
+      case ConnectionsStatusCodes.STATUS_ALREADY_CONNECTED_TO_ENDPOINT:
+        Log.d("NearbyPlugin", "Already connected to endpoint " + endpointId);
+        result = new PluginResult(Status.OK, "keep");
+        this.callback.sendPluginResult(result);
         break;
     }
   }

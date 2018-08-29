@@ -1,6 +1,6 @@
 import { Component } from '@angular/core';
 import { Campaign } from '@shared/objects';
-import { CampaignStorage } from '@shared/persistence';
+import { CampaignService } from '@shared/services';
 
 @Component({
   templateUrl: 'encounter.html'
@@ -8,7 +8,7 @@ import { CampaignStorage } from '@shared/persistence';
 export class EncounterPage {
   public currentCampaign: Campaign;
 
-  constructor(public campaignStorage: CampaignStorage) {
-    this.currentCampaign = this.campaignStorage.getCurrentCampaign();
+  constructor(public campaignService: CampaignService) {
+    this.currentCampaign = this.campaignService.getCurrentCampaign();
   }
 }

@@ -11,12 +11,7 @@ import android.util.Log;
 
 public class NearbyPayloadCb extends PayloadCallback {
   private CallbackContext callback;
-  private String identifier;
-
-  public void setIdentifier(String identifier) {
-    this.identifier = identifier;
-  }
-
+  
   public void setHandler(CallbackContext context) {
     this.callback = context;
   }

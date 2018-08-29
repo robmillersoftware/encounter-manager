@@ -1,7 +1,6 @@
 import { Component } from '@angular/core';
 import { ViewController } from 'ionic-angular';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
-import { CampaignStorage } from '@shared/persistence';
 import { CampaignService } from '@shared/services';
 import { Campaign, EncounterFactory, Location } from '@shared/objects';
 
@@ -13,14 +12,14 @@ export class StartEncounterModal {
   public encounterInfo: FormGroup;
   public campaign: Campaign;
 
-  constructor(public viewCtrl: ViewController, public campaignStorage: CampaignStorage,
-      private formBuilder: FormBuilder, public campaignService: CampaignService) {
+  constructor(public viewCtrl: ViewController, private formBuilder: FormBuilder,
+      public campaignService: CampaignService) {
     this.encounterInfo = this.formBuilder.group({
       encounterLoc: ['', Validators.required],
       encounterParticipants: ['']
     });
 
-    this.campaignStorage.currentCampaign.subscribe((c) => {
+    this.campaignService.subscribeCurrent((c) => {
       this.campaign = c;
     });
   }

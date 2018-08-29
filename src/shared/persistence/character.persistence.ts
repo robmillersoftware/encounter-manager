@@ -10,10 +10,10 @@ import { BehaviorSubject } from 'rxjs/BehaviorSubject';
 */
 @Injectable()
 export class CharacterStorage {
-  public characterSubject: BehaviorSubject<Map<string, Character>>;
+  public characters: BehaviorSubject<Map<string, Character>>;
 
   constructor(public storage: StorageService) {
-    this.characterSubject = new BehaviorSubject<Map<string, Character>>(new Map());
+    this.characters = new BehaviorSubject<Map<string, Character>>(new Map());
     this.loadCharacters();
   }
 
@@ -29,7 +29,7 @@ export class CharacterStorage {
   }
 
   private setCharacters(chars: Map<string, Character>) {
-    this.characterSubject.next(chars);
+    this.characters.next(chars);
     this.storage.set('characters', chars);
   }
 
@@ -38,7 +38,16 @@ export class CharacterStorage {
   * @return Map<string, Character>
   */
   public getCharacters() {
-      return this.characterSubject.value;
+      return this.characters.value;
+  }
+
+  /**
+  * Returns a character with the given name
+  * @param name the name of the character to be retrieved
+  */
+  public getCharacter(name: string) {
+      let characters: Map<string, Character> = this.characters.value;
+      return characters.get(name);
   }
 
   /**
@@ -46,7 +55,7 @@ export class CharacterStorage {
   * @param char
   */
   public addCharacter(char: Character) {
-      let characters = this.characterSubject.value;
+      let characters = this.characters.value;
 
       //If the character already exists, do nothing
       if (!characters.has(char.name)) {
@@ -60,8 +69,8 @@ export class CharacterStorage {
   * Remove a character with the given name from local storage
   * @param charName
   */
-  public removeCharacter(charName: string) {
-      let characters = this.characterSubject.value;
+  public deleteCharacter(charName: string) {
+      let characters = this.characters.value;
 
       //If a matching character can't be found do nothing
       if (characters.has(charName)) {
@@ -72,7 +81,7 @@ export class CharacterStorage {
   }
 
   public updateCharacter(character: Character) {
-    let characters = this.characterSubject.value;
+    let characters = this.characters.value;
 
     if (characters.has(character.name)) {
       characters.set(character.name, character);

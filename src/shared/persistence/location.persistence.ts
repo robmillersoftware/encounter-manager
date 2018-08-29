@@ -11,11 +11,11 @@ import { BehaviorSubject } from 'rxjs/BehaviorSubject';
 * @copyright 2018
 */
 @Injectable()
-export class LocationService {
-  public locationSubject: BehaviorSubject<Map<string, Location>>;
+export class LocationStorage {
+  public locations: BehaviorSubject<Map<string, Location>>;
 
   constructor(public storage: StorageService) {
-    this.locationSubject = new BehaviorSubject<Map<string, Location>>(new Map());
+    this.locations = new BehaviorSubject<Map<string, Location>>(new Map());
     this.loadLocations();
   }
 
@@ -34,7 +34,7 @@ export class LocationService {
   * Sets the locations on the behavior subject and local storage
   */
   private setLocations(loc: Map<string, Location>) {
-    this.locationSubject.next(loc);
+    this.locations.next(loc);
     this.storage.set('locations', loc);
   }
 
@@ -43,7 +43,15 @@ export class LocationService {
   * @return map<string, Location>
   */
   public getLocations() {
-      return this.locationSubject.value;
+    return this.locations.value;
+  }
+
+  /**
+  *
+  */
+  public getLocation(name: string) {
+    let locations: Map<string, Location> = this.locations.value;
+    return locations.get(name);
   }
 
   /**
@@ -51,7 +59,7 @@ export class LocationService {
   * @param loc
   */
   public addLocation(loc: Location) {
-      let locations = this.locationSubject.value;
+      let locations = this.locations.value;
 
       if (!locations.has(loc.name)) {
           locations.set(loc.name, loc);
@@ -64,8 +72,8 @@ export class LocationService {
   * Removes an existing location or does nothing if the location does not exist
   * @param locName
   */
-  public removeLocation(locName: string) {
-      let locations = this.locationSubject.value;
+  public deleteLocation(locName: string) {
+      let locations = this.locations.value;
 
       if (locations.has(locName)) {
           locations.delete(locName);

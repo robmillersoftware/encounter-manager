@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
-import { Conversation, ConversationFactory, Message, PayloadFactory } from '@shared/objects';
+import { Conversation, ConversationFactory, Message } from '@shared/objects';
 import { ChatStorage } from '@shared/persistence';
-import { ConnectionService } from '@shared/services';
+import { NetworkingService } from '@networking';
 
 /**
 * This service handles messages between peer devices
@@ -11,14 +11,10 @@ import { ConnectionService } from '@shared/services';
 */
 @Injectable()
 export class ChatService {
-  constructor(public chatStorage: ChatStorage, public connectionService: ConnectionService) {
+  constructor(public chatStorage: ChatStorage, public networking: NetworkingService) {
     //Sets a callback to handle messages coming from the Nearby plugin
-    this.connectionService.registerMessageHandler((json: string) => {
-      //TODO: Evaluate the payload/message paradigm. Seems shaky
-      let payload = PayloadFactory.fromJSON(json);
-      let message: Message = payload.payload;
-
-      this.addMessageToConversation(message, message.conversationId);
+    this.networking.subscribeToMessages((message: string) => {
+      //this.addMessageToConversation(message, message.conversationId);
     });
   }
 

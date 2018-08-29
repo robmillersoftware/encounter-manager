@@ -2,7 +2,7 @@ import { Component, Input } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { HomeViewComponent } from '../home-view.component';
 import { HomeViews } from '@pages/home/home.service';
-import { CharacterStorage } from '@shared/persistence';
+import { CharacterService } from '@shared/services';
 import { CharacterFactory } from '@shared/objects';
 
 /**
@@ -21,7 +21,7 @@ export class CharacterNew implements HomeViewComponent {
 
   public characterInfo: FormGroup;
 
-  constructor(private characterStorage: CharacterStorage, private formBuilder: FormBuilder) {
+  constructor(private characterService: CharacterService, private formBuilder: FormBuilder) {
     this.characterInfo = this.formBuilder.group({
       charName: ['', Validators.required],
       charDesc: ['']
@@ -34,7 +34,7 @@ export class CharacterNew implements HomeViewComponent {
   public createCharacter() {
     let char = CharacterFactory.createCharacter(this.characterInfo.value.charName, this.characterInfo.value.charDesc);
 
-    this.characterStorage.addCharacter(char);
+    this.characterService.addCharacter(char);
     this.callback('viewChange', HomeViews.CHARACTER_EDIT);
   }
 }

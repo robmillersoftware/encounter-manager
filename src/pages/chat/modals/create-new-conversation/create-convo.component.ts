@@ -4,6 +4,7 @@ import { FormBuilder, FormGroup } from '@angular/forms';
 import { CampaignService } from '@shared/services';
 import { UserStorage } from '@shared/persistence';
 import { Campaign, Player } from '@shared/objects';
+import { parseIdentifier } from '@globals';
 
 @Component({
   selector: 'page-create-convo',
@@ -29,7 +30,8 @@ export class CreateConversationModal {
 
     if (this.isMeta) {
       let idx = this.campaign.players.findIndex(p => {
-        return p.id === this.userStorage.getIdentifier();
+        let id = parseIdentifier(this.userStorage.getIdentifier());
+        return p.name === id.name && p.endpoint === id.endpoint;
       });
 
       this.possibleParticipants = this.campaign.players.splice(idx, 1);
@@ -69,7 +71,11 @@ export class CreateConversationModal {
     })
 
     if (participants.length > 0) {
-      let userPlayer = this.campaign.players.find(p => p.id === this.userStorage.getIdentifier());
+      let userPlayer = this.campaign.players.find(p => {
+        let id = parseIdentifier(this.userStorage.getIdentifier());
+        return p.name === id.name && p.endpoint === id.endpoint;
+      });
+
       participants.push(userPlayer);
       this.closeModal(true, participants);
     }

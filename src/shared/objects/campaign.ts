@@ -3,7 +3,7 @@
 * @author Rob Miller
 * @copyright 2018
 */
-import { Character, Location, Player, Encounter, Game, GameFactory } from '@shared/objects';
+import { Character, Location, Player, PlayerFactory, Encounter, Game } from '@shared/objects';
 
 /**
 * This interface is used to construct Campaign objects
@@ -12,6 +12,7 @@ interface CampaignData {
   name: string,
   game: Game,
   description: string,
+  gm: Player,
   characters?: Array<Character>,
   locations?: Array<Location>,
   players?: Array<Player>,
@@ -28,6 +29,7 @@ export class Campaign {
   public name: string;
   public game: Game;
   public description: string;
+  public gm: Player;
   public characters: Array<Character>;
   public locations: Array<Location>;
   public players: Array<Player>;
@@ -41,6 +43,7 @@ export class Campaign {
     this.name = data.name;
     this.game = data.game;
     this.description = data.description;
+    this.gm = data.gm;
 
     if (data.hasOwnProperty('characters') && data.characters != null) {
       this.characters = data.characters;
@@ -82,7 +85,11 @@ export class Campaign {
 * naming conventions
 */
 class CampaignBroadcast {
-  constructor(public n: string, public g: string, public d: string) {}
+  /**
+  * @param n the name of the campaign
+  * @param e the endpoint of the campaign's GM
+  */
+  constructor(public n: string, public e: string) {}
 }
 
 /**
@@ -98,9 +105,9 @@ export class CampaignFactory {
   * @param {optional} players
   * @return newly created Campaign object
   */
-  static createCampaign(name: string, game: Game, description: string, characters?: Array<Character>,
+  static createCampaign(name: string, game: Game, description: string, gm: Player, characters?: Array<Character>,
       locations?: Array<Location>, players?: Array<Player>): Campaign {
-    return new Campaign({name: name, game: game, description: description, characters: characters,
+    return new Campaign({name: name, game: game, description: description, gm: gm, characters: characters,
       locations: locations, players: players});
   }
 
@@ -119,8 +126,7 @@ export class CampaignFactory {
   * @return CampaignBroadcast JSON string
   */
   static toBroadcast(campaign: Campaign): string {
-    return JSON.stringify(new CampaignBroadcast(campaign.name, GameFactory.toJson(campaign.game),
-      campaign.description));
+    return JSON.stringify(new CampaignBroadcast(campaign.name, campaign.gm.endpoint));
   }
 
   /**
@@ -130,7 +136,6 @@ export class CampaignFactory {
   */
   static fromBroadcast(broadcast: string): Campaign {
     let b = <CampaignBroadcast>JSON.parse(broadcast);
-    let game: Game = GameFactory.fromJson(b.g);
-    return new Campaign({name: b.n, game: game, description: b.d});
+    return new Campaign({name: b.n, game: null, description: null, gm: PlayerFactory.createPlayer(null, b.e)});
   }
 }

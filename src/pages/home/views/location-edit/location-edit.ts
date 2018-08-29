@@ -1,6 +1,6 @@
 import { Component, Input } from '@angular/core';
 import { HomeViewComponent } from '../home-view.component';
-import { LocationService } from '@shared/persistence';
+import { LocationService } from '@shared/services';
 import { Location } from '@shared/objects';
 
 /**
@@ -28,7 +28,7 @@ export class LocationEdit implements HomeViewComponent {
 
     if (idx !== -1) {
       this.locations.splice(idx, 1);
-      this.locationService.removeLocation(name);
+      this.locationService.deleteLocation(name);
 
       if (this.locations.length == 0) {
         this.callback();

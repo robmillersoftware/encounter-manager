@@ -14,11 +14,10 @@ public class NearbyEndpointDiscoveryCb extends EndpointDiscoveryCallback {
   private CallbackContext callback;
   private String identifier;
 
-  public void setIdentifier(String id) {
-    this.identifier = id;
-  }
-
-  public void setCallbackContext(CallbackContext cb) {
+  /**
+  * Sets the callback to be executed when a new endpoint is discovered
+  */
+  public void setHandler(CallbackContext cb) {
     this.callback = cb;
   }
 

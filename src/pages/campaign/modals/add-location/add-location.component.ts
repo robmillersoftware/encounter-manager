@@ -1,6 +1,6 @@
 import { Component } from '@angular/core';
 import { ViewController } from 'ionic-angular';
-import { LocationService, CampaignStorage } from '@shared/persistence';
+import { LocationService, CampaignService } from '@shared/services';
 import { FormBuilder, FormGroup } from '@angular/forms';
 import { Location, Campaign } from '@shared/objects';
 
@@ -18,9 +18,9 @@ export class AddLocationModal {
   public campaign: Campaign;
 
   constructor(public viewCtrl: ViewController, public formBuilder: FormBuilder,
-      public campaignStorage: CampaignStorage, public locationService: LocationService) {
+      public campaignService: CampaignService, public locationService: LocationService) {
     this.availableLocs = new Array();
-    this.campaign = this.campaignStorage.getCurrentCampaign();
+    this.campaign = this.campaignService.getCurrentCampaign();
     this.getLocations();
   }
 
@@ -46,7 +46,7 @@ export class AddLocationModal {
       }
     });
 
-    this.campaignStorage.updateCampaign(this.campaign);
+    this.campaignService.updateCampaign(this.campaign);
     this.closeModal(true);
   }
 }

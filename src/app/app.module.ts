@@ -1,4 +1,5 @@
-import { NgModule, ErrorHandler } from '@angular/core';
+import { setServiceInjector } from '@globals';
+import { NgModule, ErrorHandler, Injector } from '@angular/core';
 import { BrowserModule } from '@angular/platform-browser';
 import { IonicApp, IonicModule, IonicErrorHandler } from 'ionic-angular';
 import { MyApp } from './app.component';
@@ -45,4 +46,8 @@ import { SplashScreen } from '@ionic-native/splash-screen';
     {provide: ErrorHandler, useClass: IonicErrorHandler}
   ]
 })
-export class AppModule {}
+export class AppModule {
+  constructor(injector: Injector) {
+    setServiceInjector(injector);
+  }
+}

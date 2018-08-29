@@ -2,7 +2,7 @@ import { Component, Input } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { HomeViewComponent } from '../home-view.component';
 import { HomeViews } from '@pages/home/home.service';
-import { LocationService } from '@shared/persistence';
+import { LocationService } from '@shared/services';
 import { LocationFactory } from '@shared/objects';
 
 /**

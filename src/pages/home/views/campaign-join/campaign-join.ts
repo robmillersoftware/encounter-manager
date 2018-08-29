@@ -1,7 +1,8 @@
 import { Component, Input, NgZone } from '@angular/core';
 import { HomeViewComponent } from '../home-view.component';
-import { CampaignStorage, UserStorage } from '@shared/persistence';
-import { ConnectionService } from '@shared/services';
+import { UserStorage } from '@shared/persistence';
+import { CampaignService } from '@shared/services';
+import { NetworkingService } from '@networking';
 import { Campaign } from '@shared/objects';
 
 /**
@@ -20,29 +21,13 @@ export class CampaignJoin implements HomeViewComponent {
 
   public campaigns: Set<Campaign>;
 
-  constructor(public connectionService: ConnectionService, public campaignStorage: CampaignStorage,
+  constructor(public network: NetworkingService, public campaignService: CampaignService,
       public userStorage: UserStorage, public zone: NgZone) {
     this.campaigns = new Set<Campaign>();
-    this.startDiscovery();
-  }
-
-  /**
-  * Starts discovery of Nearby services
-  */
-  private async startDiscovery() {
-    //First we subscribe to changes in the list of remote campaigns in the connection service
-    this.connectionService.remoteCampaigns.subscribe((campaigns: Map<string, Campaign>) => {
-      if (campaigns) {
-        this.zone.run(() => {
-          campaigns.forEach((value, key) => {
-            this.campaigns.add(value);
-          });
-        });
-      }
+    this.network.subscribeToNetworks(remotes => {
+      this.campaigns = remotes;
     });
-
-    //Then start discovery
-    this.connectionService.discoverCampaigns();
+    this.network.search();
   }
 
   /**
@@ -50,12 +35,13 @@ export class CampaignJoin implements HomeViewComponent {
   * then stops service discovery
   */
   public async loadCampaign(campaign: Campaign) {
-    this.connectionService.connectToCampaign(campaign.name, success => {
-      if (success) {
-        this.connectionService.stopDiscovery();
-        this.campaignStorage.setCurrentCampaign(campaign);
-        this.callback('tabChange');
-      }
-    });
+    console.log("Joining campaign: " + campaign.name);
+    let success = await this.network.joinNetwork(campaign.gm.endpoint);
+
+    if (success) {
+      this.network.stopSearch();
+      this.campaignService.setCurrentCampaign(campaign);
+      this.callback('tabChange');
+    }
   }
 }

@@ -5,15 +5,23 @@ import { BehaviorSubject } from 'rxjs/BehaviorSubject';
 
 @Injectable()
 export class NetworkingService {
+  private networkPeers: BehaviorSubject<Array<string>>;
   private availableNetworks: BehaviorSubject<Map<string, string>>;
 
   //Holds the last message to come through the network. Key is origin, value is contents
   private latestMessage: BehaviorSubject<Map<string, string>>;
 
   constructor(private events: Events, private network: P2PNetworkManager) {
-    //Subscribe to network receive events
-    this.events.subscribe('network-message', this.handleMessages);
-    this.events.subscribe('network-discovered', this.handleDiscovered);
+    this.availableNetworks = new BehaviorSubject(new Map<string, string>());
+    this.latestMessage = new BehaviorSubject(new Map<string, string>());
+    this.networkPeers = new BehaviorSubject(new Array<string>());
+
+    //Subscribe to network events
+    this.events.subscribe('network-message', this.handleMessages.bind(this));
+    this.events.subscribe('network-discovered', this.handleDiscovered.bind(this));
+    this.events.subscribe('network-lost', this.handleLostNetwork.bind(this));
+    this.events.subscribe('peer-joined', this.handlePeerJoined.bind(this));
+    this.events.subscribe('peer-left', this.handlePeerLeft.bind(this));
   }
 
   public discover() {
@@ -24,12 +32,9 @@ export class NetworkingService {
     this.network.stopDiscovery();
   }
 
-  public joinNetwork(name:string): Promise<boolean> {
-    return this.network.join(this.availableNetworks.value.get(name)).then(() => {
-      return true;
-    }).catch(() => {
-      return false;
-    });
+  public joinNetwork(name:string) {
+    //this.network.join(this.availableNetworks.value.get(name));
+    this.network.join(name);
   }
 
   public leaveNetwork() {
@@ -43,13 +48,41 @@ export class NetworkingService {
   public stopAdvertising() {
     this.network.stopAdvertising();
   }
-  public sendMessage(endpoints: string[], msg: string) {}
+
+  public sendMessage(endpoints: string[], msg: string) {
+    this.network.send(endpoints, msg);
+  }
+
   private handleMessages(data: any) {
     console.log("Received message from " + data.source + ". Content is " + data.message);
   }
 
   private handleDiscovered(data: any) {
-    console.log("Discovered endpoint " + data.source + " with name: " + data.name);
+    console.log("Discovered endpoint " + data.source + " broadcasting: " + data.broadcast);
+    let remotes: Map<string, string> = this.availableNetworks.value;
+    remotes.set(data.source, data.broadcast);
+    this.availableNetworks.next(remotes);
+  }
+
+  private handleLostNetwork(data: any) {
+    console.log("Discovered endpoint lost: " + data.source);
+    let remotes: Map<string, string> = this.availableNetworks.value;
+    remotes.delete(data.source);
+    this.availableNetworks.next(remotes);
+  }
+
+  private handlePeerJoined(data: any) {
+    console.log("Peer joined with endpoint: " + data.source);
+    let peers: Array<string> = this.networkPeers.value;
+    peers.push(data.source);
+    this.networkPeers.next(peers);
+  }
+
+  private handlePeerLeft(data: any) {
+    console.log("Connection lost with peer at endpoint: " + data.source);
+    let peers: Array<string> = this.networkPeers.value;
+    peers.splice(peers.indexOf(data.source), 1);
+    this.networkPeers.next(peers);
   }
 
   public subscribeToMessages(callback: any) {
@@ -57,9 +90,10 @@ export class NetworkingService {
   }
 
   public subscribeToNetworks(callback: any) {
-    //Only return names. Client shouldn't need to know about addresses
-    this.availableNetworks.subscribe(networks => {
-      callback(Array.from(networks.keys()));
-    });
+    this.availableNetworks.subscribe(callback);
+  }
+
+  public subscribeToPeers(callback: any) {
+    this.networkPeers.subscribe(callback);
   }
 }

@@ -9,7 +9,6 @@ public class NearbyPayload {
     MESSAGE,
     JOIN,
     LEAVE,
-    ROUTING,
     BROADCAST,
     DISCOVERED
   };
@@ -17,9 +16,9 @@ public class NearbyPayload {
   public String message;
   public String src;
   public String dest;
-  public String type;
+  public PayloadTypes type;
 
-  public NearbyPayload(String message, String src, String dest, int type) {
+  public NearbyPayload(String message, String src, String dest, PayloadTypes type) {
     this.message = message;
     this.src = src;
     this.dest = dest;
@@ -30,35 +29,14 @@ public class NearbyPayload {
     JSONObject obj = new JSONObject();
 
     try {
-      if (this.type != PayloadTypes.BROADCAST) {
         obj.put("message", this.message);
-        obj.put("src", this.src);
+        obj.put("source", this.src);
         obj.put("dest", this.dest);
-        obj.put("type", this.type);
-      } else {
-        obj.put("m", this.message);
-        obj.put("s", this.src);
-        obj.put("type", this.type);
-      }
+        obj.put("type", this.type.toString());
     } catch (JSONException e) {
       Log.d("NearbyPlugin", "Error converting NearbyPayload: " + e.getMessage());
     }
 
     return obj.toString();
-  }
-
-  public JSONObject toPluginResult() {
-    JSONObject rtn = new JSONObject();
-
-    try {
-      obj.put("message", this.message);
-      obj.put("src", this.src);
-      obj.put("dest", this.dest);
-      obj.put("type", this.type);
-    } catch (JSONException e) {
-      Log.d("NearbyPlugin", "Error creating JSONObject: " + e.getMessage());
-    }
-
-    return rtn;
   }
 }

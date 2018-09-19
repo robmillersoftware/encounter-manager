@@ -112,7 +112,7 @@ export class HomePage {
     if (current) {
       console.log("Current campaign is " + current.toString());
       this.navCtrl.parent.select(1);
-      this.network.broadcast(CampaignFactory.toBroadcast(current));
+      this.network.advertise(CampaignFactory.toBroadcast(current));
     }
   }
 

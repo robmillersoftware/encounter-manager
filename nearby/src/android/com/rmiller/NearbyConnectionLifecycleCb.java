@@ -34,18 +34,12 @@ public class NearbyConnectionLifecycleCb extends ConnectionLifecycleCallback {
       + connectionInfo.getEndpointName() + ", auth: " + connectionInfo.getAuthenticationToken()
       + ", isIncoming: " + connectionInfo.isIncomingConnection());
 
-    try {
-      this.connectionsClient.acceptConnection(connectionInfo.getEndpointName(), payloadCallback);
+    this.connectionsClient.acceptConnection(connectionInfo.getEndpointName(), payloadCallback);
 
-      NearbyPayload connection = new NearbyPayload(connectionInfo.getEndpointName(), endpointId, null, NearbyPayload.PayloadTypes.DISCOVERED);
-      JSONObject user = new JSONObject(connectionInfo.getEndpointName());
-      user.put("e", endpointId);
-      PluginResult result = new PluginResult(Status.OK, user);
-      result.setKeepCallback(true);
-      this.callback.sendPluginResult(result);
-    } catch (JSONException ex) {
-      Log.e("NearbyPlugin", "JSON Exception: " + ex.getMessage());
-    }
+    NearbyPayload connection = new NearbyPayload(null, endpointId, null, NearbyPayload.PayloadTypes.JOIN);
+    PluginResult result = new PluginResult(connection.toJSON());
+    result.setKeepCallback(true);
+    this.callback.sendPluginResult(result);
   }
 
   @Override
@@ -75,5 +69,8 @@ public class NearbyConnectionLifecycleCb extends ConnectionLifecycleCallback {
   @Override
   public void onDisconnected(String endpointId) {
     Log.d("NearbyPlugin", "Disconnected from endpoint: " + endpointId);
+    NearbyPayload payload = new NearbyPayload(null, endpointId, null, NearbyPayload.PayloadTypes.LEAVE);
+    PluginResult result = new PluginResult(Status.OK, payload.toJSON());
+    this.callback.sendPluginResult(result);
   }
 };

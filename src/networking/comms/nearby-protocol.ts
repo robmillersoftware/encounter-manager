@@ -3,7 +3,6 @@
 */
 import { Platform } from 'ionic-angular';
 import { Globals, ServiceInjector } from '@globals';
-import { BehaviorSubject } from 'rxjs/BehaviorSubject';
 import { Protocol } from '@networking/comms';
 
 export class Nearby implements Protocol{
@@ -12,20 +11,15 @@ export class Nearby implements Protocol{
 
   private platform: Platform;
 
-  //The NearbyPlugin window object
-  private plugin: any;
-
   constructor() {
     this.platform = ServiceInjector.get(Platform);
     this.platform.ready().then(() => {
-      this.plugin = window["NearbyPlugin"];
-
       /**
       * The service ID must be set before the NearbyPlugin can be used. The service ID
       * is hardcoded into the APK at release and is the same for all devices running this app
       * It should only change between versions.
       */
-      this.plugin.setServiceId(Globals.serviceId);
+      window["NearbyPlugin"].setServiceId(Globals.serviceId);
     });
 
     console.log("Nearby Service initialized.");
@@ -36,7 +30,9 @@ export class Nearby implements Protocol{
   * @param callback a function that takes a JSON object as a parameter
   */
   public setReceiveHandler(callback: any) {
-    this.plugin.setDataHandler(callback);
+    this.platform.ready().then(() => {
+      window["NearbyPlugin"].setDataHandler(callback);
+    });
   }
 
   public advertise(msg: string) {
@@ -44,7 +40,7 @@ export class Nearby implements Protocol{
       this.stopAdvertising();
     }
 
-    this.plugin.startAdvertising(msg);
+    window["NearbyPlugin"].startAdvertising(msg);
     this.isAdvertising = true;
   }
 
@@ -53,7 +49,7 @@ export class Nearby implements Protocol{
   */
   public stopAdvertising() {
     console.log("Stopping advertising");
-    this.plugin.stopAdvertising();
+    window["NearbyPlugin"].stopAdvertising();
     this.isAdvertising = false;
   }
 
@@ -65,7 +61,7 @@ export class Nearby implements Protocol{
       this.stopDiscovery();
     }
 
-    this.plugin.startDiscovery();
+    window["NearbyPlugin"].startDiscovery();
     this.isDiscovering = true;
   }
 
@@ -74,7 +70,7 @@ export class Nearby implements Protocol{
   */
   public stopDiscovery() {
     console.log("Stopping discovery");
-    this.plugin.stopDiscovery();
+    window["NearbyPlugin"].stopDiscovery();
     this.isDiscovering = false;
   }
 
@@ -83,7 +79,7 @@ export class Nearby implements Protocol{
   * @param name
   */
   public connect(endpoint: string) {
-      this.plugin.connect(endpoint);
+    window["NearbyPlugin"].connect(endpoint);
   }
 
   /**
@@ -91,11 +87,11 @@ export class Nearby implements Protocol{
   * @param endpoint the address to disconnect from
   */
   public disconnect(endpoint: string) {
-    this.plugin.disconnect(endpoint);
+    window["NearbyPlugin"].disconnect(endpoint);
   }
 
   public disconnectAll() {
-    this.plugin.disconnectAll();
+    window["NearbyPlugin"].disconnectAll();
   }
 
   /**
@@ -105,6 +101,6 @@ export class Nearby implements Protocol{
   * @param players a list of players to send it to
   */
   public send(endpoints: string[], message: string) {
-    this.plugin.send(JSON.stringify(endpoints), message);
+    window["NearbyPlugin"].send(JSON.stringify(endpoints), message);
   }
 }

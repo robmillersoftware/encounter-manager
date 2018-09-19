@@ -74,18 +74,6 @@ public class NearbyPlugin extends CordovaPlugin {
   }
 
   @Override
-  public void onRequestPermissionResult(int requestCode, String[] permissions,
-      int[] grantResults) throws JSONException {
-    for (int r : grantResults) {
-      //We only care if the permission was denied
-      if (r == PackageManager.PERMISSION_DENIED) {
-        Log.e(TAG, "Permission denied for ACCESS_COARSE_LOCATION");
-        return;
-      }
-    }
-  }
-
-  @Override
   public boolean execute(String action, JSONArray args, final CallbackContext callbackContext) throws JSONException {
     switch(action.toLowerCase()) {
       case "startadvertising":
@@ -100,20 +88,8 @@ public class NearbyPlugin extends CordovaPlugin {
         this.serviceId = args.getString(0);
         break;
       case "startdiscovery":
-        this.connectionsClient.startDiscovery(this.serviceId, this.endpointDiscoveryCallback,
-          new DiscoveryOptions(Strategy.P2P_CLUSTER))
-        .addOnSuccessListener(new OnSuccessListener<Void>() {
-          @Override
-          public void onSuccess(Void unusedResult) {
-            Log.d(TAG, "Successfully started discovery");
-          }
-        })
-        .addOnFailureListener(new OnFailureListener() {
-          @Override
-          public void onFailure(Exception e) {
-            Log.e(TAG, "Unable to start service discovery: " + e.getMessage());
-          }
-        });
+        Log.d(TAG, "Starting discovery");
+        this.startDiscovery();
         break;
       case "stopdiscovery":
         Log.d(TAG, "Turning off discovery.");
@@ -122,15 +98,17 @@ public class NearbyPlugin extends CordovaPlugin {
       case "send":
         Gson gson = new Gson();
         List<String> endpoints = gson.fromJson(args.getString(0), List.class);
-        this.sendPayloadBytes(endpoints, args.getString(1));
+        Log.d(TAG, "Sending payload " + args.getString(1) + " to endpoints: " + endpoints.toString());
+
+        try {
+          this.connectionsClient.sendPayload(endpoints, Payload.fromBytes(args.getString(1).getBytes("UTF-8")));
+        } catch (UnsupportedEncodingException ex) {
+          Log.d(TAG, "Unsupported UTF-8 encoding");
+        }
         break;
       case "connect":
-        try {
-          JSONObject obj = new JSONObject();
-          this.connectionsClient.requestConnection(this.identifier, args.getString(0), connectionLifecycleCallback);
-        } catch (JSONException ex) {
-          Log.d(TAG, "JSON Exception: " + ex.getMessage());
-        }
+        Log.d(TAG, "Connecting to endpoint: " + args.getString(0));
+        this.connectionsClient.requestConnection(this.serviceId, args.getString(0), connectionLifecycleCallback);
         break;
       case "disconnect":
         Log.d(TAG, "Disconnecting from endpoint: " + args.getString(0));
@@ -141,8 +119,9 @@ public class NearbyPlugin extends CordovaPlugin {
         this.connectionsClient.stopAllEndpoints();
         break;
       case "setdatahandler":
+        Log.d(TAG, "Setting handlers for the various lifecycle callbacks.");
         this.payloadCallback.setHandler(callbackContext);
-        this.connectionsLifecycleCallback.setHandler(callbackContext);
+        this.connectionLifecycleCallback.setHandler(callbackContext);
         this.endpointDiscoveryCallback.setHandler(callbackContext);
         break;
     }
@@ -159,7 +138,7 @@ public class NearbyPlugin extends CordovaPlugin {
     .addOnSuccessListener(new OnSuccessListener<Void>() {
       @Override
       public void onSuccess(Void unusedResult) {
-        Log.d(TAG, "Successfully started advertising");
+        Log.d(TAG, "Successfully started advertising: " + broadcast);
       }
     })
     .addOnFailureListener(new OnFailureListener() {
@@ -170,15 +149,21 @@ public class NearbyPlugin extends CordovaPlugin {
     });
   }
 
-  /**
-  * Sends data to given endpoints
-  */
-  private void sendPayloadBytes(List<String> endpoints, String data) {
-    try {
-      this.connectionsClient.sendPayload(endpoints, Payload.fromBytes(data.getBytes("UTF-8")));
-    } catch (UnsupportedEncodingException ex) {
-      Log.d(TAG, "Unsupported UTF-8 encoding");
-    }
+  private void startDiscovery() {
+    this.connectionsClient.startDiscovery(this.serviceId, this.endpointDiscoveryCallback,
+      new DiscoveryOptions(Strategy.P2P_CLUSTER))
+    .addOnSuccessListener(new OnSuccessListener<Void>() {
+      @Override
+      public void onSuccess(Void unusedResult) {
+        Log.d(TAG, "Successfully started discovery");
+      }
+    })
+    .addOnFailureListener(new OnFailureListener() {
+      @Override
+      public void onFailure(Exception e) {
+        Log.e(TAG, "Unable to start service discovery: " + e.getMessage());
+      }
+    });
   }
 
   /**
@@ -197,6 +182,18 @@ public class NearbyPlugin extends CordovaPlugin {
       return false;
     }
     return true;
+  }
+
+  @Override
+  public void onRequestPermissionResult(int requestCode, String[] permissions,
+      int[] grantResults) throws JSONException {
+    for (int r : grantResults) {
+      //We only care if the permission was denied
+      if (r == PackageManager.PERMISSION_DENIED) {
+        Log.e(TAG, "Permission denied for ACCESS_COARSE_LOCATION");
+        return;
+      }
+    }
   }
 
   @Override

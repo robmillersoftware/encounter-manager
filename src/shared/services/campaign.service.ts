@@ -127,7 +127,7 @@ export class CampaignService {
     if (current && current.name === cName) {
       console.log("Setting current campaign to null because it was deleted.");
       this.campaignStorage.setCurrentCampaign(null);
-      this.network.stopBroadcast();
+      this.network.stopAdvertising();
     }
 
     this.campaignStorage.deleteCampaign(cName);

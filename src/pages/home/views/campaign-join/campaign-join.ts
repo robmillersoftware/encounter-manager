@@ -3,7 +3,8 @@ import { HomeViewComponent } from '../home-view.component';
 import { UserStorage } from '@shared/persistence';
 import { CampaignService } from '@shared/services';
 import { NetworkingService } from '@networking';
-import { Campaign } from '@shared/objects';
+import { Campaign, CampaignFactory, Player, PlayerFactory } from '@shared/objects';
+import { debugMap } from '@globals';
 
 /**
 * This class represents the view for joining a remote campaign
@@ -19,15 +20,26 @@ export class CampaignJoin implements HomeViewComponent {
   @Input() id: any;
   @Input() callback: any;
 
-  public campaigns: Set<Campaign>;
+  public campaigns: Array<Campaign> = new Array<Campaign>();
 
   constructor(public network: NetworkingService, public campaignService: CampaignService,
       public userStorage: UserStorage, public zone: NgZone) {
-    this.campaigns = new Set<Campaign>();
-    this.network.subscribeToNetworks(remotes => {
-      this.campaigns = remotes;
+
+    this.network.subscribeToNetworks((remotes: Map<string, string>) => {
+      this.zone.run(() => {
+        let campaigns: Array<Campaign> = new Array<Campaign>();
+
+        Array.from(remotes.keys()).forEach(key => {
+          let campaign: Campaign = CampaignFactory.fromBroadcast(remotes.get(key));
+          campaign.gm.endpoint = key;
+
+          campaigns.push(campaign);
+        });
+
+        this.campaigns = campaigns;
+      });
     });
-    this.network.search();
+    this.network.discover();
   }
 
   /**
@@ -35,11 +47,11 @@ export class CampaignJoin implements HomeViewComponent {
   * then stops service discovery
   */
   public async loadCampaign(campaign: Campaign) {
-    console.log("Joining campaign: " + campaign.name);
+    console.log("Joining campaign: " + campaign.name + " at endpoint: " + campaign.gm.endpoint);
     let success = await this.network.joinNetwork(campaign.gm.endpoint);
 
     if (success) {
-      this.network.stopSearch();
+      this.network.stopDiscovery();
       this.campaignService.setCurrentCampaign(campaign);
       this.callback('tabChange');
     }

@@ -3,7 +3,7 @@
 * @author Rob Miller
 * @copyright 2018
 */
-import { Character, Location, Player, PlayerFactory, Encounter, Game } from '@shared/objects';
+import { Character, Location, Player, PlayerFactory, Encounter, Game, GameFactory } from '@shared/objects';
 
 /**
 * This interface is used to construct Campaign objects
@@ -12,7 +12,7 @@ interface CampaignData {
   name: string,
   game: Game,
   description: string,
-  gm: Player,
+  gm?: Player,
   characters?: Array<Character>,
   locations?: Array<Location>,
   players?: Array<Player>,
@@ -87,9 +87,11 @@ export class Campaign {
 class CampaignBroadcast {
   /**
   * @param n the name of the campaign
-  * @param e the endpoint of the campaign's GM
+  * @param g the game
+  * @param d brief description
+  * @param gm the name of the gm
   */
-  constructor(public n: string, public e: string) {}
+  constructor(public n: string, public g: string, public d: string, public gm: string) {}
 }
 
 /**
@@ -105,7 +107,7 @@ export class CampaignFactory {
   * @param {optional} players
   * @return newly created Campaign object
   */
-  static createCampaign(name: string, game: Game, description: string, gm: Player, characters?: Array<Character>,
+  static createCampaign(name: string, game: Game, description: string, gm?: Player, characters?: Array<Character>,
       locations?: Array<Location>, players?: Array<Player>): Campaign {
     return new Campaign({name: name, game: game, description: description, gm: gm, characters: characters,
       locations: locations, players: players});
@@ -126,7 +128,7 @@ export class CampaignFactory {
   * @return CampaignBroadcast JSON string
   */
   static toBroadcast(campaign: Campaign): string {
-    return JSON.stringify(new CampaignBroadcast(campaign.name, campaign.gm.endpoint));
+    return JSON.stringify(new CampaignBroadcast(campaign.name, campaign.game.name, campaign.description, campaign.gm.name));
   }
 
   /**
@@ -136,6 +138,6 @@ export class CampaignFactory {
   */
   static fromBroadcast(broadcast: string): Campaign {
     let b = <CampaignBroadcast>JSON.parse(broadcast);
-    return new Campaign({name: b.n, game: null, description: null, gm: PlayerFactory.createPlayer(null, b.e)});
+    return new Campaign({name: b.n, game: GameFactory.buildGame(b.g), description: b.d, gm: PlayerFactory.createPlayer(b.gm, null)});
   }
 }

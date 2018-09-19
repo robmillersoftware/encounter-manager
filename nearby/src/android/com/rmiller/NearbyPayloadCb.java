@@ -11,7 +11,7 @@ import android.util.Log;
 
 public class NearbyPayloadCb extends PayloadCallback {
   private CallbackContext callback;
-  
+
   public void setHandler(CallbackContext context) {
     this.callback = context;
   }
@@ -25,8 +25,9 @@ public class NearbyPayloadCb extends PayloadCallback {
         break;
       case Payload.Type.BYTES:
         try {
-          Log.d("NearbyPlugin", "Got message: " + new String(payload.asBytes(), "UTF-8"));
+          Log.d("NearbyPlugin", "Got message: " + new String(payload.asBytes(), "UTF-8") + " from endopint: " + endpointId);
 
+          //The received payload should already be in the NearbyPayload format, so no conversion necessary
           String messagePayload = new String(payload.asBytes());
           PluginResult result = new PluginResult(Status.OK, messagePayload);
           result.setKeepCallback(true);

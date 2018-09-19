@@ -2,9 +2,8 @@ export enum MessageTypes {
   MESSAGE,
   JOIN,
   LEAVE,
-  ROUTING,
-  ADVERTISE,
-  DISCOVERED
+  DISCOVERED,
+  BROADCAST
 }
 
 interface P2PMessageData {
@@ -29,42 +28,20 @@ export class P2PMessage {
 }
 
 function parseJson(json: string): P2PMessage {
-  let obj = JSON.parse(json);
-  switch(obj.type) {
+  let obj: any = JSON.parse(json);
+  let objType: MessageTypes = (<any>MessageTypes)[obj.type];
+
+  switch(objType) {
     case MessageTypes.MESSAGE:
       return P2PMessageFactory.createMessage(obj.source, obj.dest, obj.message);
     case MessageTypes.JOIN:
-      return P2PMessageFactory.createJoinMessage(obj.source, obj.message);
+      return P2PMessageFactory.createJoinMessage(obj.source, obj.dest);
     case MessageTypes.LEAVE:
       return P2PMessageFactory.createLeaveMessage(obj.source);
-    case MessageTypes.ROUTING:
-      return P2PMessageFactory.createRoutingMessage(obj.message);
-    case MessageTypes.ADVERTISE:
-      return P2PMessageFactory.createAdvertisement(obj.message);
     case MessageTypes.DISCOVERED:
-      return P2PMessageFactory.createDiscoveredMessage(obj.s)
-  }
-}
-
-function stringify(msg: P2PMessage): string {
-  switch(msg.type) {
-    case MessageTypes.MESSAGE:
-    case MessageTypes.JOIN:
-    case MessageTypes.LEAVE:
-    case MessageTypes.ROUTING:
-      return JSON.stringify(msg);
-    case MessageTypes.ADVERTISE:
-      let brObj = {
-        m: msg.message,
-        type: msg.type
-      };
-
-      //Advertisements need to be short
-      if (brObj.m.length > 32) {
-        brObj.m = brObj.m.substring(0, 32);
-      }
-
-      return JSON.stringify(brObj);
+      return P2PMessageFactory.createDiscoveredMessage(obj.source, obj.message);
+    case MessageTypes.BROADCAST:
+      return P2PMessageFactory.createBroadcastMessage(obj.message, obj.s);
   }
 }
 
@@ -73,44 +50,32 @@ export class P2PMessageFactory {
     return new P2PMessage({sourceAddress: src, destinationAddress: dest, message: msg, type: MessageTypes.MESSAGE});
   }
 
-  public static createJoinMessage(src: string, guid: string): P2PMessage {
-    return new P2PMessage({sourceAddress: src, destinationAddress: null, message: guid, type: MessageTypes.JOIN});
+  public static createJoinMessage(src: string, dest: string): P2PMessage {
+    return new P2PMessage({sourceAddress: src, destinationAddress: dest, message: null, type: MessageTypes.JOIN});
   }
 
-  public static createLeaveMessage(src: string = null): P2PMessage {
+  public static createLeaveMessage(src: string): P2PMessage {
     return new P2PMessage({sourceAddress: src, destinationAddress: null, message: null, type: MessageTypes.LEAVE});
   }
 
-  public static createAdvertisement(msg: string): P2PMessage {
-    return new P2PMessage({sourceAddress: null, destinationAddress: null, message: msg, type: MessageTypes.ADVERTISE});
+  public static createDiscoveredMessage(src: string, msg: string): P2PMessage {
+    return new P2PMessage({sourceAddress: src, destinationAddress: null, message: msg, type: MessageTypes.DISCOVERED});
   }
 
-  public static createRoutingMessage(msg: string): P2PMessage {
-    return new P2PMessage({sourceAddress: null, destinationAddress: null, message: msg, type: MessageTypes.ROUTING});
+  public static createBroadcastMessage(msg: string, src: string): P2PMessage {
+    return new P2PMessage({sourceAddress: src, destinationAddress: null, message: msg, type: MessageTypes.BROADCAST});
   }
 
-  public static createDiscoveredMessage(src: string): P2PMessage {
-    return new P2PMessage({sourceAddress: src, destinationAddress: null, message: null, type: MessageTypes.DISCOVERED});
-  }
-
-  public static createJoinJson(src: string, guid: string): string {
-    return stringify(P2PMessageFactory.createJoinMessage(src, guid));
-  }
-
-  public static createLeaveJson(src: string = null): string {
-    return stringify(P2PMessageFactory.createLeaveMessage(src));
-  }
-
-  public static createAdvertisementJson(msg: string): string {
-    return stringify(P2PMessageFactory.createAdvertisement(msg));
+  public static createJoinJson(src: string, dest: string): string {
+    return JSON.stringify(P2PMessageFactory.createJoinMessage(src, dest));
   }
 
   public static createMessageJson(src: string, dest: string, msg: string): string {
-    return stringify(P2PMessageFactory.createMessage(src, dest, msg));
+    return JSON.stringify(P2PMessageFactory.createMessage(src, dest, msg));
   }
 
-  public static createRoutingJson(msg: string) {
-    return stringify(P2PMessageFactory.createRoutingMessage(msg));
+  public static createBroadcastJson(msg: string, src: string): string {
+    return JSON.stringify(P2PMessageFactory.createBroadcastMessage(msg, src));
   }
 
   public static fromJSON(json: string): P2PMessage {
@@ -118,6 +83,6 @@ export class P2PMessageFactory {
   }
 
   public static toJSON(msg: P2PMessage): string {
-    return stringify(msg);
+    return JSON.stringify(msg);
   }
 }

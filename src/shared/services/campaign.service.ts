@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
-import { Campaign, Player, Encounter } from '@shared/objects';
-import { CampaignStorage } from '@shared/persistence';
+import { Campaign, CampaignFactory, Player, PlayerFactory, Encounter } from '@shared/objects';
+import { CampaignStorage, UserStorage } from '@shared/persistence';
 import { NetworkingService } from '@networking';
 
 /**
@@ -11,7 +11,11 @@ import { NetworkingService } from '@networking';
 */
 @Injectable()
 export class CampaignService {
-  constructor(private campaignStorage: CampaignStorage, private network: NetworkingService) {}
+  private networkSubscription: any;
+
+  constructor(private campaignStorage: CampaignStorage, private network: NetworkingService, private userStorage: UserStorage) {
+    this.network.subscribeToPeers(this.setCurrentPlayers.bind(this));
+  }
 
   /**
   * Adds a new campaign to campaign storage
@@ -65,6 +69,12 @@ export class CampaignService {
   * @param campaign
   */
   public setCurrentCampaign(campaign: Campaign) {
+    if (this.networkSubscription) {
+      this.networkSubscription.unsubscribe();
+    }
+
+    this.network.stopDiscovery();
+    this.network.advertise(CampaignFactory.toBroadcast(campaign));
     this.campaignStorage.setCurrentCampaign(campaign);
   }
 
@@ -82,6 +92,25 @@ export class CampaignService {
     }
 
     return campaign;
+  }
+
+  public setCurrentPlayers(players: Array<any>) {
+    console.log("Setting players on current campaign: " + players.join(','));
+    let campaign = this.campaignStorage.getCurrentCampaign();
+    players.forEach(player => {
+      let p = campaign.players.find(item => item.endpoint === player.endpoint);
+      if (!p) {
+        campaign.players.push(PlayerFactory.createPlayer(player.name, player.endpoint));
+        this.updateCampaign(campaign);
+      }
+    });
+    /*let p: Player = PlayerFactory.fromJSON(player);
+    let campaign = this.campaignStorage.getCurrentCampaign();
+
+    if (campaign) {
+      campaign.players.push(p);
+      this.updateCampaign(campaign);
+    }*/
   }
 
   /**
@@ -138,10 +167,33 @@ export class CampaignService {
   * @param c The updated version of a campaign
   */
   public updateCampaign(c: Campaign) {
-    if (this.getCurrentCampaign().name === c.name) {
+    let campaign = this.getCurrentCampaign();
+
+    if (campaign && campaign.name === c.name) {
       this.setCurrentCampaign(c);
     }
 
     this.campaignStorage.updateCampaign(c);
+  }
+
+  /**
+  * Joins a campaign that is hosted on another device
+  * @param c the campaign to join
+  */
+  public joinCampaign(c: Campaign): Promise<any> {
+    return new Promise((resolve, reject) => {
+      if (!c.gm || !c.gm.endpoint) {
+        console.log("Tried to join campaign with no gm endpoint.");
+        reject();
+      }
+
+      this.network.joinNetwork(c.gm.endpoint, this.userStorage.getUser().name);
+      resolve();
+    });
+  }
+
+  public discoverCampaigns(callback: any) {
+    this.networkSubscription = this.network.subscribeToNetworks(callback);
+    this.network.discover();
   }
 }

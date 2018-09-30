@@ -1,5 +1,5 @@
 export interface Protocol {
-  connect(endpoint: string),
+  connect(endpoint: string, message: string),
   disconnect(endpoint: string),
   disconnectAll(),
   setReceiveHandler(callback: any),

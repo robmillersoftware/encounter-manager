@@ -2,9 +2,7 @@ import { Component } from '@angular/core';
 import { ViewController, NavParams } from 'ionic-angular';
 import { FormBuilder, FormGroup } from '@angular/forms';
 import { CampaignService } from '@shared/services';
-import { UserStorage } from '@shared/persistence';
 import { Campaign, Player } from '@shared/objects';
-import { parseIdentifier } from '@globals';
 
 @Component({
   selector: 'page-create-convo',
@@ -19,27 +17,27 @@ export class CreateConversationModal {
   public checkboxes: Map<string, boolean>;
 
   constructor(public viewCtrl: ViewController, private params: NavParams, private formBuilder: FormBuilder,
-      public campaignService: CampaignService, private userStorage: UserStorage) {
+      public campaignService: CampaignService) {
     this.conversationInfo = this.formBuilder.group({
       conversationParticipants: ['']
     });
 
     this.campaign = this.params.get('campaign');
     this.isMeta = this.params.get('isMeta');
-    this.gm = this.campaignService.getGm(this.campaign.name);
+    this.gm = this.campaign.gm;
 
     if (this.isMeta) {
       let idx = this.campaign.players.findIndex(p => {
-        let id = parseIdentifier(this.userStorage.getIdentifier());
-        return p.name === id.name && p.endpoint === id.endpoint;
+        //The only player with a null endpoint is the local user
+        return p.endpoint === null;
       });
 
       this.possibleParticipants = this.campaign.players.splice(idx, 1);
     } else {
       this.possibleParticipants = this.campaign.characters;
-      this.possibleParticipants.push(this.gm);
     }
 
+    this.possibleParticipants.push(this.gm);
     this.checkboxes = new Map<string, boolean>();
   }
 
@@ -65,15 +63,18 @@ export class CreateConversationModal {
           allParticipants = this.campaign.characters;
         }
 
-        let participant = allParticipants.findIndex(p => p.name.trim() === stripped.trim());
-        participants.push(participant);
+        allParticipants.forEach(p => {
+          console.log("P- " + p.name.trim() + " === S:" + stripped.trim());
+          if (p.name.trim() === stripped.trim()) {
+            participants.push(p);
+          }
+        });
       }
-    })
+    });
 
     if (participants.length > 0) {
       let userPlayer = this.campaign.players.find(p => {
-        let id = parseIdentifier(this.userStorage.getIdentifier());
-        return p.name === id.name && p.endpoint === id.endpoint;
+        return p.endpoint === null;
       });
 
       participants.push(userPlayer);

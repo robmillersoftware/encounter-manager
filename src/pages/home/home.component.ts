@@ -1,12 +1,10 @@
 import { Component, ComponentFactoryResolver, ViewChild } from '@angular/core';
 import { ModalController, IonicPage, NavController, Events } from 'ionic-angular';
 import { NavigationService, CampaignService } from '@shared/services';
-import { NetworkingService } from '@networking';
 import { UserStorage } from '@shared/persistence';
 import { HomeViewComponent } from './views';
 import { HomeDirective } from './home.directive';
 import { HomeService, HomeViews } from './home.service';
-import { CampaignFactory } from '@shared/objects';
 
 /**
 * This class contains the logic and several views for the home page of the application.
@@ -28,8 +26,7 @@ export class HomePage {
 
   constructor(public modalCtrl: ModalController, public navCtrl: NavController, public campaignService: CampaignService,
       public homeService: HomeService,  public userStorage: UserStorage,
-      private componentFactoryResolver: ComponentFactoryResolver, private network: NetworkingService,
-      private navService: NavigationService, private events: Events) {
+      private componentFactoryResolver: ComponentFactoryResolver, private navService: NavigationService, private events: Events) {
 
     this.views = this.homeService.getViews();
     this.navService.headerData.subscribe((data) => {
@@ -112,7 +109,6 @@ export class HomePage {
     if (current) {
       console.log("Current campaign is " + current.toString());
       this.navCtrl.parent.select(1);
-      this.network.advertise(CampaignFactory.toBroadcast(current));
     }
   }
 

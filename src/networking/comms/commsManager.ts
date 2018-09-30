@@ -47,8 +47,8 @@ export class CommsManager {
   * @param endpoint the network address to connect to
   * @return a promise containing an object with relevant connection data
   */
-  public connect(endpoint: string): Promise<any> {
-    return this.protocol.connect(endpoint);
+  public connect(endpoint: string, message: string): Promise<any> {
+    return this.protocol.connect(endpoint, message);
   }
 
   /**

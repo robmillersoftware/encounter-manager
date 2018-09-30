@@ -1,16 +1,12 @@
 /**
 * This file contains all of the classes and methods for dealing with User objects
 */
-import { Campaign } from '@shared/objects';
 
 /**
 * This interface is used for creating User objects
 */
 interface UserData {
-  name: string,
-  id: string,
-  endpoint?: string,
-  currentCampaign?: Campaign
+  name: string
 }
 
 /**
@@ -18,15 +14,9 @@ interface UserData {
 */
 export class User {
   public name: string;
-  public id: string;
-  public endpoint: string;
-  public currentCampaign: Campaign;
 
   constructor(data: UserData) {
     this.name = data.name;
-    this.id = data.id;
-    this.endpoint = data.hasOwnProperty('endpoint') ? data.endpoint : null;
-    this.currentCampaign = data.hasOwnProperty('currentCampaign') ? data.currentCampaign : null;
   }
 }
 
@@ -42,8 +32,8 @@ export class UserFactory {
   * @param currentCampaign
   * @return the created User
   */
-  static createUser(name: string, id: string, endpoint?: string, currentCampaign?: Campaign): User {
-    return new User({name: name, id: id, endpoint: endpoint, currentCampaign: currentCampaign});
+  static createUser(name: string): User {
+    return new User({name: name});
   }
 
   /**

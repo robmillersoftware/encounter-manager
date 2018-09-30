@@ -25,7 +25,7 @@ public class NearbyEndpointDiscoveryCb extends EndpointDiscoveryCallback {
     Log.d("NearbyPlugin", "Discovered endpoint: " + endpointId + ", name: " + discoveredEndpointInfo.getEndpointName()
       + ", service: " + discoveredEndpointInfo.getServiceId());
 
-    NearbyPayload payload = new NearbyPayload(discoveredEndpointInfo.getEndpointName(), endpointId, null, NearbyPayload.PayloadTypes.DISCOVERED);
+    NearbyPayload payload = new NearbyPayload(discoveredEndpointInfo.getEndpointName(), endpointId, NearbyPayload.PayloadTypes.DISCOVERED);
     PluginResult result = new PluginResult(Status.OK, payload.toJSON());
     result.setKeepCallback(true);
     callback.sendPluginResult(result);
@@ -34,7 +34,7 @@ public class NearbyEndpointDiscoveryCb extends EndpointDiscoveryCallback {
   @Override
   public void onEndpointLost(String endpointId) {
     Log.d("NearbyPlugin", "Lost endpoint: " + endpointId);
-    NearbyPayload payload = new NearbyPayload(null, endpointId, null, NearbyPayload.PayloadTypes.BROADCAST);
+    NearbyPayload payload = new NearbyPayload(null, endpointId, NearbyPayload.PayloadTypes.BROADCAST);
     PluginResult result = new PluginResult(Status.OK, payload.toJSON());
     result.setKeepCallback(true);
     callback.sendPluginResult(result);

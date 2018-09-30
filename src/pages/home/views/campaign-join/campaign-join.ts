@@ -1,10 +1,7 @@
 import { Component, Input, NgZone } from '@angular/core';
 import { HomeViewComponent } from '../home-view.component';
-import { UserStorage } from '@shared/persistence';
-import { CampaignService } from '@shared/services';
-import { NetworkingService } from '@networking';
-import { Campaign, CampaignFactory, Player, PlayerFactory } from '@shared/objects';
-import { debugMap } from '@globals';
+import { CampaignService, UserService } from '@shared/services';
+import { Campaign, CampaignFactory, PlayerFactory } from '@shared/objects';
 
 /**
 * This class represents the view for joining a remote campaign
@@ -22,10 +19,8 @@ export class CampaignJoin implements HomeViewComponent {
 
   public campaigns: Array<Campaign> = new Array<Campaign>();
 
-  constructor(public network: NetworkingService, public campaignService: CampaignService,
-      public userStorage: UserStorage, public zone: NgZone) {
-
-    this.network.subscribeToNetworks((remotes: Map<string, string>) => {
+  constructor(public campaignService: CampaignService, public userService: UserService, public zone: NgZone) {
+    this.campaignService.discoverCampaigns((remotes: Map<string, string>) => {
       this.zone.run(() => {
         let campaigns: Array<Campaign> = new Array<Campaign>();
 
@@ -39,7 +34,6 @@ export class CampaignJoin implements HomeViewComponent {
         this.campaigns = campaigns;
       });
     });
-    this.network.discover();
   }
 
   /**
@@ -48,12 +42,15 @@ export class CampaignJoin implements HomeViewComponent {
   */
   public async loadCampaign(campaign: Campaign) {
     console.log("Joining campaign: " + campaign.name + " at endpoint: " + campaign.gm.endpoint);
-    let success = await this.network.joinNetwork(campaign.gm.endpoint);
+    this.campaignService.joinCampaign(campaign).then(() => {
+      console.log("Campaign joined successfully.");
 
-    if (success) {
-      this.network.stopDiscovery();
+      //Add yourself to the campaign object
+      //TODO: Who is actually in charge of this? How do we sync?
+      campaign.players.push(PlayerFactory.createPlayer(this.userService.getUserName(), null, null));
+
       this.campaignService.setCurrentCampaign(campaign);
       this.callback('tabChange');
-    }
+    });
   }
 }

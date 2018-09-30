@@ -3,7 +3,7 @@ import { Protocol } from '@networking/comms';
 export class MockProtocol implements Protocol{
   constructor() {}
 
-  public connect(endpoint: string) {}
+  public connect(endpoint: string, message: string) {}
   public disconnect(endpoint: string) {}
   public disconnectAll() {}
   public setReceiveHandler(callback: any) {}

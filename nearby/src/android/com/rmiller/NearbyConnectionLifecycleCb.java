@@ -36,8 +36,8 @@ public class NearbyConnectionLifecycleCb extends ConnectionLifecycleCallback {
 
     this.connectionsClient.acceptConnection(connectionInfo.getEndpointName(), payloadCallback);
 
-    NearbyPayload connection = new NearbyPayload(null, endpointId, null, NearbyPayload.PayloadTypes.JOIN);
-    PluginResult result = new PluginResult(connection.toJSON());
+    NearbyPayload connection = new NearbyPayload(null, endpointId, NearbyPayload.PayloadTypes.JOIN);
+    PluginResult result = new PluginResult(Status.OK, connection.toJSON());
     result.setKeepCallback(true);
     this.callback.sendPluginResult(result);
   }
@@ -69,7 +69,7 @@ public class NearbyConnectionLifecycleCb extends ConnectionLifecycleCallback {
   @Override
   public void onDisconnected(String endpointId) {
     Log.d("NearbyPlugin", "Disconnected from endpoint: " + endpointId);
-    NearbyPayload payload = new NearbyPayload(null, endpointId, null, NearbyPayload.PayloadTypes.LEAVE);
+    NearbyPayload payload = new NearbyPayload(null, endpointId, NearbyPayload.PayloadTypes.LEAVE);
     PluginResult result = new PluginResult(Status.OK, payload.toJSON());
     this.callback.sendPluginResult(result);
   }

@@ -78,8 +78,8 @@ export class Nearby implements Protocol{
   * Connects to a remote campaign with the specified name
   * @param name
   */
-  public connect(endpoint: string) {
-    window["NearbyPlugin"].connect(endpoint);
+  public connect(endpoint: string, message: string) {
+    window["NearbyPlugin"].connect(endpoint, message);
   }
 
   /**

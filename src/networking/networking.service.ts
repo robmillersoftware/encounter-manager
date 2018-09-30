@@ -5,7 +5,7 @@ import { BehaviorSubject } from 'rxjs/BehaviorSubject';
 
 @Injectable()
 export class NetworkingService {
-  private networkPeers: BehaviorSubject<Array<string>>;
+  private networkPeers: BehaviorSubject<Array<any>>;
   private availableNetworks: BehaviorSubject<Map<string, string>>;
 
   //Holds the last message to come through the network. Key is origin, value is contents
@@ -14,7 +14,7 @@ export class NetworkingService {
   constructor(private events: Events, private network: P2PNetworkManager) {
     this.availableNetworks = new BehaviorSubject(new Map<string, string>());
     this.latestMessage = new BehaviorSubject(new Map<string, string>());
-    this.networkPeers = new BehaviorSubject(new Array<string>());
+    this.networkPeers = new BehaviorSubject(new Array<any>());
 
     //Subscribe to network events
     this.events.subscribe('network-message', this.handleMessages.bind(this));
@@ -32,9 +32,8 @@ export class NetworkingService {
     this.network.stopDiscovery();
   }
 
-  public joinNetwork(name:string) {
-    //this.network.join(this.availableNetworks.value.get(name));
-    this.network.join(name);
+  public joinNetwork(name:string, message: string) {
+    this.network.join(name, message);
   }
 
   public leaveNetwork() {
@@ -73,8 +72,8 @@ export class NetworkingService {
 
   private handlePeerJoined(data: any) {
     console.log("Peer joined with endpoint: " + data.source);
-    let peers: Array<string> = this.networkPeers.value;
-    peers.push(data.source);
+    let peers: Array<any> = this.networkPeers.value;
+    peers.push({ name: data.name, endpoint: data.source });
     this.networkPeers.next(peers);
   }
 

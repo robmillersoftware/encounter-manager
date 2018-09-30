@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { Events } from 'ionic-angular';
-import { P2PMessageFactory, MessageTypes } from '@networking/p2p';
+import { P2PMessageFactory, P2PTypes } from '@networking/p2p';
 import { CommsManager } from '@networking/comms';
 
 @Injectable()
@@ -8,6 +8,7 @@ export class P2PNetworkManager {
   private peers: Array<string>;
 
   constructor(private commsManager: CommsManager, private events: Events) {
+    this.peers = new Array<string>();
     this.commsManager.setReceiveHandler(this.receive.bind(this));
   }
 
@@ -29,8 +30,8 @@ export class P2PNetworkManager {
   * Establishes a connection with the given host.
   * @param {string} hostAddress the address to connect to.
   */
-  public join(hostAddress: string) {
-    this.commsManager.connect(hostAddress);
+  public join(hostAddress: string, message: string) {
+    this.commsManager.connect(hostAddress, message);
   }
 
   /**
@@ -55,34 +56,33 @@ export class P2PNetworkManager {
   * @param {string} message this is a json string representing a P2PMessage object
   */
   public receive(message: string) {
-    console.log('WTFISHAPPENING: ' + JSON.stringify(message));
     console.log('Received message: ' + message);
     let payload = JSON.parse(message);
-    let payloadType: MessageTypes = (<any>MessageTypes)[payload.type];
+    let payloadType: P2PTypes = (<any>P2PTypes)[payload.type];
 
     switch(payloadType) {
       //A new endpoint is joining the network
-      case MessageTypes.JOIN:
+      case P2PTypes.JOIN:
         console.log("Adding peer " + payload.source + " to network.");
-        this.addPeer(payload.source);
+        this.addPeer(payload.message, payload.source);
         break;
       //This message is an update sent when peers leave or join a network
-      case MessageTypes.LEAVE:
+      case P2PTypes.LEAVE:
         console.log("Removing peer " + payload.source + " from network.");
         this.removePeer(payload.source);
         break;
       //This type is for a chat message
-      case MessageTypes.MESSAGE:
+      case P2PTypes.MESSAGE:
         console.log("Recieved network message from peer " + payload.source + ": " + payload.message);
         this.events.publish('network-message', { source: payload.source, message: payload.message });
         break;
       //A new endpoint has been discovered
-      case MessageTypes.DISCOVERED:
+      case P2PTypes.DISCOVERED:
         console.log("New network discovered at endpoint: " + payload.source + " broadcasting: " + payload.message);
         this.events.publish('network-discovered', { broadcast: payload.message, source: payload.source });
         break;
       //A previously disccovered endpoint has been lost
-      case MessageTypes.BROADCAST:
+      case P2PTypes.BROADCAST:
         console.log("Lost previously discovered network " + payload.source);
         this.events.publish('network-lost', { source: payload.source });
         break;
@@ -110,13 +110,12 @@ export class P2PNetworkManager {
   * peer to everyone else on the network.
   * @param {string} address the new peer's address
   */
-  public addPeer(address: string) {
+  public addPeer(name: string, address: string) {
     if (!this.peers.includes(address)) {
-      this.commsManager.connect(address);
       this.peers.push(address);
       this.sendRoutingTableUpdate(address);
 
-      this.events.publish('peer-joined', {address: address});
+      this.events.publish('peer-joined', {name: name, source: address});
     }
   }
 
@@ -129,7 +128,7 @@ export class P2PNetworkManager {
     if (this.peers.includes(address)) {
       this.peers.splice(this.peers.indexOf(address), 1);
 
-      this.events.publish('peer-left', {address: address});
+      this.events.publish('peer-left', {source: address});
     }
   }
 
@@ -139,6 +138,6 @@ export class P2PNetworkManager {
   * @param {string} address the new peer's endpoint address
   */
   public sendRoutingTableUpdate(address: string) {
-    this.commsManager.send(this.peers, P2PMessageFactory.createJoinJson(address, null));
+    this.commsManager.send(this.peers, P2PMessageFactory.createJoinJson(address));
   }
 }

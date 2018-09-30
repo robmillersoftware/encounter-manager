@@ -18,10 +18,9 @@ public class NearbyPayload {
   public String dest;
   public PayloadTypes type;
 
-  public NearbyPayload(String message, String src, String dest, PayloadTypes type) {
+  public NearbyPayload(String message, String src, PayloadTypes type) {
     this.message = message;
     this.src = src;
-    this.dest = dest;
     this.type = type;
   }
 
@@ -31,7 +30,6 @@ public class NearbyPayload {
     try {
         obj.put("message", this.message);
         obj.put("source", this.src);
-        obj.put("dest", this.dest);
         obj.put("type", this.type.toString());
     } catch (JSONException e) {
       Log.d("NearbyPlugin", "Error converting NearbyPayload: " + e.getMessage());

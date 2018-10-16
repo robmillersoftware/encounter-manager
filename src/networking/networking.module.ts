@@ -3,12 +3,12 @@
  */
 import { NgModule } from '@angular/core';
 import { IonicModule } from 'ionic-angular';
-import { NetworkingService } from '@networking';
+import { NetworkingService, SyncService } from '@networking';
 import { CommsManager } from '@networking/comms';
 import { P2PNetworkManager } from '@networking/p2p';
 
 @NgModule({
   imports: [IonicModule],
-  providers: [CommsManager, P2PNetworkManager, NetworkingService]
+  providers: [CommsManager, P2PNetworkManager, NetworkingService, SyncService]
 })
 export class NetworkingModule {}

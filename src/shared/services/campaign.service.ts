@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { Campaign, CampaignFactory, Player, PlayerFactory, Encounter } from '@shared/objects';
 import { CampaignStorage, UserStorage } from '@shared/persistence';
-import { NetworkingService } from '@networking';
+import { NetworkingService, SyncService } from '@networking';
 
 /**
 * This service manages campaigns
@@ -13,8 +13,18 @@ import { NetworkingService } from '@networking';
 export class CampaignService {
   private networkSubscription: any;
 
-  constructor(private campaignStorage: CampaignStorage, private network: NetworkingService, private userStorage: UserStorage) {
+  constructor(private campaignStorage: CampaignStorage, private network: NetworkingService, private userStorage: UserStorage,
+      private syncService: SyncService) {
     this.network.subscribeToPeers(this.setCurrentPlayers.bind(this));
+    this.syncService.subscribeToServerSync('campaign', campaign => {
+      let current = this.getCurrentCampaign();
+
+      if (current && current.name === campaign.name) {
+        this.setCurrentCampaign(campaign);
+      }
+
+      this.campaignStorage.updateCampaign(campaign);
+    });
   }
 
   /**
@@ -104,13 +114,6 @@ export class CampaignService {
         this.updateCampaign(campaign);
       }
     });
-    /*let p: Player = PlayerFactory.fromJSON(player);
-    let campaign = this.campaignStorage.getCurrentCampaign();
-
-    if (campaign) {
-      campaign.players.push(p);
-      this.updateCampaign(campaign);
-    }*/
   }
 
   /**
@@ -174,6 +177,7 @@ export class CampaignService {
     }
 
     this.campaignStorage.updateCampaign(c);
+    this.syncService.updateSyncedObject('campaign', JSON.stringify(c), true);
   }
 
   /**
@@ -192,6 +196,10 @@ export class CampaignService {
     });
   }
 
+  /**
+  * Discovers campaigns hosted on another device
+  * @param callback the method to call upon discovery
+  */
   public discoverCampaigns(callback: any) {
     this.networkSubscription = this.network.subscribeToNetworks(callback);
     this.network.discover();

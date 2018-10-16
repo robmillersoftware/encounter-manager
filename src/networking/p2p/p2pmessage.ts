@@ -40,6 +40,8 @@ function parseJson(json: string): P2PMessage {
       return P2PMessageFactory.createDiscoveredMessage(obj.source, obj.message);
     case P2PTypes.BROADCAST:
       return P2PMessageFactory.createBroadcastMessage(obj.message, obj.s);
+    case P2PTypes.SYNC:
+      return P2PMessageFactory.createSyncMessage(obj.message);
   }
 }
 
@@ -67,6 +69,7 @@ export class P2PMessageFactory {
   public static createSyncMessage(msg: string) {
     return new P2PMessage({sourceAddress: null, message: msg, type: P2PTypes.SYNC});
   }
+
   public static createJoinJson(src: string): string {
     return JSON.stringify(P2PMessageFactory.createJoinMessage(src));
   }
@@ -77,6 +80,11 @@ export class P2PMessageFactory {
 
   public static createBroadcastJson(msg: string, src: string): string {
     return JSON.stringify(P2PMessageFactory.createBroadcastMessage(msg, src));
+  }
+
+  public static createSyncJson(name: string, msg: string): string {
+    let syncObj = {name: name, json: msg};
+    return JSON.stringify(P2PMessageFactory.createSyncMessage(JSON.stringify(syncObj)));
   }
 
   public static fromJSON(json: string): P2PMessage {

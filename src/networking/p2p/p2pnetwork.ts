@@ -86,6 +86,9 @@ export class P2PNetworkManager {
         console.log("Lost previously discovered network " + payload.source);
         this.events.publish('network-lost', { source: payload.source });
         break;
+      case P2PTypes.SYNC:
+        console.log("Received sync: " + payload.message);
+        this.events.publish('network-sync', { source: payload.source, object: payload.message });
     }
   }
 
@@ -139,5 +142,9 @@ export class P2PNetworkManager {
   */
   public sendRoutingTableUpdate(address: string) {
     this.commsManager.send(this.peers, P2PMessageFactory.createJoinJson(address));
+  }
+
+  public sync(name: string, object: string) {
+    this.commsManager.send(this.peers, P2PMessageFactory.createSyncJson(name, object));
   }
 }

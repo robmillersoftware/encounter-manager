@@ -170,6 +170,7 @@ export class CampaignService {
   * @param c The updated version of a campaign
   */
   public updateCampaign(c: Campaign) {
+    console.log("Updating campaign: " + JSON.stringify(c));
     let campaign = this.getCurrentCampaign();
 
     if (campaign && campaign.name === c.name) {

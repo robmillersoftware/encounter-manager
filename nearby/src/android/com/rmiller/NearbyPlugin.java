@@ -26,6 +26,8 @@ import com.google.android.gms.tasks.OnFailureListener;
 import com.google.gson.Gson;
 import android.Manifest;
 import android.content.pm.PackageManager;
+import org.apache.cordova.PluginResult;
+import org.apache.cordova.PluginResult.Status;
 
 /**
  * A Cordova plugin that wraps the Wifi P2P Android API
@@ -45,30 +47,29 @@ public class NearbyPlugin extends CordovaPlugin {
   //application find each other
   protected String serviceId;
 
-  //These are callbacks executed on the Javascript side
-  protected CallbackContext endpointCbContext;
-  protected CallbackContext messageHandler;
-
-  //This callback is executed when a payload is received
-  private final NearbyPayloadCb payloadCallback = new NearbyPayloadCb();
+  private CordovaWebView webView;
 
   //This callback is executed when there is a change to a connection
   private NearbyConnectionLifecycleCb connectionLifecycleCallback;
 
   //This callback is executed when a new endpoint is discovered
-  private final NearbyEndpointDiscoveryCb endpointDiscoveryCallback = new NearbyEndpointDiscoveryCb();
+  private NearbyEndpointDiscoveryCb endpointDiscoveryCallback;
 
   @Override
   public void initialize(CordovaInterface cordova, CordovaWebView webView) {
     super.initialize(cordova, webView);
+
+    this.webView = webView;
 
     //Location is required for Google Nearby to work
     if (!cordova.hasPermission(Manifest.permission.ACCESS_COARSE_LOCATION)) {
       cordova.requestPermission(this, REQUEST_CODE, Manifest.permission.ACCESS_COARSE_LOCATION);
     }
 
-    connectionsClient = Nearby.getConnectionsClient(cordova.getActivity().getApplicationContext());
-    connectionLifecycleCallback = new NearbyConnectionLifecycleCb(connectionsClient);
+    Context context = cordova.getActivity().getApplicationContext();
+    this.connectionsClient = Nearby.getConnectionsClient(context);
+    this.connectionLifecycleCallback = new NearbyConnectionLifecycleCb(context, connectionsClient);
+    this.endpointDiscoveryCallback = new NearbyEndpointDiscoveryCb(context);
 
     Log.d(TAG, "Initializing Nearby");
   }
@@ -118,12 +119,22 @@ public class NearbyPlugin extends CordovaPlugin {
         Log.d(TAG, "Disconnecting from all endpoints.");
         this.connectionsClient.stopAllEndpoints();
         break;
-      case "setdatahandler":
-        Log.d(TAG, "Setting handlers for the various lifecycle callbacks.");
-        this.payloadCallback.setHandler(callbackContext);
-        this.connectionLifecycleCallback.setHandler(callbackContext);
-        this.endpointDiscoveryCallback.setHandler(callbackContext);
+      /*case "setcallback":
+        Log.d(TAG, "Setting javascript callback.");
+        this.connectionLifecycleCallback.setCallback(callbackContext);
+        this.endpointDiscoveryCallback.setCallback(callbackContext);
         break;
+      case "checkmessages":
+        Log.d(TAG, "Getting messages from queue.");
+
+        MessageQueue queue = MessageQueue.getInstance();
+
+        if (queue.hasMessages()) {
+          Log.d(TAG, "Found " + queue.getMessages().size() + " messages in the queue.");
+          PluginResult result = new PluginResult(Status.OK, queue.getMessagesAsJSON());
+          callbackContext.sendPluginResult(result);
+        }
+        break;*/
     }
 
     return true;

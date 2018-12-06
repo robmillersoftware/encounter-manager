@@ -1,12 +1,14 @@
 /**
 * This file contains all of the classes and methods for dealing with User objects
 */
+const uuidv4 = require('uuid/v4');
 
 /**
 * This interface is used for creating User objects
 */
 interface UserData {
-  name: string
+  name: string,
+  uuid: string
 }
 
 /**
@@ -14,9 +16,11 @@ interface UserData {
 */
 export class User {
   public name: string;
+  public uuid: string;
 
   constructor(data: UserData) {
     this.name = data.name;
+    this.uuid = data.uuid;
   }
 }
 
@@ -33,7 +37,7 @@ export class UserFactory {
   * @return the created User
   */
   static createUser(name: string): User {
-    return new User({name: name});
+    return new User({name: name, uuid: uuidv4()});
   }
 
   /**

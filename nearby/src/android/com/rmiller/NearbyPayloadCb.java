@@ -2,18 +2,19 @@ package com.rmiller;
 
 import com.google.android.gms.nearby.connection.PayloadCallback;
 import com.google.android.gms.nearby.connection.Payload;
-import org.apache.cordova.PluginResult;
-import org.apache.cordova.PluginResult.Status;
-import org.apache.cordova.CallbackContext;
 import java.io.UnsupportedEncodingException;
 import com.google.android.gms.nearby.connection.PayloadTransferUpdate;
 import android.util.Log;
+import android.content.Context;
+import android.content.Intent;
+import android.os.Bundle;
+import android.support.v4.content.LocalBroadcastManager;
 
 public class NearbyPayloadCb extends PayloadCallback {
-  private CallbackContext callback;
+  Context context;
 
-  public void setHandler(CallbackContext context) {
-    this.callback = context;
+  public NearbyPayloadCb(Context context) {
+    this.context = context;
   }
 
   @Override
@@ -27,11 +28,17 @@ public class NearbyPayloadCb extends PayloadCallback {
         try {
           Log.d("NearbyPlugin", "Got message: " + new String(payload.asBytes(), "UTF-8") + " from endopint: " + endpointId);
 
-          //The received payload should already be in the NearbyPayload format, so no conversion necessary
+          //Build a payload object on this end and add the endpointId as the src
           String messagePayload = new String(payload.asBytes());
-          PluginResult result = new PluginResult(Status.OK, messagePayload);
-          result.setKeepCallback(true);
-          this.callback.sendPluginResult(result);
+          NearbyPayload nearbyPayload = new NearbyPayload(messagePayload);
+          nearbyPayload.source = endpointId;
+
+          //MessageQueue.getInstance().addMessage(nearbyPayload);
+          final Intent intent = new Intent("payload");
+          Bundle b = new Bundle();
+          b.putString("payload", nearbyPayload.toJSON());
+          intent.putExtras(b);
+          LocalBroadcastManager.getInstance(this.context).sendBroadcastSync(intent);
         } catch (UnsupportedEncodingException e) {
           Log.e("NearbyPlugin", "UTF-8 is unsupported");
         }

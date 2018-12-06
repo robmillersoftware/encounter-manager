@@ -6,7 +6,9 @@ export class MockProtocol implements Protocol{
   public connect(endpoint: string, message: string) {}
   public disconnect(endpoint: string) {}
   public disconnectAll() {}
-  public setReceiveHandler(callback: any) {}
+  public setConnectionHandler(callback: any) {}
+  public setPayloadHandler(callback: any) {}
+  public setDiscoveryHandler(callback: any) {}
   public advertise(msg: string) {}
   public stopAdvertising() {}
   public discover() {}

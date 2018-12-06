@@ -77,7 +77,7 @@ export class CampaignNew implements HomeViewComponent {
     let user = await this.userStorage.getUser();
 
     //Create a GM
-    let gm = PlayerFactory.createPlayer(user.name, null);
+    let gm = PlayerFactory.createPlayer(user.name, user.uuid, null);
     let game = this.gameService.getGame('None');
 
     //Create a new Campaign object

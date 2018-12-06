@@ -47,7 +47,7 @@ export class CampaignJoin implements HomeViewComponent {
 
       //Add yourself to the campaign object
       //TODO: Who is actually in charge of this? How do we sync?
-      campaign.players.push(PlayerFactory.createPlayer(this.userService.getUserName(), null, null));
+      campaign.players.push(PlayerFactory.createPlayer(this.userService.getUserName(), this.userService.getId(), null, null));
 
       this.campaignService.setCurrentCampaign(campaign);
       this.callback('tabChange');

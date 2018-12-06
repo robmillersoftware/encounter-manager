@@ -2,6 +2,7 @@
 * This class wraps the Cordova Nearby Plugin
 */
 import { Platform } from 'ionic-angular';
+import { Broadcaster } from '@ionic-native/broadcaster';
 import { Globals, ServiceInjector } from '@globals';
 import { Protocol } from '@networking/comms';
 
@@ -10,9 +11,13 @@ export class Nearby implements Protocol{
   public isDiscovering: boolean = false;
 
   private platform: Platform;
+  private broadcaster: Broadcaster;
 
   constructor() {
+    //Use service injector so this class can be instantiated manually
+    this.broadcaster = ServiceInjector.get(Broadcaster);
     this.platform = ServiceInjector.get(Platform);
+
     this.platform.ready().then(() => {
       /**
       * The service ID must be set before the NearbyPlugin can be used. The service ID
@@ -29,10 +34,19 @@ export class Nearby implements Protocol{
   * Registers a callback to handle any messages coming through the Nearby plugin
   * @param callback a function that takes a JSON object as a parameter
   */
-  public setReceiveHandler(callback: any) {
-    this.platform.ready().then(() => {
-      window["NearbyPlugin"].setDataHandler(callback);
-    });
+  public setConnectionHandler(callback: any) {
+    console.log("Setting up connection handler.");
+    this.broadcaster.addEventListener('connection').subscribe(callback);
+  }
+
+  public setDiscoveryHandler(callback: any) {
+    console.log("Setting up discovery handler.");
+    this.broadcaster.addEventListener('discovery').subscribe(callback);
+  }
+
+  public setPayloadHandler(callback: any) {
+    console.log("Setting up payload handler.");
+    this.broadcaster.addEventListener('payload').subscribe(callback);
   }
 
   public advertise(msg: string) {
@@ -79,7 +93,7 @@ export class Nearby implements Protocol{
   * @param name
   */
   public connect(endpoint: string, message: string) {
-    window["NearbyPlugin"].connect(endpoint, message);
+    window["NearbyPlugin"].connect(endpoint);
   }
 
   /**
@@ -101,6 +115,7 @@ export class Nearby implements Protocol{
   * @param players a list of players to send it to
   */
   public send(endpoints: string[], message: string) {
+    console.log("Sending payload: " + message + ", to endpoints: " + endpoints.join(","));
     window["NearbyPlugin"].send(JSON.stringify(endpoints), message);
   }
 }

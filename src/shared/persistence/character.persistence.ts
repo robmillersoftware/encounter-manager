@@ -2,7 +2,6 @@ import { Injectable } from '@angular/core';
 import { StorageService } from '@shared/persistence';
 import { Character } from '@shared/objects';
 import { BehaviorSubject } from 'rxjs/BehaviorSubject';
-
 /**
 * This service manages CRUD operations for characters in local storage
 * @author Rob Miller

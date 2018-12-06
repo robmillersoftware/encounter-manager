@@ -9,7 +9,11 @@ export class P2PNetworkManager {
 
   constructor(private commsManager: CommsManager, private events: Events) {
     this.peers = new Array<string>();
-    this.commsManager.setReceiveHandler(this.receive.bind(this));
+    console.log("Setting receive handlers in P2P Network");
+
+    this.commsManager.setDiscoveryCallback(this.receiveEndpoints.bind(this));
+    this.commsManager.setPayloadCallback(this.receivePayload.bind(this));
+    this.commsManager.setConnectionCallback(this.receiveConnections.bind(this));
   }
 
   /**
@@ -31,6 +35,7 @@ export class P2PNetworkManager {
   * @param {string} hostAddress the address to connect to.
   */
   public join(hostAddress: string, message: string) {
+    this.peers.push(hostAddress);
     this.commsManager.connect(hostAddress, message);
   }
 
@@ -51,32 +56,33 @@ export class P2PNetworkManager {
     this.commsManager.send(addresses, message);
   }
 
-  /**
-  * This method handles all payloads that come across the network.
-  * @param {string} message this is a json string representing a P2PMessage object
-  */
-  public receive(message: string) {
-    console.log('Received message: ' + message);
-    let payload = JSON.parse(message);
-    let payloadType: P2PTypes = (<any>P2PTypes)[payload.type];
+  public receiveConnections(event: any) {
+    let payload = P2PMessageFactory.fromJSON(event.payload);
 
-    switch(payloadType) {
+    switch(payload.type) {
       //A new endpoint is joining the network
       case P2PTypes.JOIN:
         console.log("Adding peer " + payload.source + " to network.");
-        this.addPeer(payload.message, payload.source);
+        this.addPeer(payload.source);
         break;
       //This message is an update sent when peers leave or join a network
       case P2PTypes.LEAVE:
         console.log("Removing peer " + payload.source + " from network.");
         this.removePeer(payload.source);
         break;
-      //This type is for a chat message
-      case P2PTypes.MESSAGE:
-        console.log("Recieved network message from peer " + payload.source + ": " + payload.message);
-        this.events.publish('network-message', { source: payload.source, message: payload.message });
+      case P2PTypes.CONNECTED:
+        console.log("Successfully connected to endpoint: " + payload.source);
+        this.events.publish('network-connected', { source: payload.source });
         break;
-      //A new endpoint has been discovered
+      default:
+        console.log("Received unknown payload type from connection lifecycle endpoint: " + payload.type);
+    }
+  }
+
+  public receiveEndpoints(event: any) {
+    let payload = P2PMessageFactory.fromJSON(event.payload);
+
+    switch(payload.type) {
       case P2PTypes.DISCOVERED:
         console.log("New network discovered at endpoint: " + payload.source + " broadcasting: " + payload.message);
         this.events.publish('network-discovered', { broadcast: payload.message, source: payload.source });
@@ -86,9 +92,30 @@ export class P2PNetworkManager {
         console.log("Lost previously discovered network " + payload.source);
         this.events.publish('network-lost', { source: payload.source });
         break;
+      default:
+        console.log("Received unknown payload type from discovery endpoint: " + payload.type);
+    }
+  }
+
+  /**
+  * This method handles all payloads that come across the network.
+  * @param {string} message this is a json string representing a P2PMessage object
+  */
+  public receivePayload(event: any) {
+    let payload = P2PMessageFactory.fromJSON(event.payload);
+
+    switch(payload.type) {
+      //This type is for a chat message
+      case P2PTypes.MESSAGE:
+        console.log("Recieved network message from peer " + payload.source + ": " + payload.message);
+        this.events.publish('network-message', { source: payload.source, message: payload.message });
+        break;
       case P2PTypes.SYNC:
-        console.log("Received sync: " + payload.message);
+        console.log("Received sync");
         this.events.publish('network-sync', { source: payload.source, object: payload.message });
+        break;
+      default:
+        console.log("Received unknown payload type from payload endpoint: " + payload.type);
     }
   }
 
@@ -113,12 +140,10 @@ export class P2PNetworkManager {
   * peer to everyone else on the network.
   * @param {string} address the new peer's address
   */
-  public addPeer(name: string, address: string) {
+  public addPeer(address: string) {
     if (!this.peers.includes(address)) {
+      this.commsManager.send(this.peers, P2PMessageFactory.createJoinJson(address));
       this.peers.push(address);
-      this.sendRoutingTableUpdate(address);
-
-      this.events.publish('peer-joined', {name: name, source: address});
     }
   }
 
@@ -135,16 +160,9 @@ export class P2PNetworkManager {
     }
   }
 
-  /**
-  * When a new peer joins the network, update other peers and let them know they need to request
-  * connections.
-  * @param {string} address the new peer's endpoint address
-  */
-  public sendRoutingTableUpdate(address: string) {
-    this.commsManager.send(this.peers, P2PMessageFactory.createJoinJson(address));
-  }
-
-  public sync(name: string, object: string) {
-    this.commsManager.send(this.peers, P2PMessageFactory.createSyncJson(name, object));
+  public sync(message: string) {
+    if (this.peers.length > 0) {
+      this.commsManager.send(this.peers, P2PMessageFactory.createSyncJson(message));
+    }
   }
 }

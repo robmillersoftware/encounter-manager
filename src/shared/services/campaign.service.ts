@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { Campaign, CampaignFactory, Player, PlayerFactory, Encounter } from '@shared/objects';
 import { CampaignStorage, UserStorage } from '@shared/persistence';
-import { NetworkingService, SyncService } from '@networking';
+import { NetworkingService } from '@networking';
 
 /**
 * This service manages campaigns
@@ -13,18 +13,8 @@ import { NetworkingService, SyncService } from '@networking';
 export class CampaignService {
   private networkSubscription: any;
 
-  constructor(private campaignStorage: CampaignStorage, private network: NetworkingService, private userStorage: UserStorage,
-      private syncService: SyncService) {
+  constructor(private campaignStorage: CampaignStorage, private network: NetworkingService, private userStorage: UserStorage) {
     this.network.subscribeToPeers(this.setCurrentPlayers.bind(this));
-    this.syncService.subscribeToServerSync('campaign', campaign => {
-      let current = this.getCurrentCampaign();
-
-      if (current && current.name === campaign.name) {
-        this.setCurrentCampaign(campaign);
-      }
-
-      this.campaignStorage.updateCampaign(campaign);
-    });
   }
 
   /**
@@ -97,7 +87,9 @@ export class CampaignService {
     let campaign = this.campaignStorage.getCampaign(c.name);
 
     if (campaign) {
-      campaign.players.push(p);
+      let players = campaign.players;
+      players.push(p);
+      campaign.players = players;
       this.campaignStorage.updateCampaign(campaign);
     }
 
@@ -107,10 +99,13 @@ export class CampaignService {
   public setCurrentPlayers(players: Array<any>) {
     console.log("Setting players on current campaign: " + players.join(','));
     let campaign = this.campaignStorage.getCurrentCampaign();
-    players.forEach(player => {
-      let p = campaign.players.find(item => item.endpoint === player.endpoint);
+    players.forEach(json => {
+      let player: Player = PlayerFactory.fromJSON(json);
+      let p = campaign.players.find(item => item.id === player.id);
       if (!p) {
-        campaign.players.push(PlayerFactory.createPlayer(player.name, player.endpoint));
+        let playerArr = campaign.players;
+        playerArr.push(p);
+        campaign.players = playerArr;
         this.updateCampaign(campaign);
       }
     });
@@ -136,7 +131,9 @@ export class CampaignService {
     let campaign: Campaign = this.campaignStorage.getCurrentCampaign();
 
     if (campaign && campaign.activeEncounter) {
-      campaign.encounterHistory.push(campaign.activeEncounter);
+      let history = campaign.encounterHistory;
+      history.push(campaign.activeEncounter);
+      campaign.encounterHistory = history;
       campaign.activeEncounter = null;
 
       this.campaignStorage.updateCampaign(campaign);
@@ -178,7 +175,6 @@ export class CampaignService {
     }
 
     this.campaignStorage.updateCampaign(c);
-    this.syncService.updateSyncedObject('campaign', JSON.stringify(c), true);
   }
 
   /**
@@ -186,13 +182,16 @@ export class CampaignService {
   * @param c the campaign to join
   */
   public joinCampaign(c: Campaign): Promise<any> {
-    return new Promise((resolve, reject) => {
+    return new Promise((resolve, reject) => { {
+
+    }
       if (!c.gm || !c.gm.endpoint) {
         console.log("Tried to join campaign with no gm endpoint.");
         reject();
       }
 
-      this.network.joinNetwork(c.gm.endpoint, this.userStorage.getUser().name);
+      let player: Player = PlayerFactory.createPlayer(this.userStorage.getUser().name, this.userStorage.getUser().uuid, null, null);
+      this.network.joinNetwork(c.gm.endpoint, JSON.stringify(player));
       resolve();
     });
   }
@@ -204,5 +203,32 @@ export class CampaignService {
   public discoverCampaigns(callback: any) {
     this.networkSubscription = this.network.subscribeToNetworks(callback);
     this.network.discover();
+  }
+
+  public updateUserInfo(info: any) {
+    let c: Campaign = this.getCurrentCampaign();
+    let u: string = this.userStorage.getUser().uuid;
+
+    if (c) {
+      let gm = c.gm;
+      if (gm.id == u) {
+        gm.name = info.name ? info.name : gm.name;
+        gm.endpoint = info.endpoint ? info.endpoint : gm.endpoint;
+        gm.characters = info.characters ? info.characters : gm.characters;
+        c.gm = gm;
+      } else {
+        let players = c.players;
+        players.forEach(player => {
+          if (player.id == u) {
+            player.name = info.name ? info.name : player.name;
+            player.endpoint = info.endpoint ? info.endpoint : player.endpoint;
+            player.characters = info.characters ? info.characters : player.characters;
+          }
+        });
+        c.players = players;
+      }
+    }
+
+    this.updateCampaign(c);
   }
 }

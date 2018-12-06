@@ -10,6 +10,7 @@ import { Character } from '@shared/objects';
 */
 interface PlayerData {
   name: string,
+  id: string,
   endpoint: string,
   characters?: Array<Character>
 }
@@ -19,11 +20,13 @@ interface PlayerData {
 */
 export class Player {
   public name: string;
+  public id: string;
   public endpoint: string;
   public characters: Array<Character>;
 
   constructor(data: PlayerData) {
     this.name = data.name;
+    this.id = data.id;
     this.endpoint = data.endpoint;
     this.characters = data.hasOwnProperty('characters') ? data.characters : new Array<Character>();
   }
@@ -35,13 +38,14 @@ export class Player {
 export class PlayerFactory {
   /**
   * Creates a Player object with the given parameters
-  * @param identifier
-  * @param isGm
+  * @param name
+  * @param id
+  * @param endpoint
   * @param characters
   * @return the created Player
   */
-  static createPlayer(name: string, endpoint: string, characters?: Array<Character>): Player {
-    return new Player({name: name, endpoint: endpoint, characters: characters});
+  static createPlayer(name: string, id: string, endpoint: string, characters?: Array<Character>): Player {
+    return new Player({name: name, id: id, endpoint: endpoint, characters: characters});
   }
 
   /**

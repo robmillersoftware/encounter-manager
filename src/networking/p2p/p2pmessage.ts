@@ -2,9 +2,10 @@ export enum P2PTypes {
   MESSAGE,
   JOIN,
   LEAVE,
-  DISCOVERED,
   BROADCAST,
-  SYNC
+  DISCOVERED,
+  SYNC,
+  CONNECTED
 }
 
 interface P2PMessageData {
@@ -27,9 +28,8 @@ export class P2PMessage {
 
 function parseJson(json: string): P2PMessage {
   let obj: any = JSON.parse(json);
-  let objType: P2PTypes = (<any>P2PTypes)[obj.type];
 
-  switch(objType) {
+  switch(+obj.type) {
     case P2PTypes.MESSAGE:
       return P2PMessageFactory.createMessage(obj.source, obj.message);
     case P2PTypes.JOIN:
@@ -42,6 +42,8 @@ function parseJson(json: string): P2PMessage {
       return P2PMessageFactory.createBroadcastMessage(obj.message, obj.s);
     case P2PTypes.SYNC:
       return P2PMessageFactory.createSyncMessage(obj.message);
+    case P2PTypes.CONNECTED:
+      return P2PMessageFactory.createConnectedMessage(obj.source);
   }
 }
 
@@ -51,7 +53,7 @@ export class P2PMessageFactory {
   }
 
   public static createJoinMessage(src: string): P2PMessage {
-    return new P2PMessage({sourceAddress: src, message: null, type: P2PTypes.JOIN});
+    return new P2PMessage({sourceAddress: src, type: P2PTypes.JOIN});
   }
 
   public static createLeaveMessage(src: string): P2PMessage {
@@ -70,6 +72,10 @@ export class P2PMessageFactory {
     return new P2PMessage({sourceAddress: null, message: msg, type: P2PTypes.SYNC});
   }
 
+  public static createConnectedMessage(src: string): P2PMessage {
+    return new P2PMessage({sourceAddress: src, message: null, type: P2PTypes.CONNECTED});
+  }
+
   public static createJoinJson(src: string): string {
     return JSON.stringify(P2PMessageFactory.createJoinMessage(src));
   }
@@ -82,9 +88,8 @@ export class P2PMessageFactory {
     return JSON.stringify(P2PMessageFactory.createBroadcastMessage(msg, src));
   }
 
-  public static createSyncJson(name: string, msg: string): string {
-    let syncObj = {name: name, json: msg};
-    return JSON.stringify(P2PMessageFactory.createSyncMessage(JSON.stringify(syncObj)));
+  public static createSyncJson(msg: string): string {
+    return JSON.stringify(P2PMessageFactory.createSyncMessage(msg));
   }
 
   public static fromJSON(json: string): P2PMessage {

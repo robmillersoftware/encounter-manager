@@ -1,16 +1,15 @@
 import { Component } from '@angular/core';
 import { ViewController } from 'ionic-angular';
-import { UserStorage } from '@shared/persistence';
-import { User } from '@shared/objects';
+import { UserService, CampaignService } from '@shared/services';
 
 @Component({
   selector: 'page-account-settings',
   templateUrl: 'account-settings.html'
 })
 export class AccountSettingsModal {
-  public user: User;
-  constructor(public viewCtrl: ViewController, public userStorage: UserStorage) {
-    this.user = this.userStorage.getUser();
+  public userName: string;
+  constructor(public viewCtrl: ViewController, public userService: UserService, public campaignService: CampaignService) {
+    this.userName = this.userService.getUserName();
   }
 
   public closeModal(didSubmit: boolean) {
@@ -18,6 +17,9 @@ export class AccountSettingsModal {
   }
 
   public onBlur(event: any) {
-    this.userStorage.setName(this.user.name);
+    this.userService.setUserName(this.userName);
+
+    console.log("Updating player name in campaign.");
+    this.campaignService.updateUserInfo({name: this.userName});
   }
 }

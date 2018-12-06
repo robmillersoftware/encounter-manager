@@ -38,8 +38,19 @@ export class CommsManager {
   * Sets the callback for handling messages coming through the network.
   * @param callback the method to call
   */
-  public setReceiveHandler(callback) {
-    this.protocol.setReceiveHandler(callback);
+  public setConnectionCallback(callback) {
+    console.log("Setting connection handler in Comms Manager");
+    this.protocol.setConnectionHandler(callback);
+  }
+
+  public setDiscoveryCallback(callback) {
+    console.log("Setting endpoint handler in Comms Manager");
+    this.protocol.setDiscoveryHandler(callback);
+  }
+
+  public setPayloadCallback(callback) {
+    console.log("Setting message handler in Comms Manager");
+    this.protocol.setPayloadHandler(callback);
   }
 
   /**

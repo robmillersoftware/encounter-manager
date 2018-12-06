@@ -86,6 +86,7 @@
     <plugin name="NearbyPlugin" spec="./nearby">
         <variable name="GOOGLE_PLAY_SERVICES_VERSION" value="12.0.0" />
     </plugin>
+    <plugin name="cordova-plugin-broadcaster" spec="^3.1.1" />
     <engine name="ios" spec="^4.5.5" />
     <engine name="android" spec="^7.1.1" />
 </widget>

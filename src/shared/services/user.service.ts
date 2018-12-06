@@ -19,4 +19,8 @@ export class UserService {
   public setUserName(name: string) {
     this.userStorage.setName(name);
   }
+
+  public getId(): string {
+    return this.userStorage.getUser().uuid;
+  }
 }

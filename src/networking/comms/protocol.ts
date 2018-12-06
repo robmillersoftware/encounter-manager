@@ -2,10 +2,12 @@ export interface Protocol {
   connect(endpoint: string, message: string),
   disconnect(endpoint: string),
   disconnectAll(),
-  setReceiveHandler(callback: any),
+  setConnectionHandler(callback: any),
+  setDiscoveryHandler(callback: any),
+  setPayloadHandler(callback: any),
   advertise(msg: string),
   stopAdvertising(),
   discover(),
   stopDiscovery(),
-  send(endpoints: string[], msg: string)
+  send(endpoints: string[], msg: string),
 }

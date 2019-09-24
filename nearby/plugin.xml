@@ -42,6 +42,9 @@
       </feature>
     </config-file>
 
+    <source-file src="src/android/com/rmiller/NearbyTaskExecutor.java" target-dir="src/com/rmiller" />
+    <source-file src="src/android/com/rmiller/OfflineTaskExecutor.java" target-dir="src/com/rmiller" />
+    <source-file src="src/android/com/rmiller/NearbyTaskExecutorImpl.java" target-dir="src/com/rmiller" />
     <source-file src="src/android/com/rmiller/MessageQueue.java" target-dir="src/com/rmiller" />
     <source-file src="src/android/com/rmiller/NearbyEndpointDiscoveryCb.java" target-dir="src/com/rmiller" />
     <source-file src="src/android/com/rmiller/NearbyConnectionLifecycleCb.java" target-dir="src/com/rmiller" />

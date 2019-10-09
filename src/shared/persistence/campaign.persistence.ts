@@ -61,6 +61,7 @@ export class CampaignStorage implements SyncStorage {
   public getCampaigns(): Map<string, Campaign> {
     return this.campaigns.value;
   }
+
   /**
   * Sets the current campaign
   * @param c The campaign to set
@@ -80,7 +81,7 @@ export class CampaignStorage implements SyncStorage {
   * Returns the current campaign
   */
   public getCurrentCampaign(): Campaign {
-    return this.currentCampaign.value;
+    return CampaignFactory.cloneCampaign(this.currentCampaign.value);
   }
 
   /**

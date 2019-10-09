@@ -50,7 +50,7 @@ export class CampaignJoin implements HomeViewComponent {
       campaign.players.push(PlayerFactory.createPlayer(this.userService.getUserName(), this.userService.getId(), null, null));
 
       this.campaignService.setCurrentCampaign(campaign);
-      this.callback('tabChange');
+      this.callback({newTab: 1});
     });
   }
 }

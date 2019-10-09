@@ -90,6 +90,6 @@ export class CampaignNew implements HomeViewComponent {
       selectedLocs);
 
     this.campaignService.createCampaign(newCamp);
-    this.callback('viewChange', HomeViews.CAMPAIGN_LOAD);
+    this.callback({newView: HomeViews.CAMPAIGN_LOAD});
   }
 }

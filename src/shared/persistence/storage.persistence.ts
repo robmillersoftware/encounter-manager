@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { Storage } from '@ionic/storage';
-import { Location, Character, Campaign } from '@shared/objects';
+import { Location, Character, Campaign, CampaignFactory } from '@shared/objects';
 
 /**
  * This class is a wrapper around the Ionic Storage service. This class will contain
@@ -55,16 +55,17 @@ export class StorageService {
         });
       //Gets the current campaign from the user object
       case 'currentCampaign':
-        return this.storage.get('currentCampaign');
+        let current = await this.storage.get('currentCampaign');
+        return CampaignFactory.cloneCampaign(current);
       //Returns a map with key of campaign name and value of campaign object
       case 'campaigns':
         return this.storage.get('campaigns').then(val => {
           let map: Map<string, Campaign> = new Map();
 
           if (Array.isArray(val)) {
-            let arr: Array<Campaign> = val;
+            let arr: Array<any> = val;
             arr.forEach(c => {
-              map.set(c.name, c);
+              map.set(c._name, CampaignFactory.cloneCampaign(c));
             });
           }
 

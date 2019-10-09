@@ -39,7 +39,7 @@ export class CampaignLoad implements HomeViewComponent {
 
     //If there are no campaigns left, then go back to the dashboard
     if (this.campaigns.length === 0) {
-      this.callback('viewChange', HomeViews.DASHBOARD);
+      this.callback({newView: HomeViews.DASHBOARD});
     }
   }
 
@@ -49,6 +49,9 @@ export class CampaignLoad implements HomeViewComponent {
   */
   public async loadCampaign(campaign: Campaign) {
     this.campaignService.setCurrentCampaign(campaign);
-    this.callback('tabChange', 0);
+    this.callback({
+      newView: HomeViews.DASHBOARD,
+      newTab: 1
+    });
   }
 }

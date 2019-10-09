@@ -1,4 +1,4 @@
-import { Component, ComponentFactoryResolver, ViewChild } from '@angular/core';
+import { Component, ComponentFactoryResolver, ViewChild, NgZone } from '@angular/core';
 import { ModalController, IonicPage, NavController, Events } from 'ionic-angular';
 import { NavigationService, CampaignService } from '@shared/services';
 import { UserStorage } from '@shared/persistence';
@@ -25,12 +25,14 @@ export class HomePage {
   private views: any;
 
   constructor(public modalCtrl: ModalController, public navCtrl: NavController, public campaignService: CampaignService,
-      public homeService: HomeService,  public userStorage: UserStorage,
+      public homeService: HomeService,  public userStorage: UserStorage, public zone: NgZone,
       private componentFactoryResolver: ComponentFactoryResolver, private navService: NavigationService, private events: Events) {
 
     this.views = this.homeService.getViews();
     this.navService.headerData.subscribe((data) => {
-      this.headerData = data;
+      this.zone.run(() => {
+        this.headerData = data;
+      });
     });
 
     console.log("Home page is loaded.");
@@ -78,23 +80,17 @@ export class HomePage {
   * @param operation This is the operation to be performed
   * @param data This is data containing information about the operation
   */
-  private navTo(operation: string, id: any) {
-    switch(operation) {
-      case 'tabChange':
-        //Currently we only handle tab changes to the Campaign tab. This can be
-        //expanded later
+  private navTo(operations: any) {
+    if (!isNaN(operations.newView)) {
+      this.loadComponent(operations.newView);
+    }
+
+    if (!isNaN(operations.newTab)) {
+      if (operations.newTab === 1) {
         this.checkCurrentCampaign();
-        break;
-      case 'viewChange':
-        //A view change without data should return to the default (i.e. the dashboard)
-        if (!id) {
-          this.loadComponent(HomeViews.DASHBOARD);
-        } else {
-          this.loadComponent(id);
-        }
-        break;
-      default:
-        this.loadComponent(HomeViews.DASHBOARD);
+      } else {
+        this.navCtrl.parent.select(operations.newTab);
+      }
     }
   }
 

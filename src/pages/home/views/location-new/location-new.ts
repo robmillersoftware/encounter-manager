@@ -36,6 +36,6 @@ export class LocationNew implements HomeViewComponent {
     let loc = LocationFactory.createLocation(this.locationInfo.value.locName, this.locationInfo.value.locDesc);
 
     this.locationService.addLocation(loc);
-    this.callback('viewChange', HomeViews.LOCATION_EDIT);
+    this.callback({newView: HomeViews.LOCATION_EDIT});
   }
 }

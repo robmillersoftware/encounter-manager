@@ -151,6 +151,10 @@ export class CampaignFactory {
   }
 
   static cloneCampaign(campaign: Campaign): Campaign {
+    if (!campaign) {
+      return null;
+    }
+
     return new Campaign(null, campaign);
   }
 

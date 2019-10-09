@@ -56,7 +56,6 @@
   "devDependencies": {
     "@ionic/app-scripts": "^3.2.4",
     "NearbyPlugin": "file:nearby",
-    "ionic": "^5.1.0",
     "safe-json-stringify": "^1.2.0",
     "typescript": "^2.9.2",
     "webpack-merge": "^4.1.4"

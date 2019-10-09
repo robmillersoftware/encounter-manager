@@ -1,7 +1,7 @@
 <ion-header>
   <ion-navbar>
     <ion-buttons *ngIf="headerData.canGoBack" left>
-      <button ion-button icon-only (click)="navTo('viewChange')">
+      <button ion-button icon-only (click)="navTo({newView: 0})">
         <ion-icon name="arrow-back"></ion-icon>
       </button>
     </ion-buttons>

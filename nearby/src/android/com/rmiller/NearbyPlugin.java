@@ -31,6 +31,7 @@ public class NearbyPlugin extends CordovaPlugin {
   //This is the unique identifier for this instance of an application
   protected String identifier;
 
+  private Context context;
   private CordovaWebView webView;
   private NearbyTaskExecutor taskExecutor;
 
@@ -45,8 +46,7 @@ public class NearbyPlugin extends CordovaPlugin {
       cordova.requestPermission(this, REQUEST_CODE, Manifest.permission.ACCESS_COARSE_LOCATION);
     }
 
-    Context context = cordova.getActivity().getApplicationContext();
-    this.taskExecutor = new NearbyTaskExecutorImpl(context);
+    this.context = cordova.getActivity().getApplicationContext();
 
     Log.d(TAG, "Initializing Nearby");
   }
@@ -54,6 +54,16 @@ public class NearbyPlugin extends CordovaPlugin {
   @Override
   public boolean execute(String action, JSONArray args, final CallbackContext callbackContext) throws JSONException {
     switch(action.toLowerCase()) {
+      case "initialize":
+        if (this.taskExecutor != null) {
+          if (args.getBoolean(0)) {
+            this.taskExecutor = new OfflineTaskExecutor(this.context);
+            Log.d(TAG, "Initializing Offline Task Executor.");
+          } else {
+            this.taskExecutor = new NearbyTaskExecutorImpl(this.context);
+            Log.d(TAG, "Initializing Task Executor.");
+          }
+        }
       case "startadvertising":
         this.taskExecutor.startAdvertising(args.getString(0));
         break;

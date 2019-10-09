@@ -19,8 +19,15 @@ export class CommsManager {
 
     //We are only handling Nearby for now. If it's not found then we're just testing so mock it.
     if (this.isCordova && window['NearbyPlugin']) {
+      console.log('Using Nearby plugin.');
       this.protocol = new Nearby();
+    } else if (this.isCordova) {
+      console.log('Using mocked Nearby plugin.');
+      //Create a mocked version of the nearby plugin in cordova
+      this.protocol = new Nearby(true);
     } else {
+      console.log('Using mocked protocol.');
+      //Create a JS mock of Nearby
       this.protocol = new MockProtocol();
     }
   }

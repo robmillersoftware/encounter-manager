@@ -3,6 +3,9 @@ var exec = require('cordova/exec');
 var PLUGIN_NAME = 'NearbyPlugin';
 
 var NearbyPlugin = {
+  initialize: function(isMock) {
+    exec(null, null, PLUGIN_NAME, 'initialize', [isMock]);
+  },
   setServiceId: function(serviceId) {
     exec(null, null, PLUGIN_NAME, 'setServiceId', [serviceId]);
   },

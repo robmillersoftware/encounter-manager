@@ -35,6 +35,6 @@ export class CharacterNew implements HomeViewComponent {
     let char = CharacterFactory.createCharacter(this.characterInfo.value.charName, this.characterInfo.value.charDesc);
 
     this.characterService.addCharacter(char);
-    this.callback('viewChange', HomeViews.CHARACTER_EDIT);
+    this.callback({newView: HomeViews.CHARACTER_EDIT});
   }
 }

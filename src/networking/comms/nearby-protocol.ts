@@ -13,7 +13,7 @@ export class Nearby implements Protocol{
   private platform: Platform;
   private broadcaster: Broadcaster;
 
-  constructor() {
+  constructor(isMock: boolean = false) {
     //Use service injector so this class can be instantiated manually
     this.broadcaster = ServiceInjector.get(Broadcaster);
     this.platform = ServiceInjector.get(Platform);
@@ -24,6 +24,7 @@ export class Nearby implements Protocol{
       * is hardcoded into the APK at release and is the same for all devices running this app
       * It should only change between versions.
       */
+      window["NearbyPlugin"].initialize(isMock);
       window["NearbyPlugin"].setServiceId(Globals.serviceId);
     });
 

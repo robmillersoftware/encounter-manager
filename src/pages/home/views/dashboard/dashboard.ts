@@ -35,11 +35,13 @@ export class Dashboard implements HomeViewComponent {
       public campaignService: CampaignService, public characterService: CharacterService,
       public locationService: LocationService, public zone: NgZone) {
     this.campaignService.subscribe(val => {
-      if (val && val.size > 0) {
-        this.hasCampaigns = true;
-      } else {
-        this.hasCampaigns = false;
-      }
+      this.zone.run(() => {
+        if (val && val.size > 0) {
+          this.hasCampaigns = true;
+        } else {
+          this.hasCampaigns = false;
+        }
+      });
     });
 
     this.characterService.subscribe(val => {
@@ -70,6 +72,6 @@ export class Dashboard implements HomeViewComponent {
   */
   navTo(id: any) {
     this.events.unsubscribe('Account');
-    this.callback('viewChange', id);
+    this.callback({newView: id});
   }
 }

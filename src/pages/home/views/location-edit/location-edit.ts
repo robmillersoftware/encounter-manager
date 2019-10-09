@@ -2,6 +2,7 @@ import { Component, Input } from '@angular/core';
 import { HomeViewComponent } from '../home-view.component';
 import { LocationService } from '@shared/services';
 import { Location } from '@shared/objects';
+import { HomeViews } from '@pages/home/home.service';
 
 /**
 * This class represents the view for editing/viewing/deleting locations.
@@ -31,7 +32,7 @@ export class LocationEdit implements HomeViewComponent {
       this.locationService.deleteLocation(name);
 
       if (this.locations.length == 0) {
-        this.callback();
+        this.callback({newView: HomeViews.DASHBOARD});
       }
     }
   }

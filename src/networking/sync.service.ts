@@ -44,7 +44,6 @@ export class SyncObject {
   }
 
   static stringify(o: SyncObject): string {
-    console.log("INSIDE STRINGIFY");
     let replacer = (name, value) => {
       if (name === 'timestamps') {
         let obj = Object.create(null);

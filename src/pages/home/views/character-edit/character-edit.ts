@@ -2,6 +2,7 @@ import { Component, Input } from '@angular/core';
 import { HomeViewComponent } from '../home-view.component';
 import { CharacterService } from '@shared/services';
 import { Character } from '@shared/objects';
+import { HomeViews } from '@pages/home/home.service';
 
 /**
 * This class represents the character view/edit/delete view
@@ -34,7 +35,7 @@ export class CharacterEdit implements HomeViewComponent {
       this.characterService.deleteCharacter(name);
 
       if (this.characters.length == 0) {
-        this.callback();
+        this.callback({newView: HomeViews.DASHBOARD});
       }
     }
   }

@@ -23,4 +23,8 @@ export class UserService {
   public getId(): string {
     return this.userStorage.getUser().uuid;
   }
+
+  public clearStorage() {
+    this.userStorage.clearStorage();
+  }
 }

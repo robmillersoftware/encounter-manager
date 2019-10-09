@@ -42,7 +42,7 @@ export class HomeService {
         new HeaderData('Load an Existing Campaign', true )),
       new HomeView(Dashboard, 'dashboard', HomeViews.DASHBOARD,
         new HeaderData('RetConnected', false, true,
-          ['Account'] ))
+          ['Account', 'Settings'] ))
     ];
   }
 

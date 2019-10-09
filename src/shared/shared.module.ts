@@ -8,7 +8,7 @@ import { IonicModule, IonicApp } from 'ionic-angular';
 import { NetworkingModule } from '@networking';
 
 import { EncTile, EncChat, EncPlayerCard, EncNpcCard, EncCampaignCard, EncLocCard, AccountSettingsModal,
-  MessageBubble, MessageInput } from '@shared/components';
+  MessageBubble, MessageInput, AppSettingsModal } from '@shared/components';
 
 import { StorageService, CharacterStorage, LocationStorage, UserStorage, CampaignStorage, ChatStorage, GameStorage } from '@shared/persistence';
 import { LocationService, NavigationService, CharacterService, CampaignService, ChatService, GameService, UserService } from '@shared/services';
@@ -16,8 +16,8 @@ import { LocationService, NavigationService, CharacterService, CampaignService, 
 @NgModule({
     imports: [NetworkingModule, IonicModule, IonicStorageModule.forRoot()],
     bootstrap: [IonicApp],
-    declarations: [EncTile, EncChat, EncPlayerCard, EncNpcCard, EncCampaignCard, EncLocCard, AccountSettingsModal, MessageBubble, MessageInput],
-    entryComponents: [EncTile, EncChat, EncPlayerCard, EncNpcCard, EncCampaignCard, EncLocCard, AccountSettingsModal, MessageBubble, MessageInput],
+    declarations: [EncTile, EncChat, EncPlayerCard, EncNpcCard, EncCampaignCard, EncLocCard, AccountSettingsModal, AppSettingsModal, MessageBubble, MessageInput],
+    entryComponents: [EncTile, EncChat, EncPlayerCard, EncNpcCard, EncCampaignCard, EncLocCard, AccountSettingsModal, AppSettingsModal, MessageBubble, MessageInput],
     providers: [
       StorageService,
       CharacterStorage,
@@ -34,6 +34,6 @@ import { LocationService, NavigationService, CharacterService, CampaignService, 
       GameService,
       UserService
     ],
-    exports: [EncTile, EncChat, EncPlayerCard, EncNpcCard, EncCampaignCard, EncLocCard, AccountSettingsModal, MessageBubble, MessageInput, IonicModule],
+    exports: [EncTile, EncChat, EncPlayerCard, EncNpcCard, EncCampaignCard, EncLocCard, AccountSettingsModal, AppSettingsModal, MessageBubble, MessageInput, IonicModule],
 })
 export class SharedModule {}

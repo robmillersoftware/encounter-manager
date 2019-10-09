@@ -7,13 +7,14 @@
     </ion-buttons>
     <ion-title>Choose Participants</ion-title>
   </ion-toolbar>
-  <form *ngIf="campaign" [formGroup]="conversationInfo" (ngSubmit)="setParticipants()">
+  <form #form="ngForm" *ngIf="campaign" [formGroup]="conversationInfo" (ngSubmit)="setParticipants(form)">
     <div *ngFor="let participant of possibleParticipants">
       <ion-item>
         <ion-checkbox (ionChange)="onChange(participant.name, $event.checked)"></ion-checkbox>
         <ion-label>{{participant.name}}</ion-label>
       </ion-item>
     </div>
-    <button ion-button type="submit" [disabled]="!conversationInfo.valid">Begin</button>
+    <!--<button ion-button type="submit" [disabled]="!conversationInfo.valid">Begin</button>-->
+    <button ion-button type="submit">Begin</button>
   </form>
 </div>

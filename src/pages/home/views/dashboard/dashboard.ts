@@ -3,7 +3,7 @@ import { ModalController, Events } from 'ionic-angular';
 import { HomeViewComponent } from '../home-view.component';
 import { HomeService } from '@pages/home/home.service';
 import { CampaignService, CharacterService, LocationService } from '@shared/services';
-import { AccountSettingsModal } from '@shared/components';
+import { AccountSettingsModal, AppSettingsModal } from '@shared/components';
 
 /**
 * This class represents the dashboard, which is the hub of the home page
@@ -61,9 +61,18 @@ export class Dashboard implements HomeViewComponent {
       this.hideOverlay = false;
       modal.present();
       modal.onDidDismiss(() => {
-          this.hideOverlay = true;
+        this.hideOverlay = true;
       });
     });
+
+    this.events.subscribe('Settings', () => {
+      let modal = this.modalCtrl.create(AppSettingsModal);
+      this.hideOverlay = false;
+      modal.present();
+      modal.onDidDismiss(() => {
+        this.hideOverlay = true;
+      });
+    })
   }
 
   /**

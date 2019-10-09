@@ -107,4 +107,13 @@ export class StorageService {
         this.storage.set(key, value);
     }
   }
+
+  /**
+   * Wipes the application storage. Should probably only be used for testing
+   */
+  public clearAll() {
+    this.storage.clear().then(() => {
+      location.reload();
+    });
+  }
 }

@@ -59,4 +59,11 @@ export class UserStorage {
     user.name = name;
     this.setUser(user);
   }
+
+  /**
+   * Clears all application storage
+   */
+  public clearStorage() {
+    this.storageService.clearAll();
+  }
 }

@@ -16,5 +16,6 @@ export class AppSettingsModal {
 
   public clearData() {
     this.userService.clearStorage();
+    window.localStorage.clear();
   }
 }

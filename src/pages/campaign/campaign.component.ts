@@ -1,7 +1,7 @@
 import { Component, NgZone } from '@angular/core';
 import { ModalController, NavController } from 'ionic-angular';
 import { CampaignService } from '@shared/services';
-//import { Campaign } from '@shared/objects';
+import { Campaign } from '@shared/objects';
 import { StartEncounterModal, AddCharacterModal, AddLocationModal } from './modals';
 
 @Component({
@@ -9,13 +9,13 @@ import { StartEncounterModal, AddCharacterModal, AddLocationModal } from './moda
     templateUrl: 'campaign.html'
 })
 export class CampaignPage {
-  //campaign: Campaign;
+  campaign: Campaign;
   campaignString: string;
   hideOverlay: boolean = true;
 
   constructor(public navCtrl: NavController, private campaignService: CampaignService, private modalCtrl: ModalController, private zone: NgZone) {
     this.campaignService.subscribeCurrent(c => {
-      //this.campaign = c;
+      this.campaign = c;
 
       this.zone.run(() => {
         this.campaignString = JSON.stringify(c);

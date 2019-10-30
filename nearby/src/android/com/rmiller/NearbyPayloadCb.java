@@ -34,9 +34,9 @@ public class NearbyPayloadCb extends PayloadCallback {
           nearbyPayload.source = endpointId;
 
           //MessageQueue.getInstance().addMessage(nearbyPayload);
-          final Intent intent = new Intent("payload");
+          final Intent intent = new Intent("detail");
           Bundle b = new Bundle();
-          b.putString("payload", nearbyPayload.toJSON());
+          b.putString("detail", nearbyPayload.toJSON());
           intent.putExtras(b);
           LocalBroadcastManager.getInstance(this.context).sendBroadcastSync(intent);
         } catch (UnsupportedEncodingException e) {

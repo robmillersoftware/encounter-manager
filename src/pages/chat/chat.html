@@ -45,13 +45,13 @@
     <ion-navbar>
       <ion-title>Messages</ion-title>
     </ion-navbar>
-    <!--<ion-scroll *ngIf="currentConversation" scrollY="true">
+    <ion-scroll *ngIf="currentConversation" scrollY="true">
       <ion-grid>
         <ion-row *ngFor="let message of currentConversation.messages">
           <message-bubble (message)="message"></message-bubble>
         </ion-row>
       </ion-grid>
-    </ion-scroll>-->
+    </ion-scroll>
     <message-input (conversation)="currentConversation"></message-input>
   </ion-slide>
 </ion-slides>

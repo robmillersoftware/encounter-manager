@@ -12,7 +12,9 @@ const customConfig = {
                 '@pages': path.resolve('./src/pages'),
                 '@pages/*': path.resolve('./src/pages/*'),
                 '@networking': path.resolve('./src/networking'),
-                '@networking/*': path.resolve('./src/networking/*')
+                '@networking/*': path.resolve('./src/networking/*'),
+                '@test': path.resolve('./src/test'),
+                '@test/*': path.resolve('./src/test/*')
             }
         }
     },
@@ -25,7 +27,9 @@ const customConfig = {
                 '@pages': path.resolve('./src/pages'),
                 '@pages/*': path.resolve('./src/pages/*'),
                 '@networking': path.resolve('./src/networking'),
-                '@networking/*': path.resolve('./src/networking/*')
+                '@networking/*': path.resolve('./src/networking/*'),
+                '@test': path.resolve('./src/test'),
+                '@test/*': path.resolve('./src/test/*')
             }
         }
     }

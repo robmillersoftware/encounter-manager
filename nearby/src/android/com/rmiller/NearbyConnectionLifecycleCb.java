@@ -51,7 +51,7 @@ public class NearbyConnectionLifecycleCb extends ConnectionLifecycleCallback {
     this.callback.sendPluginResult(result);*/
     final Intent intent = new Intent("connection");
     Bundle b = new Bundle();
-    b.putString("payload", payload.toJSON());
+    b.putString("detail", payload.toJSON());
     intent.putExtras(b);
 
     LocalBroadcastManager.getInstance(this.context).sendBroadcastSync(intent);
@@ -89,7 +89,7 @@ public class NearbyConnectionLifecycleCb extends ConnectionLifecycleCallback {
     }
 
     if (payload != null) {
-      b.putString("payload", payload.toJSON());
+      b.putString("detail", payload.toJSON());
       intent.putExtras(b);
 
       LocalBroadcastManager.getInstance(this.context).sendBroadcastSync(intent);
@@ -106,7 +106,7 @@ public class NearbyConnectionLifecycleCb extends ConnectionLifecycleCallback {
     this.callback.sendPluginResult(result);*/
     final Intent intent = new Intent("connection");
     Bundle b = new Bundle();
-    b.putString("payload", payload.toJSON());
+    b.putString("detail", payload.toJSON());
     intent.putExtras(b);
     LocalBroadcastManager.getInstance(this.context).sendBroadcastSync(intent);
   }

@@ -57,7 +57,7 @@ export class P2PNetworkManager {
   }
 
   public receiveConnections(event: any) {
-    let payload = P2PMessageFactory.fromJSON(event.payload);
+    let payload = P2PMessageFactory.fromJSON(event.detail);
 
     switch(payload.type) {
       //A new endpoint is joining the network
@@ -80,7 +80,9 @@ export class P2PNetworkManager {
   }
 
   public receiveEndpoints(event: any) {
-    let payload = P2PMessageFactory.fromJSON(event.payload);
+    console.log(event);
+    console.log(JSON.stringify(event));
+    let payload = P2PMessageFactory.fromJSON(event.detail);
 
     switch(payload.type) {
       case P2PTypes.DISCOVERED:
@@ -102,7 +104,7 @@ export class P2PNetworkManager {
   * @param {string} message this is a json string representing a P2PMessage object
   */
   public receivePayload(event: any) {
-    let payload = P2PMessageFactory.fromJSON(event.payload);
+    let payload = P2PMessageFactory.fromJSON(event.detail);
 
     switch(payload.type) {
       //This type is for a chat message

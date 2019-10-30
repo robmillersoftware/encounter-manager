@@ -4,6 +4,7 @@ import { HomeViewComponent } from '../home-view.component';
 import { HomeService } from '@pages/home/home.service';
 import { CampaignService, CharacterService, LocationService } from '@shared/services';
 import { AccountSettingsModal, AppSettingsModal } from '@shared/components';
+import { TestingControlsModal } from '@test/components/testing-controls/testing-controls.component';
 
 /**
 * This class represents the dashboard, which is the hub of the home page
@@ -72,7 +73,16 @@ export class Dashboard implements HomeViewComponent {
       modal.onDidDismiss(() => {
         this.hideOverlay = true;
       });
-    })
+    });
+
+    this.events.subscribe('Test', () => {
+      let modal = this.modalCtrl.create(TestingControlsModal);
+      this.hideOverlay = false;
+      modal.present();
+      modal.onDidDismiss(() => {
+        this.hideOverlay = true;
+      });
+    });
   }
 
   /**
@@ -80,6 +90,8 @@ export class Dashboard implements HomeViewComponent {
   * @param data an object containing any data necessary for the navigation method
   */
   navTo(id: any) {
+    this.events.unsubscribe('Test');
+    this.events.unsubscribe('Settings');
     this.events.unsubscribe('Account');
     this.callback({newView: id});
   }

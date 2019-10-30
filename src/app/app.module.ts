@@ -9,6 +9,7 @@ import { HomeModule } from '@pages/home/home.component.module';
 import { CampaignModule } from '@pages/campaign/campaign.component.module';
 import { ChatModule } from '@pages/chat/chat.component.module';
 import { OptionsModule } from '@pages/options/options.component.module';
+import { TestModule } from '@test/test.module';
 
 import { EncounterPage, NotesPage, TabsPage, MainPage } from '@pages';
 
@@ -25,12 +26,13 @@ import { SplashScreen } from '@ionic-native/splash-screen';
   ],
   imports: [
     SharedModule,
+    TestModule,
     BrowserModule,
     IonicModule.forRoot(MyApp),
     HomeModule,
     CampaignModule,
     ChatModule,
-    OptionsModule,
+    OptionsModule
   ],
   bootstrap: [IonicApp],
   entryComponents: [

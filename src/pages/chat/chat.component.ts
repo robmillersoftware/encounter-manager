@@ -60,7 +60,7 @@ export class ChatPage {
     modal.onDidDismiss(data => {
       this.hideOverlay = true;
       if (data.didSubmit) {
-        console.log("Creating new conversation isMeta=" + data.isMeta + " with participants: " + data.participants.join(','));
+        console.log("Creating new conversation isMeta=" + data.isMeta + " with participants: " + data.participants.length);
         this.currentConversation = this.chatService.startConversation(data.isMeta, data.participants);
         this.slides.slideNext();
       }

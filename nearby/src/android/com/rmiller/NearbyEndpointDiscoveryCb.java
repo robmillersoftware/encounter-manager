@@ -42,7 +42,7 @@ public class NearbyEndpointDiscoveryCb extends EndpointDiscoveryCallback {
     this.callback.sendPluginResult(result);*/
     final Intent intent = new Intent("discovery");
     Bundle b = new Bundle();
-    b.putString("payload", payload.toJSON());
+    b.putString("detail", payload.toJSON());
     intent.putExtras(b);
     LocalBroadcastManager.getInstance(this.context).sendBroadcastSync(intent);
   }
@@ -57,7 +57,7 @@ public class NearbyEndpointDiscoveryCb extends EndpointDiscoveryCallback {
     this.callback.sendPluginResult(result);*/
     final Intent intent = new Intent("connection");
     Bundle b = new Bundle();
-    b.putString("payload", payload.toJSON());
+    b.putString("detail", payload.toJSON());
     intent.putExtras(b);
     LocalBroadcastManager.getInstance(this.context).sendBroadcastSync(intent);
   }

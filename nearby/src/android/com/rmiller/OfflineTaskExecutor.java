@@ -4,6 +4,15 @@ import android.util.Log;
 import java.util.List;
 
 public class OfflineTaskExecutor implements NearbyTaskExecutor {
+    //This is a string that uniquely identifies the application as a whole. This allows users of an
+  //application find each other
+  protected String serviceId;
+  protected Context context;
+
+  public NearbyTaskExecutorImpl(Context context) {
+    this.context = context;
+  }
+
   public void startAdvertising(String broadcast) {
     Log.d(NearbyPlugin.TAG, "Called startAdvertising on offline task executor with: " + broadcast);
   }
@@ -33,6 +42,7 @@ public class OfflineTaskExecutor implements NearbyTaskExecutor {
   }
 
   public void setServiceId(String id) {
+    this.serviceId = id;
     Log.d(NearbyPlugin.TAG, "Called setServiceId on offline task executor with id: " + id);
   }
 

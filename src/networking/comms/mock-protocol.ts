@@ -1,4 +1,6 @@
 import { Protocol } from '@networking/comms';
+import { P2PMessageFactory } from '@networking/p2p';
+import { CampaignFactory, Campaign } from '@shared/objects';
 
 export class MockProtocol implements Protocol{
   private isAdvertising: boolean = false;
@@ -53,6 +55,16 @@ export class MockProtocol implements Protocol{
     }
 
     this.isDiscovering = true;
+
+    let campaigns = JSON.parse(window.localStorage.getItem('campaigns'));
+    if (campaigns && campaigns.length > 0) {
+      campaigns.forEach(c => {
+        let campaign: Campaign = CampaignFactory.cloneCampaign(c);
+        let event = new CustomEvent('discovery', { detail:
+            P2PMessageFactory.toJSON(P2PMessageFactory.createDiscoveredMessage(campaign.gm.endpoint, CampaignFactory.toBroadcast(campaign))) });
+        document.dispatchEvent(event);
+      });
+    }
   }
 
   public stopDiscovery() {

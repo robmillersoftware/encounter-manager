@@ -9,7 +9,9 @@
       "@pages/*": ["pages/*"],
       "@vendor/*": ["vendor/*"],
       "@networking": ["networking"],
-      "@networking/*": ["networking/*"]
+      "@networking/*": ["networking/*"],
+      "@test": ["test"],
+      "@test/*": ["test/*"]
     },
     "allowSyntheticDefaultImports": true,
     "declaration": false,

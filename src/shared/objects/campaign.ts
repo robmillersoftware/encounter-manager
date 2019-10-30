@@ -6,6 +6,8 @@
 import { Character, Location, Player, PlayerFactory, Encounter, Game, GameFactory } from '@shared/objects';
 import { SyncObject } from '@networking';
 
+let uuidv4 = require('uuid/v4');
+
 /**
 * This interface is used to construct Campaign objects
 */
@@ -13,6 +15,7 @@ interface CampaignData {
   name: string,
   game: Game,
   description: string,
+  id?: string,
   gm?: Player,
   characters?: Array<Character>,
   locations?: Array<Location>,
@@ -33,6 +36,7 @@ export class Campaign extends SyncObject {
   private _game: Game;
   private _description: string;
   private _gm: Player;
+  private _id: string;
   private _characters: Array<Character>;
   private _locations: Array<Location>;
   private _players: Array<Player>;
@@ -56,6 +60,12 @@ export class Campaign extends SyncObject {
       this.saveField("_description", data.description);
       this.saveField("_gm", data.gm);
       this.saveField("_activeEncounter", data.activeEncounter);
+
+      if (data.hasOwnProperty('id')) {
+        this.saveField("_id", data.id);
+      } else {
+        this.saveField("_id", uuidv4());
+      }
 
       if (data.hasOwnProperty('characters') && data.characters != null) {
         this.saveField("_characters", data.characters);
@@ -100,6 +110,8 @@ export class Campaign extends SyncObject {
   set game(game: Game) { this.saveField("_game", game); }
   get description(): string { return this._description; }
   set description(desc: string) { this.saveField("_description", desc); }
+  get id(): string { return this._id; }
+  set id(id: string) { this.saveField("_id", id); }
   get gm(): Player { return this._gm; }
   set gm(gm: Player) { this.saveField("_gm", gm); }
   get characters(): Array<Character> { return this._characters; }
@@ -125,10 +137,11 @@ class CampaignBroadcast {
   /**
   * @param n the name of the campaign
   * @param g the game
+  * @param i the uuid of the campaign
   * @param d brief description
   * @param gm the name of the gm
   */
-  constructor(public n: string, public g: string, public d: string, public hn: string, public hi: string) {}
+  constructor(public n: string, public g: string, public i: string, public d: string, public hn: string, public hi: string) {}
 }
 
 /**
@@ -179,7 +192,7 @@ export class CampaignFactory {
   * @return CampaignBroadcast JSON string
   */
   static toBroadcast(campaign: Campaign): string {
-    return JSON.stringify(new CampaignBroadcast(campaign.name, campaign.game.name, campaign.description, campaign.gm.name, campaign.gm.id));
+    return JSON.stringify(new CampaignBroadcast(campaign.name, campaign.game.name, campaign.id, campaign.description, campaign.gm.name, campaign.gm.id));
   }
 
   /**

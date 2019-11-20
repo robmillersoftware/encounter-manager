@@ -33,7 +33,7 @@
     "@ionic/pro": "^1.1.0",
     "@ionic/storage": "^2.2.0",
     "@types/uuid": "^3.4.3",
-    "angular": "^1.7.3",
+    "angular": "^1.7.9",
     "child-process": "^1.0.2",
     "cordova-android": "^7.1.1",
     "cordova-custom-config": "^5.1.0",

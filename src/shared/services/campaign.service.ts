@@ -182,7 +182,7 @@ export class CampaignService {
   * @param c the campaign to join
   */
   public joinCampaign(c: Campaign): Promise<any> {
-    return new Promise((resolve, reject) => { {
+    return new Promise<void>((resolve, reject) => { {
 
     }
       if (!c.gm || !c.gm.endpoint) {
